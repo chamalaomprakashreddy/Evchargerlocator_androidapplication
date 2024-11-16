@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText loginEmail, loginPassword;
     private Button loginButton;
-    private TextView signupLink;
+    private TextView signupLink, forgotPasswordLink;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         loginPassword = findViewById(R.id.loginPassword);
         loginButton = findViewById(R.id.loginButton);
         signupLink = findViewById(R.id.signupLink);
+        forgotPasswordLink = findViewById(R.id.forgotPasswordLink);
 
         // Handle Login Button Click
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -46,11 +47,11 @@ public class MainActivity extends AppCompatActivity {
                 if (email.isEmpty() || password.isEmpty()) {
                     Toast.makeText(MainActivity.this, "Please fill in both fields.", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Assuming login is successful (you can integrate with a real backend)
+                    // Replace this with actual login logic (e.g., backend authentication)
                     Toast.makeText(MainActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
 
                     // Start the main activity or dashboard after login
-                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                    Intent intent = new Intent(MainActivity.this, MainDashboardActivity.class); // Replace with your actual dashboard activity
                     startActivity(intent);
                     finish();
                 }
@@ -62,6 +63,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openRegisterActivity();
+            }
+        });
+
+        // Handle Forgot Password Link Click (Optional)
+        forgotPasswordLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Implement forgot password logic here, e.g., send a reset password email
+                Toast.makeText(MainActivity.this, "Forgot Password clicked", Toast.LENGTH_SHORT).show();
+                // You might want to navigate to a password reset activity or show a dialog
             }
         });
     }

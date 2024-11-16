@@ -4,19 +4,17 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Login Title Text -->
     <TextView
         android:id="@+id/loginTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="50dp"
-        android:text="Login"
+        android:text="EV Charger Locator Login"
         android:textSize="24sp"
         android:textColor="@android:color/black"
         android:layout_centerHorizontal="true" />
 
-    <!-- Email input field -->
     <EditText
         android:id="@+id/loginEmail"
         android:layout_width="match_parent"
@@ -26,7 +24,6 @@
         android:hint="Email"
         android:inputType="textEmailAddress" />
 
-    <!-- Password input field -->
     <EditText
         android:id="@+id/loginPassword"
         android:layout_width="match_parent"
@@ -36,16 +33,24 @@
         android:hint="Password"
         android:inputType="textPassword" />
 
-    <!-- Login button -->
+    <TextView
+        android:id="@+id/forgotPasswordLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/loginPassword"
+        android:layout_marginTop="16dp"
+        android:text="Forgot Password?"
+        android:textColor="@android:color/holo_blue_light"
+        android:layout_toRightOf="@id/loginPassword" />
+
     <Button
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/loginPassword"
+        android:layout_below="@id/forgotPasswordLink"
         android:layout_marginTop="16dp"
         android:text="Login" />
 
-    <!-- Sign-up link -->
     <TextView
         android:id="@+id/signupLink"
         android:layout_width="wrap_content"
