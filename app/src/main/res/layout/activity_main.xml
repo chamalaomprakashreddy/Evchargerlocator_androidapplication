@@ -1,66 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
 
-    <TextView
-        android:id="@+id/loginTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="50dp"
-        android:text="EV Charger Locator Login"
-        android:textSize="24sp"
-        android:textColor="@android:color/black"
-        android:layout_centerHorizontal="true" />
-
+    <!-- Email input field -->
     <EditText
-        android:id="@+id/loginEmail"
+        android:id="@+id/emailEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/loginTitle"
-        android:layout_marginTop="32dp"
         android:hint="Email"
-        android:inputType="textEmailAddress" />
+        android:inputType="textEmailAddress"
+        android:padding="10dp" />
 
+    <!-- Password input field -->
     <EditText
-        android:id="@+id/loginPassword"
+        android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/loginEmail"
-        android:layout_marginTop="16dp"
         android:hint="Password"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:padding="10dp" />
 
-    <TextView
-        android:id="@+id/forgotPasswordLink"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/loginPassword"
-        android:layout_marginTop="16dp"
-        android:text="Forgot Password?"
-        android:textColor="@android:color/holo_blue_light"
-        android:layout_toRightOf="@id/loginPassword" />
-
+    <!-- Login Button -->
     <Button
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/forgotPasswordLink"
-        android:layout_marginTop="16dp"
-        android:text="Login" />
+        android:text="Login"
+        android:padding="10dp" />
 
+    <!-- Register TextView (acting as button) -->
     <TextView
-        android:id="@+id/signupLink"
-        android:layout_width="wrap_content"
+        android:id="@+id/registerTextView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/loginButton"
-        android:layout_marginTop="16dp"
+        android:text="Don't have an account? Register"
+        android:textColor="@android:color/holo_blue_dark"
+        android:gravity="center"
+        android:padding="10dp"
         android:clickable="true"
-        android:onClick="openRegisterActivity"
-        android:text="Don't have an account? Sign Up"
-        android:textColor="@android:color/holo_blue_light"
-        android:layout_centerHorizontal="true" />
-
-</RelativeLayout>
+        android:focusable="true"/>
+</LinearLayout>
