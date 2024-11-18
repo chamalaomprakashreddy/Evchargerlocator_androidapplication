@@ -1,6 +1,7 @@
 package com.example.evchargerlocator_androidapplication;
+
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -11,10 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
-    private Button loginButton;
+    private Button loginButton, adminLoginButton;
     private TextView registerTextView;
 
-    // Hardcoded credentials for demonstration (you can change these values)
+    // Hardcoded credentials for demonstration
     private final String validEmail = "user@example.com";
     private final String validPassword = "password123";
 
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.passwordEditText);
         loginButton = findViewById(R.id.loginButton);
         registerTextView = findViewById(R.id.registerTextView);
+        adminLoginButton = findViewById(R.id.adminLoginButton);
 
         // Login Button Logic
         loginButton.setOnClickListener(v -> {
@@ -38,26 +40,24 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Validate login with hardcoded credentials
             if (email.equals(validEmail) && password.equals(validPassword)) {
                 Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                // Navigate to user dashboard or similar
             } else {
                 Toast.makeText(MainActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // RegisterActivity TextView Logic (acting as a button)
+        // RegisterActivity Navigation
         registerTextView.setOnClickListener(v -> {
-            String email = emailEditText.getText().toString();
-            String password = passwordEditText.getText().toString();
+            Intent registerIntent = new Intent(MainActivity.this, RegisterActivity.class);
+            startActivity(registerIntent);
+        });
 
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(MainActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Simulate registration (display message instead of saving)
-            Toast.makeText(MainActivity.this, "Registration successful (Data not saved)", Toast.LENGTH_SHORT).show();
+        // AdminLoginActivity Navigation
+        adminLoginButton.setOnClickListener(v -> {
+            Intent adminIntent = new Intent(MainActivity.this, AdminLoginActivity.class);
+            startActivity(adminIntent);
         });
     }
 }

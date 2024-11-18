@@ -6,7 +6,6 @@
     android:padding="16dp"
     android:gravity="center">
 
-    <!-- Email input field -->
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="match_parent"
@@ -15,7 +14,6 @@
         android:inputType="textEmailAddress"
         android:padding="10dp" />
 
-    <!-- Password input field -->
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
@@ -24,15 +22,14 @@
         android:inputType="textPassword"
         android:padding="10dp" />
 
-    <!-- Login Button -->
     <Button
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/design_default_color_secondary_variant"
         android:text="Login"
         android:padding="10dp" />
 
-    <!-- RegisterActivity TextView (acting as button) -->
     <TextView
         android:id="@+id/registerTextView"
         android:layout_width="match_parent"
@@ -42,5 +39,14 @@
         android:gravity="center"
         android:padding="10dp"
         android:clickable="true"
-        android:focusable="true"/>
+        android:focusable="true" />
+
+    <Button
+        android:id="@+id/adminLoginButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Admin Login"
+        android:padding="10dp"
+        android:backgroundTint="@color/black"
+        android:textColor="@android:color/white" />
 </LinearLayout>
