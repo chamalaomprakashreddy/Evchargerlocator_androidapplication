@@ -6,10 +6,6 @@
     android:padding="16dp"
     android:gravity="center">
 
-    <!-- Title TextView -->
-
-    <!-- Subtitle TextView -->
-
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="match_parent"
