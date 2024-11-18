@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Register TextView Logic (acting as a button)
+        // RegisterActivity TextView Logic (acting as a button)
         registerTextView.setOnClickListener(v -> {
             String email = emailEditText.getText().toString();
             String password = passwordEditText.getText().toString();

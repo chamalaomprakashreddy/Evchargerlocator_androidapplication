@@ -32,7 +32,7 @@
         android:text="Login"
         android:padding="10dp" />
 
-    <!-- Register TextView (acting as button) -->
+    <!-- RegisterActivity TextView (acting as button) -->
     <TextView
         android:id="@+id/registerTextView"
         android:layout_width="match_parent"

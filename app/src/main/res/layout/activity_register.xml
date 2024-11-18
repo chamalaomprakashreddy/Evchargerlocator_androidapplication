@@ -46,7 +46,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp" />
 
-    <!-- Register Button -->
+    <!-- RegisterActivity Button -->
     <Button
         android:id="@+id/registerButton"
         android:layout_width="match_parent"
