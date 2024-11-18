@@ -6,6 +6,31 @@
     android:padding="16dp"
     android:gravity="center">
 
+    <!-- Title TextView -->
+
+    <!-- Subtitle TextView -->
+
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="EVCHARGER LOCATOR"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/subtitleTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="LOGIN"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="18sp" />
+
+    <!-- Email Input -->
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="match_parent"
@@ -14,6 +39,7 @@
         android:inputType="textEmailAddress"
         android:padding="10dp" />
 
+    <!-- Password Input -->
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
@@ -22,6 +48,7 @@
         android:inputType="textPassword"
         android:padding="10dp" />
 
+    <!-- Login Button -->
     <Button
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
@@ -30,6 +57,7 @@
         android:text="Login"
         android:padding="10dp" />
 
+    <!-- Register TextView -->
     <TextView
         android:id="@+id/registerTextView"
         android:layout_width="match_parent"
@@ -41,12 +69,13 @@
         android:clickable="true"
         android:focusable="true" />
 
+    <!-- Admin Login Button -->
     <Button
         android:id="@+id/adminLoginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Admin Login"
-        android:padding="10dp"
         android:backgroundTint="@color/black"
+        android:padding="10dp"
+        android:text="Admin Login"
         android:textColor="@android:color/white" />
 </LinearLayout>
