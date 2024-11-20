@@ -1,58 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EV CHARGER LOCATOR"
+        android:textColor="#028A0F"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="50dp" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Signup"
+        android:textColor="@android:color/black"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="30dp" />
+
     <!-- Username Field -->
     <EditText
         android:id="@+id/registerUsername"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Username"
+        android:hint="Enter your Username"
         android:inputType="text"
-        android:layout_marginBottom="16dp" />
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/subtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="30dp" />
 
     <!-- Email Field -->
     <EditText
         android:id="@+id/registerEmail"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Email"
+        android:hint="Enter your Email"
         android:inputType="textEmailAddress"
-        android:layout_below="@id/registerUsername"
-        android:layout_marginBottom="16dp" />
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/registerUsername"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp" />
+
+    <!-- Phone Number Field -->
+    <EditText
+        android:id="@+id/registerPhoneNumber"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter your Phone Number"
+        android:inputType="phone"
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/registerEmail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp" />
 
     <!-- Password Field -->
     <EditText
         android:id="@+id/registerPassword"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Password"
+        android:hint="Enter your Password"
         android:inputType="textPassword"
-        android:layout_below="@id/registerEmail"
-        android:layout_marginBottom="8dp" />
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/registerPhoneNumber"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp" />
 
-    <!-- Password Error Text (Initially Hidden) -->
+    <!-- Password Error Text -->
     <TextView
         android:id="@+id/passwordErrorText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Ensure it contains at least one uppercase, one lowercase, one symbol, one number, and is at least 8 characters long."
         android:textColor="@android:color/holo_red_dark"
         android:textSize="14sp"
         android:visibility="gone"
-        android:layout_below="@id/registerPassword"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp" />
+        app:layout_constraintTop_toBottomOf="@id/registerPassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
 
-    <!-- RegisterActivity Button -->
+    <!-- Signup Button -->
     <Button
         android:id="@+id/registerButton"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Register"
-        android:layout_below="@id/passwordErrorText"
+        android:text="SignUp"
+        android:backgroundTint="#2196F3"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/passwordErrorText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
-</RelativeLayout>
+    <!-- Already Have Account and Login Text -->
+    <TextView
+        android:id="@+id/alreadyHaveAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        app:layout_constraintTop_toBottomOf="@id/registerButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"
+        android:text="Already have an account? Login" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
