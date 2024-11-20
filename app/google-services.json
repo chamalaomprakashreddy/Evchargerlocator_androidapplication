@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "503585740248",
+    "project_id": "evchargerlocatorandroidapp",
+    "storage_bucket": "evchargerlocatorandroidapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503585740248:android:eaa9926a9a661894570ead",
+        "android_client_info": {
+          "package_name": "com.example.evchargerlocator_androidapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANSviBG3Fws74FrDNDaiR2Lqiouff8uDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
