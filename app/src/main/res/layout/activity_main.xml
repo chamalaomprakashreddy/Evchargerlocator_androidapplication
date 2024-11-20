@@ -21,25 +21,23 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Subtitle TextView -->
-
-    <!-- Welcome Back TextView -->
     <TextView
         android:id="@+id/subtitleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="LOGIN"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_margin="30dp"
-        app:layout_constraintTop_toBottomOf="@id/titleTextView" />
+    android:gravity="center"
+    android:padding="10dp"
+    android:text="LOGIN"
+    android:textColor="@color/black"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.0"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/titleTextView" />
 
+    <!-- Welcome Back TextView -->
     <TextView
         android:id="@+id/welcomeBackTextView"
         android:layout_width="0dp"
@@ -52,13 +50,10 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_margin="10dp"
-        app:layout_constraintTop_toBottomOf="@id/subtitleTextView" />
+        android:layout_marginTop="10dp"
+    app:layout_constraintTop_toBottomOf="@id/subtitleTextView" />
 
     <!-- Email Input -->
-
-    <!-- Password Input -->
-
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="0dp"
@@ -70,10 +65,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_margin="20dp"
         app:layout_constraintTop_toBottomOf="@id/welcomeBackTextView" />
 
-    <!-- Forgot Password Link -->
+    <!-- Password Input -->
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="0dp"
@@ -85,9 +79,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_margin="10dp"
         app:layout_constraintTop_toBottomOf="@id/emailEditText" />
 
+    <!-- Forgot Password Link -->
     <TextView
         android:id="@+id/forgotPasswordTextView"
         android:layout_width="0dp"
@@ -101,11 +95,10 @@
         app:layout_constraintTop_toBottomOf="@id/passwordEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_margin="5dp" />
+        android:layout_marginTop="5dp"
+    />
 
     <!-- Login Button -->
-
-    <!-- Register TextView -->
     <Button
         android:id="@+id/loginButton"
         android:layout_width="0dp"
@@ -117,10 +110,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_margin="10dp"
+
         app:layout_constraintTop_toBottomOf="@id/forgotPasswordTextView" />
 
-    <!-- Admin Login Button -->
+    <!-- Register TextView -->
     <TextView
         android:id="@+id/registerTextView"
         android:layout_width="0dp"
@@ -135,9 +128,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_margin="10dp"
+
         app:layout_constraintTop_toBottomOf="@id/loginButton" />
 
+    <!-- Admin Login Button -->
     <Button
         android:id="@+id/adminLoginButton"
         android:layout_width="0dp"
@@ -150,7 +144,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_margin="10dp"
+
         app:layout_constraintTop_toBottomOf="@id/registerTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

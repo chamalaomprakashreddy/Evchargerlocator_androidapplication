@@ -9,11 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class AdminLoginActivity extends AppCompatActivity {
 
@@ -23,18 +22,15 @@ public class AdminLoginActivity extends AppCompatActivity {
     private TextView forgotPassword;
     private ImageView backArrow;
 
+    private FirebaseAuth firebaseAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_admin_login);
 
-        // Apply edge-to-edge insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        // Initialize Firebase Auth
+        firebaseAuth = FirebaseAuth.getInstance();
 
         // Initialize views
         usernameInput = findViewById(R.id.usernameInput);
@@ -45,8 +41,7 @@ public class AdminLoginActivity extends AppCompatActivity {
 
         // Set up the back arrow functionality
         backArrow.setOnClickListener(v -> {
-            // Go back to the previous screen (or close activity)
-            finish();
+            finish(); // Go back to the previous screen (or close activity)
         });
 
         // Set up the login button functionality
@@ -57,22 +52,27 @@ public class AdminLoginActivity extends AppCompatActivity {
             if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(AdminLoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             } else {
-                // Add login logic here (e.g., authentication with a server or local validation)
-                if (validateLogin(username, password)) {
-                    Toast.makeText(AdminLoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    // Navigate to the next screen (e.g., admin dashboard)
-                    Intent intent = new Intent(AdminLoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(AdminLoginActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-                }
+                // Firebase authentication logic
+                loginWithFirebase(username, password);
             }
         });
     }
 
-    private boolean validateLogin(String username, String password) {
-        // Placeholder logic for validating login credentials
-        // Replace with actual authentication logic as required
-        return username.equals("admin") && password.equals("admin123");
+    private void loginWithFirebase(String username, String password) {
+        // Assuming the username is the email for Firebase login (replace as needed)
+        firebaseAuth.signInWithEmailAndPassword(username, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Login successful
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        Toast.makeText(AdminLoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                        // Navigate to the admin dashboard or another activity
+                        Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class); // Replace with your actual activity
+                        startActivity(intent);
+                    } else {
+                        // Login failed
+                        Toast.makeText(AdminLoginActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }
