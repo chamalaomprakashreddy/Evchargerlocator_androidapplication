@@ -11,9 +11,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
 public class AdminLoginActivity extends AppCompatActivity {
 
     private EditText usernameInput;
@@ -22,15 +19,10 @@ public class AdminLoginActivity extends AppCompatActivity {
     private TextView forgotPassword;
     private ImageView backArrow;
 
-    private FirebaseAuth firebaseAuth;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_login);
-
-        // Initialize Firebase Auth
-        firebaseAuth = FirebaseAuth.getInstance();
 
         // Initialize views
         usernameInput = findViewById(R.id.usernameInput);
@@ -52,27 +44,24 @@ public class AdminLoginActivity extends AppCompatActivity {
             if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(AdminLoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             } else {
-                // Firebase authentication logic
-                loginWithFirebase(username, password);
+                // Admin login logic (use hardcoded credentials)
+                if (isAdmin(username, password)) {
+                    // Successful admin login
+                    Toast.makeText(AdminLoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                    // Navigate to the admin dashboard or another activity
+                    Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class);
+                    startActivity(intent);
+                } else {
+                    // Login failed
+                    Toast.makeText(AdminLoginActivity.this, "Invalid admin credentials", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
-    private void loginWithFirebase(String username, String password) {
-        // Assuming the username is the email for Firebase login (replace as needed)
-        firebaseAuth.signInWithEmailAndPassword(username, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        // Login successful
-                        FirebaseUser user = firebaseAuth.getCurrentUser();
-                        Toast.makeText(AdminLoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                        // Navigate to the admin dashboard or another activity
-                        Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class); // Replace with your actual activity
-                        startActivity(intent);
-                    } else {
-                        // Login failed
-                        Toast.makeText(AdminLoginActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-                    }
-                });
+    // This method checks for hardcoded admin credentials (replace with your own logic)
+    private boolean isAdmin(String username, String password) {
+        // Example hardcoded admin credentials (replace with your own logic or database)
+        return username.equals("admin") && password.equals("admin123");
     }
 }
