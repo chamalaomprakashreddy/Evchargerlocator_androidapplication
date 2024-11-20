@@ -9,10 +9,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.evchargerlocator_androidapplication" />
+                  <option name="mobileSdkAppId" value="1:503585740248:android:eaa9926a9a661894570ead" />
+                  <option name="projectId" value="evchargerlocatorandroidapp" />
+                  <option name="projectNumber" value="503585740248" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
