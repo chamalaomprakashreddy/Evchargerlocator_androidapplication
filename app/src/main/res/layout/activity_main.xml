@@ -111,7 +111,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:backgroundTint="@android:color/holo_blue_dark"
+        android:backgroundTint="#2196F3"
         android:padding="10dp"
         android:text="Login"
         app:layout_constraintEnd_toEndOf="parent"
