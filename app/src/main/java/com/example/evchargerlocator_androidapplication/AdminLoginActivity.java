@@ -58,8 +58,7 @@ public class AdminLoginActivity extends AppCompatActivity {
             }
         });
     }
-
-    // This method checks for hardcoded admin credentials (replace with your own logic)
+    
     private boolean isAdmin(String username, String password) {
         // Example hardcoded admin credentials (replace with your own logic or database)
         return username.equals("admin") && password.equals("admin123");
