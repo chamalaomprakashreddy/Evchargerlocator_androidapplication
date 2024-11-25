@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
     private Button loginButton, adminLoginButton;
-    private TextView registerTextView;
+    private TextView registerTextView, forgotPasswordTextView;
     private FirebaseAuth firebaseAuth;
 
     @Override
@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.loginButton);
         registerTextView = findViewById(R.id.registerTextView);
         adminLoginButton = findViewById(R.id.adminLoginButton);
+        forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView); // Reference the new TextView
 
         // Login Button Logic
         loginButton.setOnClickListener(v -> {
@@ -43,20 +44,14 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // Firebase Authentication - Sign in with email and password
             firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
-                            // Login successful
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
                             Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-
-                            // Navigate to user dashboard or similar
-                            Intent intent = new Intent(MainActivity.this, UserDashboardActivity.class); // Replace with your actual activity
+                            Intent intent = new Intent(MainActivity.this, UserDashboardActivity.class);
                             startActivity(intent);
                             finish();
                         } else {
-                            // Login failed
                             Toast.makeText(MainActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -72,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
         adminLoginButton.setOnClickListener(v -> {
             Intent adminIntent = new Intent(MainActivity.this, AdminLoginActivity.class);
             startActivity(adminIntent);
+        });
+
+        // ForgotPasswordActivity Navigation
+        forgotPasswordTextView.setOnClickListener(v -> {
+            Intent forgotPasswordIntent = new Intent(MainActivity.this, ForgetPasswordActivity.class);
+            startActivity(forgotPasswordIntent);
         });
     }
 }
