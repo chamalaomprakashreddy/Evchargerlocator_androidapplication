@@ -88,7 +88,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="Forgot Password?"
-        android:textColor="@android:color/holo_red_dark"
+        android:textColor="@android:color/holo_blue_dark"
         android:padding="10dp"
         android:clickable="true"
         android:focusable="true"
