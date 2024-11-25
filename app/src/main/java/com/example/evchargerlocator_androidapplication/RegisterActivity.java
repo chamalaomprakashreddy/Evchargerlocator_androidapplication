@@ -1,6 +1,7 @@
 package com.example.evchargerlocator_androidapplication;
+
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,20 +10,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.evchargerlocator_androidapplication.R;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private static final String PASSWORD_PATTERN =
-            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
-
-    private EditText usernameEditText, emailEditText, phoneNumberEditText, passwordEditText;
-    private TextView passwordErrorText;
+    private EditText registerUsername, registerEmail, registerPhoneNumber, registerPassword;
+    private TextView passwordErrorText, alreadyHaveAccount;
     private Button registerButton;
     private FirebaseAuth firebaseAuth;
 
@@ -34,85 +28,87 @@ public class RegisterActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance();
 
-        // Initialize Views
-        usernameEditText = findViewById(R.id.registerUsername);
-        emailEditText = findViewById(R.id.registerEmail);
-        phoneNumberEditText = findViewById(R.id.registerPhoneNumber);
-        passwordEditText = findViewById(R.id.registerPassword);
+        // Initialize UI components
+        registerUsername = findViewById(R.id.registerUsername);
+        registerEmail = findViewById(R.id.registerEmail);
+        registerPhoneNumber = findViewById(R.id.registerPhoneNumber);
+        registerPassword = findViewById(R.id.registerPassword);
         passwordErrorText = findViewById(R.id.passwordErrorText);
         registerButton = findViewById(R.id.registerButton);
+        alreadyHaveAccount = findViewById(R.id.alreadyHaveAccount);
 
-        // Set up the Register Button
+        // Set up the SignUp button click listener
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 handleRegistration();
             }
         });
+
+        // Optionally, set up "Already have an account?" click listener (for login screen)
+        alreadyHaveAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Redirect to the login screen if the user already has an account
+                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish(); // Finish this activity to prevent the user from going back to the registration screen
+            }
+        });
     }
 
     private void handleRegistration() {
-        String username = usernameEditText.getText().toString().trim();
-        String email = emailEditText.getText().toString().trim();
-        String phoneNumber = phoneNumberEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
+        String username = registerUsername.getText().toString();
+        String email = registerEmail.getText().toString();
+        String phoneNumber = registerPhoneNumber.getText().toString();
+        String password = registerPassword.getText().toString();
 
-        if (TextUtils.isEmpty(username)) {
-            usernameEditText.setError("Username is required");
+        // Simple validation logic (you can customize further)
+        if (username.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "All fields must be filled in", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailEditText.setError("Enter a valid email");
-            return;
-        }
-
-        if (TextUtils.isEmpty(phoneNumber) || !Pattern.compile("\\d{10}").matcher(phoneNumber).matches()) {
-            phoneNumberEditText.setError("Enter a valid 10-digit phone number");
-            return;
-        }
-
+        // Password validation
         if (!isPasswordValid(password)) {
             passwordErrorText.setVisibility(View.VISIBLE);
-            return;
         } else {
             passwordErrorText.setVisibility(View.GONE);
+
+            // If all fields are valid, proceed with Firebase registration
+            registerUserWithFirebase(email, password);
         }
-
-        // Register the user with Firebase
-        registerUserWithFirebase(email, password, username);
     }
 
+    // Password validation: checks if it contains at least one uppercase letter, one lowercase letter, one symbol,
+    // one number, and is at least 8 characters long
     private boolean isPasswordValid(String password) {
-        return Pattern.compile(PASSWORD_PATTERN).matcher(password).matches();
+        return password.length() >= 8 &&
+                password.matches(".*[A-Z].*") &&  // at least one uppercase letter
+                password.matches(".*[a-z].*") &&  // at least one lowercase letter
+                password.matches(".*\\d.*") &&    // at least one digit
+                password.matches(".*[!@#$%^&*(),.?\":{}|<>].*"); // at least one special character
     }
 
-    private void registerUserWithFirebase(String email, String password, String username) {
+    private void registerUserWithFirebase(String email, String password) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Registration success
+                        // Registration successful
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
-                            Toast.makeText(RegisterActivity.this,
-                                    "Registration Successful!", Toast.LENGTH_SHORT).show();
+                            // Show success message
+                            Toast.makeText(RegisterActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
 
-                            // Optionally update user profile (e.g., username)
-                           // updateUserProfile(username);
+                            // Redirect to MainActivity (home page)
+                            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();  // Finish the registration activity to prevent the user from navigating back to it
                         }
                     } else {
-                        // Handle errors
-                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
-                            Toast.makeText(RegisterActivity.this,
-                                    "Email is already registered", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(RegisterActivity.this,
-                                    "Registration Failed: " + task.getException().getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                        // Handle errors (e.g., email already registered)
+                        Toast.makeText(RegisterActivity.this, "Registration Failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-
-
 }
