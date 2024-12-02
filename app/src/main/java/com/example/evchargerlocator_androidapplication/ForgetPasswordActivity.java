@@ -29,12 +29,21 @@ public class ForgetPasswordActivity extends AppCompatActivity {
             String email = emailInput.getText().toString().trim();
             if (email.isEmpty()) {
                 Toast.makeText(ForgetPasswordActivity.this, "Please enter your email", Toast.LENGTH_SHORT).show();
+            } else {
+                sendPasswordResetEmail(email);
             }
-//               else {
-            //sendPasswordResetEmail(email);
-            //}
-
-            // yogesh code
         });
+    }
+
+    private void sendPasswordResetEmail(String email) {
+        firebaseAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(ForgetPasswordActivity.this, "Password reset email sent. Check your inbox.", Toast.LENGTH_SHORT).show();
+                        finish(); // Close the activity
+                    } else {
+                        Toast.makeText(ForgetPasswordActivity.this, "Failed to send reset email. Please check the email address.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }
