@@ -57,10 +57,16 @@ public class AdminLoginActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Setup Password Intent
+        forgotPassword.setOnClickListener(v -> {
+            Intent forgotPasswordIntent = new Intent(AdminLoginActivity.this, ForgetPasswordActivity.class);
+            startActivity(forgotPasswordIntent);
+        });
     }
-    
+
     private boolean isAdmin(String username, String password) {
-        // Example hardcoded admin credentials (replace with your own logic or database)
-        return username.equals("admin") && password.equals("admin123");
+        // Hardcoded admin credentials
+        return username.equals("evlocator1834@gmail.com") && password.equals("Admin@1834");
     }
 }
