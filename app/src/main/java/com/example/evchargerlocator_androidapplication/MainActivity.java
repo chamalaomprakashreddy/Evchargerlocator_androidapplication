@@ -2,15 +2,16 @@ package com.example.evchargerlocator_androidapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
     private Button loginButton, adminLoginButton;
     private TextView registerTextView, forgotPasswordTextView;
     private FirebaseAuth firebaseAuth;
+    private ImageView showHidePasswordButton;
+    private boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +36,20 @@ public class MainActivity extends AppCompatActivity {
         registerTextView = findViewById(R.id.registerTextView);
         adminLoginButton = findViewById(R.id.adminLoginButton);
         forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView); // Reference the new TextView
+        showHidePasswordButton = findViewById(R.id.showHidePasswordButton);
+
+        // Toggle password visibility
+        showHidePasswordButton.setOnClickListener(v -> {
+            if (isPasswordVisible) {
+                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                showHidePasswordButton.setImageResource(R.drawable.ic_eye_closed);
+            } else {
+                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                showHidePasswordButton.setImageResource(R.drawable.ic_eye_open);
+            }
+            passwordEditText.setSelection(passwordEditText.length()); // Keep cursor at the end
+            isPasswordVisible = !isPasswordVisible;
+        });
 
         // Login Button Logic
         loginButton.setOnClickListener(v -> {
