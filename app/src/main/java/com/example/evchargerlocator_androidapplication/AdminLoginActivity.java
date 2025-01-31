@@ -17,7 +17,7 @@ public class AdminLoginActivity extends AppCompatActivity {
     private EditText passwordInput;
     private Button loginButton;
     private TextView forgotPassword;
-    private ImageView backArrow;
+    private TextView backArrowText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,10 +29,10 @@ public class AdminLoginActivity extends AppCompatActivity {
         passwordInput = findViewById(R.id.passwordInput);
         loginButton = findViewById(R.id.loginButton);
         forgotPassword = findViewById(R.id.forgotPassword);
-        backArrow = findViewById(R.id.backArrow);
+        backArrowText = findViewById(R.id.backArrowText);
 
         // Set up the back arrow functionality
-        backArrow.setOnClickListener(v -> {
+        backArrowText.setOnClickListener(v -> {
             finish(); // Go back to the previous screen (or close activity)
         });
 

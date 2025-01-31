@@ -3,6 +3,7 @@ package com.example.evchargerlocator_androidapplication;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +14,8 @@ public class ForgetPasswordActivity extends AppCompatActivity {
     private EditText emailInput;
     private Button submitButton;
     private FirebaseAuth firebaseAuth;
+    private TextView backArrowText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +26,11 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         // Initialize views
         emailInput = findViewById(R.id.emailInput);
         submitButton = findViewById(R.id.submitButton);
+        backArrowText = findViewById(R.id.backArrowText);
+        // Set up the back arrow functionality
+        backArrowText.setOnClickListener(v -> {
+            finish(); // Go back to the previous screen (or close activity)
+        });
 
         // Set onClickListener for the Submit button
         submitButton.setOnClickListener(v -> {

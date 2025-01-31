@@ -18,6 +18,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText registerUsername, registerEmail, registerPhoneNumber, registerPassword;
     private TextView passwordErrorText, alreadyHaveAccount;
     private Button registerButton;
+    private TextView backArrowText;
     private FirebaseAuth firebaseAuth;
 
     @Override
@@ -36,6 +37,12 @@ public class RegisterActivity extends AppCompatActivity {
         passwordErrorText = findViewById(R.id.passwordErrorText);
         registerButton = findViewById(R.id.registerButton);
         alreadyHaveAccount = findViewById(R.id.alreadyHaveAccount);
+        backArrowText = findViewById(R.id.backArrowText);
+
+        // Set up the back arrow functionality
+        backArrowText.setOnClickListener(v -> {
+            finish(); // Go back to the previous screen (or close activity)
+        });
 
         // Set up the SignUp button click listener
         registerButton.setOnClickListener(new View.OnClickListener() {
