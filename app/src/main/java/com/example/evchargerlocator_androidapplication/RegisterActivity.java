@@ -116,10 +116,10 @@ public class RegisterActivity extends AppCompatActivity {
     private void togglePasswordVisibility(EditText passwordField, ImageView toggleIcon) {
         if (passwordField.getInputType() == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
             passwordField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            toggleIcon.setImageResource(R.drawable.ic_visibility_off); // Use closed eye icon
+            toggleIcon.setImageResource(R.drawable.ic_eye_closed); // Use closed eye icon
         } else {
             passwordField.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            toggleIcon.setImageResource(R.drawable.ic_visibility); // Use open eye icon
+            toggleIcon.setImageResource(R.drawable.ic_eye_open); // Use open eye icon
         }
         passwordField.setSelection(passwordField.getText().length()); // Keep cursor at the end
     }

@@ -107,7 +107,7 @@
         android:layout_marginBottom="12dp"
         android:clickable="true"
         android:focusable="true"
-        android:src="@drawable/ic_visibility_off"
+        android:src="@drawable/ic_eye_closed"
         app:layout_constraintBottom_toBottomOf="@id/registerPassword"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -135,7 +135,7 @@
         android:layout_marginBottom="12dp"
         android:clickable="true"
         android:focusable="true"
-        android:src="@drawable/ic_visibility_off"
+        android:src="@drawable/ic_eye_closed"
         app:layout_constraintBottom_toBottomOf="@id/confirmPassword"
         app:layout_constraintEnd_toEndOf="parent" />
 
