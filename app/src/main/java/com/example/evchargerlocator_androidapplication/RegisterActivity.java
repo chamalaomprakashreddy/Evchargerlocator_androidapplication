@@ -110,7 +110,7 @@ public class RegisterActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(RegisterActivity.this, "Registration Failed! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                });
+                }
     }
 
     private void togglePasswordVisibility(EditText passwordField, ImageView toggleIcon) {
