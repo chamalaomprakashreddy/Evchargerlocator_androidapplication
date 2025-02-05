@@ -27,7 +27,7 @@ public class HomePageActivity extends AppCompatActivity {
 
         menuActions.put(R.id.activity_trip, () -> {
             Toast.makeText(HomePageActivity.this, "trip ", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(HomePageActivity.this, TripActivity.class));
+            startActivity(new Intent(HomePageActivity.this, TripPlannerActivity.class));
             // Add your logout logic (e.g., clear user session, navigate to login page)
         });
 
@@ -43,10 +43,8 @@ public class HomePageActivity extends AppCompatActivity {
         });
 
         menuActions.put(R.id.activity_user_profile, () -> {
-            Toast.makeText(HomePageActivity.this, "About", Toast.LENGTH_SHORT).show();
-            // Navigate to AboutActivity
-            Intent aboutIntent = new Intent(HomePageActivity.this, UserProfileActivity.class);
-            startActivity(aboutIntent);
+            Toast.makeText(HomePageActivity.this, "Profile", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(HomePageActivity.this, UserProfileActivity.class));
         });
 
         // Set a listener for item selection in the BottomNavigationView
