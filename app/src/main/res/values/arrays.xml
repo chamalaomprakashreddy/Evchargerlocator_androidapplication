@@ -1,0 +1,17 @@
+<resources>
+    <string-array name="levels_array">
+        <item>Level 1</item>
+        <item>Level 2</item>
+        <item>Level 3</item>
+    </string-array>
+    <string-array name="connectors_array">
+        <item>J1772</item>
+        <item>CCS</item>
+        <item>CHAdeMO</item>
+    </string-array>
+    <string-array name="networks_array">
+        <item>7 CHARGE</item>
+        <item>Electrify America</item>
+        <item>ChargePoint</item>
+    </string-array>
+</resources>
