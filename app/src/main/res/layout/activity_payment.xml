@@ -80,7 +80,7 @@
         android:paddingLeft="70dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:text="Add Payment Method"
+        android:text="Add Credit/Debit Details"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
