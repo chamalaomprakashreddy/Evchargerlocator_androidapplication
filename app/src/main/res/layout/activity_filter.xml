@@ -10,104 +10,141 @@
     android:padding="16dp"
     android:background="@color/white">
 
-    <!-- Title -->
+    <!-- Back Arrow -->
     <TextView
-        android:id="@+id/title_filters"
+        android:id="@+id/backArrowText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Filters"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="28dp"
+        android:text="←"
         android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="32sp"
+        app:layout_constraintEnd_toStartOf="@+id/title"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="FILTERS"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
 
     <!-- Levels -->
     <TextView
         android:id="@+id/label_levels"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="80dp"
+        android:padding="10dp"
         android:text="LEVELS"
-        android:textStyle="bold"
-        android:textSize="14sp"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/title_filters"
+        android:textSize="14sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <Spinner
-        android:id="@+id/spinner_levels"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:entries="@array/levels_array"
-        android:background="@drawable/spinner_background"
-        app:layout_constraintTop_toBottomOf="@id/label_levels"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/title" />
 
     <!-- Connectors -->
+    <Spinner
+        android:id="@+id/spinner_levels"
+        android:layout_width="120dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="132dp"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/spinner_background"
+        android:entries="@array/levels_array"
+        app:layout_constraintStart_toEndOf="@id/label_levels"
+        app:layout_constraintTop_toBottomOf="@id/title" />
+
     <TextView
         android:id="@+id/label_connectors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="32dp"
+        android:padding="10dp"
         android:text="CONNECTORS"
-        android:textStyle="bold"
-        android:textSize="14sp"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/spinner_levels"
+        android:textSize="14sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/spinner_levels" />
 
     <Spinner
         android:id="@+id/spinner_connectors"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:entries="@array/connectors_array"
+        android:layout_width="120dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="92dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/spinner_background"
-        app:layout_constraintTop_toBottomOf="@id/label_connectors"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:entries="@array/connectors_array"
+        app:layout_constraintStart_toEndOf="@id/label_connectors"
+        app:layout_constraintTop_toBottomOf="@id/spinner_levels" />
 
     <!-- Networks -->
     <TextView
         android:id="@+id/label_networks"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="28dp"
+        android:padding="10dp"
         android:text="NETWORKS"
-        android:textStyle="bold"
-        android:textSize="14sp"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/spinner_connectors"
+        android:textSize="14sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/spinner_connectors" />
 
     <Spinner
         android:id="@+id/spinner_networks"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:entries="@array/networks_array"
+        android:layout_width="120dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="108dp"
+        android:layout_marginTop="28dp"
         android:background="@drawable/spinner_background"
-        app:layout_constraintTop_toBottomOf="@id/label_networks"
+        android:entries="@array/networks_array"
+        app:layout_constraintStart_toEndOf="@id/label_networks"
+        app:layout_constraintTop_toBottomOf="@id/spinner_connectors" />
+
+    <!-- Reset Button -->
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="150dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="48dp"
+        android:backgroundTint="@color/black"
+        android:text="RESET"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/spinner_networks" />
+
 
     <!-- Apply Button -->
     <Button
         android:id="@+id/button_apply"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_width="150dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="30dp"
+        android:backgroundTint="@color/black"
         android:text="APPLY"
         android:textAllCaps="true"
-        android:backgroundTint="@color/black"
         android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/spinner_networks"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/resetButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
