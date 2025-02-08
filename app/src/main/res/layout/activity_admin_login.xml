@@ -16,7 +16,7 @@
         android:textColor="#028A0F"
         android:textSize="25dp"
         android:textStyle="bold"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="40dp"
         app:layout_constraintStart_toEndOf="@id/backArrowText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,8 +28,8 @@
         android:id="@+id/backArrowText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="28dp"
         android:text="\u2190"
         android:textColor="@color/black"
         android:textSize="32sp"
@@ -59,7 +59,7 @@
         android:layout_height="wrap_content"
         android:hint="Enter Your Email"
         android:padding="12dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="80dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subtitle"
@@ -87,13 +87,14 @@
             android:paddingEnd="50dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginHorizontal="16dp"
             tools:ignore="MissingConstraints" />
 
         <ImageView
             android:id="@+id/showHidePasswordButton"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="20dp"
             android:layout_marginTop="5dp"
             android:src="@drawable/ic_eye_closed"
             android:contentDescription="Show Password"
@@ -111,11 +112,11 @@
         android:text="Forgot Password?"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:textColor="#2196F3"
+        android:textColor="@android:color/holo_blue_dark"
         app:layout_constraintTop_toBottomOf="@id/passwordContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="24dp" />
 
     <!-- Login Button -->
     <Button
@@ -124,10 +125,11 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="20dp"
+        android:textSize="16dp"
         android:text="Login"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        android:backgroundTint="#2196F3"
+        android:backgroundTint="@android:color/holo_blue_dark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/forgotPassword" />

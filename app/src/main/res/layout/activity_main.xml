@@ -9,17 +9,17 @@
     <!-- Title TextView -->
     <TextView
         android:id="@+id/titleTextView"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="EVCHARGER LOCATOR"
-        android:textColor="@android:color/holo_green_dark"
-        android:textSize="24sp"
+        android:text="EV CHARGER LOCATOR"
+        android:textColor="#028A0F"
+        android:textSize="25dp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="30dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.2" />
 
     <!-- Subtitle TextView -->
     <TextView
@@ -58,7 +58,7 @@
         android:id="@+id/emailEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="40dp"
         android:hint="Enter your Email"
         android:inputType="textEmailAddress"
         android:padding="10dp"
@@ -125,8 +125,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:backgroundTint="#2196F3"
+        android:backgroundTint="@android:color/holo_blue_dark"
         android:padding="10dp"
+        android:textSize="16dp"
         android:text="Login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -153,8 +154,9 @@
         android:id="@+id/adminLoginButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="30dp"
         android:backgroundTint="@color/black"
+        android:textSize="16dp"
         android:padding="10dp"
         android:text="Admin Login"
         android:textColor="@android:color/white"

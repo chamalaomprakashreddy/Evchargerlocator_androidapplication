@@ -16,13 +16,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="24dp"
         android:text="←"
         android:textColor="@color/black"
         android:textSize="32sp"
-        app:layout_constraintEnd_toStartOf="@+id/title"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/title"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Title -->
@@ -30,7 +30,7 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="30dp"
         android:text="FILTERS"
         android:textColor="@color/black"
         android:textSize="25sp"
@@ -121,12 +121,13 @@
     <!-- Reset Button -->
     <Button
         android:id="@+id/resetButton"
-        android:layout_width="150dp"
-        android:layout_height="56dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="120dp"
         android:layout_marginTop="48dp"
-        android:backgroundTint="@color/black"
-        android:text="RESET"
-        android:textAllCaps="true"
+        android:backgroundTint="@android:color/holo_blue_dark"
+        android:text="Reset"
+        android:textSize="16dp"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
