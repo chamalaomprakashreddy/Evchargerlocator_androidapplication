@@ -34,12 +34,19 @@ public class PaymentActivity extends AppCompatActivity {
         Button googlePayButton = findViewById(R.id.googlePayButton);
         Button paypalButton = findViewById(R.id.paypalButton);
         TextView addPaymentMethodText = findViewById(R.id.addPaymentMethodText);
+        TextView savedPaymentMethodText = findViewById(R.id.savedPaymentMethodText);
 
         // Navigate to Profile when clicking back arrow
         backArrowText.setOnClickListener(v -> {
             Intent intent = new Intent(PaymentActivity.this, UserProfileActivity.class);
             startActivity(intent);
             finish();
+        });
+
+        // Open Saved Payment Method Activity
+        savedPaymentMethodText.setOnClickListener(v -> {
+            Intent intent = new Intent(PaymentActivity.this, SavedPaymentMethodsActivity.class);
+            startActivity(intent);
         });
 
         // Navigate to Card Details when clicking "Add Payment Method"

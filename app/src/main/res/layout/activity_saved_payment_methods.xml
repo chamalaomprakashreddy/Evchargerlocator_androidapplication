@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SavedPaymentMethodsActivity">
+
+    <!-- Back Arrow -->
+    <TextView
+        android:id="@+id/backArrowText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="←"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/titleText"/>
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Saved Payment Methods"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginTop="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.391"
+        app:layout_constraintStart_toEndOf="@id/backArrowText"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- RecyclerView for saved payment methods -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/paymentMethodsRecyclerView"
+        android:layout_width="348dp"
+        android:layout_height="524dp"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toTopOf="@id/paypalButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleText" />
+
+    <!-- PayPal Button -->
+    <Button
+        android:id="@+id/paypalButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Continue Payment"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:padding="12dp"
+        android:layout_margin="30dp"
+        android:backgroundTint="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
