@@ -33,16 +33,30 @@ android {
 }
 
 dependencies {
-
+    // Using `implementation` with the correct Kotlin DSL syntax
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.auth)
+
+    // Firebase dependencies
+    implementation("com.google.firebase:firebase-auth:21.1.0")  // Firebase Authentication
+    implementation("com.google.firebase:firebase-firestore:24.3.0")  // Firebase Firestore
+    implementation("com.google.firebase:firebase-database:20.0.5")  // Firebase Realtime Database
+
+    // Google Play services
+    implementation("com.google.android.gms:play-services-maps:19.0.0")  // Google Maps
+    implementation("com.google.android.gms:play-services-location:21.3.0")  // Location Services
+
+    // Testing dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation("com.google.android.gms:play-services-maps:19.0.0")
-    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    // Firebase Messaging (optional, for push notifications)
+    implementation("com.google.firebase:firebase-messaging:23.0.0")
+    implementation("com.google.firebase:firebase-analytics:21.0.0")
 }
+
+// Apply the Google services plugin at the bottom of the file
+apply(plugin = "com.google.gms.google-services")
