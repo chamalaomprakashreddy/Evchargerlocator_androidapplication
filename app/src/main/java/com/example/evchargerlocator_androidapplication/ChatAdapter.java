@@ -5,19 +5,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.List;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHolder> {
 
     private List<Message> messages;
+    private List<Message> filteredMessages;  // List to store filtered messages for search
     private String currentUserId;
     private DatabaseReference messagesRef;
 
     // Constructor
     public ChatAdapter(List<Message> messages, String currentUserId) {
         this.messages = messages;
+        this.filteredMessages = messages;  // Initialize with all messages
         this.currentUserId = currentUserId;
         this.messagesRef = FirebaseDatabase.getInstance().getReference("messages");
     }
@@ -32,7 +35,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
     @Override
     public void onBindViewHolder(MessageViewHolder holder, int position) {
         // Bind the message data to the ViewHolder
-        Message message = messages.get(position);
+        Message message = filteredMessages.get(position);
 
         // Set the message text
         holder.messageText.setText(message.getMessage());
@@ -50,21 +53,36 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
             holder.messageText.setBackgroundResource(R.drawable.message_bubble_received);
             holder.messageTime.setVisibility(View.VISIBLE); // Show timestamp for received messages
         }
+
+        // Set swipe-to-delete functionality (long press to delete message)
+        holder.itemView.setOnLongClickListener(v -> {
+            // Perform message deletion
+            int positionToDelete = holder.getAdapterPosition();
+            removeItem(positionToDelete);
+            return true;
+        });
     }
 
     @Override
     public int getItemCount() {
-        return messages.size();
+        return filteredMessages.size();
     }
 
+    // Remove an item from both Firebase and RecyclerView
     public void removeItem(int position) {
-        Message message = messages.get(position);
+        Message message = filteredMessages.get(position);
         // Remove from Firebase
         messagesRef.child(message.getMessageId()).removeValue();  // Make sure to delete the message from Firebase
 
         // Remove from RecyclerView
-        messages.remove(position);
+        filteredMessages.remove(position);
         notifyItemRemoved(position);
+    }
+
+    // Method to update the filtered messages (for search functionality)
+    public void updateMessages(List<Message> filteredMessages) {
+        this.filteredMessages = filteredMessages;
+        notifyDataSetChanged();  // Notify the adapter that the data has been updated
     }
 
     // ViewHolder to represent individual messages

@@ -7,18 +7,18 @@ import java.util.Locale;
 public class Message {
     private String senderId;
     private String message;
-    private long timestamp;  // Timestamp field to store the message send time
-    private String messageId;  // Unique ID for each message
+    private long timestamp;
+    private String messageId;  // Unique message ID for Firebase
 
     // Default constructor (required for Firebase)
     public Message() {}
 
-    // Constructor to initialize message object with all attributes
+    // Constructor to initialize message object with an additional messageId
     public Message(String senderId, String message, long timestamp, String messageId) {
         this.senderId = senderId;
         this.message = message;
         this.timestamp = timestamp;
-        this.messageId = messageId;
+        this.messageId = messageId;  // Set the unique message ID
     }
 
     // Getter and Setter methods
@@ -47,11 +47,11 @@ public class Message {
     }
 
     public String getMessageId() {
-        return messageId;
+        return messageId;  // Getter for message ID
     }
 
     public void setMessageId(String messageId) {
-        this.messageId = messageId;
+        this.messageId = messageId;  // Setter for message ID
     }
 
     // Method to format timestamp into a human-readable format (e.g., "10:30 AM")
