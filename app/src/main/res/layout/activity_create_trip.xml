@@ -37,9 +37,9 @@
         android:id="@+id/tripName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Trip Name"
+        android:hint=" Enter Trip Name"
         android:layout_marginHorizontal="26dp"
-        android:padding="10dp"
+        android:padding="12dp"
         android:background="@android:drawable/editbox_background"
         app:layout_constraintTop_toBottomOf="@id/titleCreateTrip"
         app:layout_constraintStart_toStartOf="parent"
@@ -50,8 +50,8 @@
         android:id="@+id/tripDate"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Trip Date"
-        android:padding="10dp"
+        android:hint="DD/MM/YYYY"
+        android:padding="12dp"
         android:layout_marginHorizontal="26dp"
         android:background="@android:drawable/editbox_background"
         app:layout_constraintTop_toBottomOf="@id/tripName"
@@ -59,17 +59,49 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="20dp"/>
 
-    <Button
-        android:id="@+id/saveTripButton"
-        android:layout_width="match_parent"
+
+    <!-- Start Point Field -->
+    <EditText
+        android:id="@+id/startPoint"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="120dp"
-        android:text="Save Trip"
-        android:textSize="16dp"
-        android:backgroundTint="@color/black"
+        android:hint="Enter Start Point"
+        android:layout_marginHorizontal="26dp"
+        android:padding="12dp"
+        android:background="@android:drawable/editbox_background"
         app:layout_constraintTop_toBottomOf="@id/tripDate"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp"/>
+        android:layout_marginTop="20dp"/>
+
+    <!-- End Point Field -->
+    <EditText
+        android:id="@+id/endPoint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter End Point"
+        android:layout_marginHorizontal="26dp"
+        android:padding="12dp"
+        android:background="@android:drawable/editbox_background"
+        app:layout_constraintTop_toBottomOf="@id/startPoint"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"/>
+
+    <!-- Save Trip Button -->
+    <Button
+        android:id="@+id/saveTripButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Save Trip"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/black"
+        android:paddingVertical="12dp"
+        app:layout_constraintTop_toBottomOf="@id/endPoint"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="120dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

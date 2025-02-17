@@ -8,12 +8,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -25,10 +24,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
+
 
 public class HomePageActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -37,6 +42,8 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
     private SearchView mapSearchView;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private BottomNavigationView bottomNavigationView;
+    private TextView distanceText, durationText;
+    private String startLocation, endLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +53,10 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         mapSearchView = findViewById(R.id.mapSearch);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+        Intent intent = getIntent();
+        startLocation = intent.getStringExtra("startLocation");
+        endLocation = intent.getStringExtra("endLocation");
+
         // Initialize Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
@@ -54,7 +65,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         getLastLocation();
-
+        fetchDirections();
         setupSearch();
         setupBottomNavigation();
     }
@@ -135,13 +146,64 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
+    private void fetchDirections() {
+        if (startLocation == null || endLocation == null) return;
+        new Thread(() -> {
+            try {
+                String urlString = "https://maps.googleapis.com/maps/api/directions/json?origin="
+                        + startLocation + "&destination=" + endLocation + "&key=AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs";
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                JSONObject jsonResponse = new JSONObject(response.toString());
+                JSONArray routes = jsonResponse.getJSONArray("routes");
+                if (routes.length() > 0) {
+                    JSONObject route = routes.getJSONObject(0);
+                    JSONObject leg = route.getJSONArray("legs").getJSONObject(0);
+
+                    String distance = leg.getJSONObject("distance").getString("text");
+                    String duration = leg.getJSONObject("duration").getString("text");
+
+                    runOnUiThread(() -> {
+                        distanceText.setText("Distance: " + distance);
+                        durationText.setText("Duration: " + duration);
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         myMap = googleMap;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             myMap.setMyLocationEnabled(true);
         }
+
+        if (startLocation != null && endLocation != null) {
+            String[] startCoords = startLocation.split(",");
+            String[] endCoords = endLocation.split(",");
+
+            LatLng startLatLng = new LatLng(Double.parseDouble(startCoords[0]), Double.parseDouble(startCoords[1]));
+            LatLng endLatLng = new LatLng(Double.parseDouble(endCoords[0]), Double.parseDouble(endCoords[1]));
+
+            myMap.addMarker(new MarkerOptions().position(startLatLng).title("Start Location"));
+            myMap.addMarker(new MarkerOptions().position(endLatLng).title("Destination"));
+            myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 10));
+        }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
