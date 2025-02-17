@@ -12,9 +12,10 @@ public class PaymentMethodsAdapter extends RecyclerView.Adapter<PaymentMethodsAd
 
     private List<String> paymentMethods;
     private OnPaymentMethodClickListener listener;
+    private int selectedPosition = -1;
 
     public interface OnPaymentMethodClickListener {
-        void onPaymentMethodClick(String method);
+        void onMethodSelected(String method);
     }
 
     public PaymentMethodsAdapter(List<String> paymentMethods, OnPaymentMethodClickListener listener) {
@@ -25,15 +26,22 @@ public class PaymentMethodsAdapter extends RecyclerView.Adapter<PaymentMethodsAd
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_payment_method, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String method = paymentMethods.get(position);
-        holder.paymentMethodText.setText(method);
-        holder.itemView.setOnClickListener(v -> listener.onPaymentMethodClick(method));
+        holder.methodTextView.setText(method);
+        holder.itemView.setSelected(position == selectedPosition);
+        holder.itemView.setOnClickListener(v -> {
+            int previous = selectedPosition;
+            selectedPosition = holder.getAdapterPosition();
+            notifyItemChanged(previous);
+            notifyItemChanged(selectedPosition);
+            listener.onMethodSelected(method);
+        });
     }
 
     @Override
@@ -42,11 +50,11 @@ public class PaymentMethodsAdapter extends RecyclerView.Adapter<PaymentMethodsAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView paymentMethodText;
+        TextView methodTextView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            paymentMethodText = itemView.findViewById(android.R.id.text1);
+            methodTextView = itemView.findViewById(R.id.methodTextView);
         }
     }
 }

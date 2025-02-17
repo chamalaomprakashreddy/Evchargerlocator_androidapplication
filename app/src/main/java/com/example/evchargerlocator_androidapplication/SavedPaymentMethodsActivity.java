@@ -11,13 +11,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class SavedPaymentMethodsActivity extends AppCompatActivity {
 
     private RecyclerView paymentMethodsRecyclerView;
-    private Button paypalButton;
-    private List<String> savedPaymentMethods;
+    private Button continueButton;
+    private List<String> paymentMethods;
     private PaymentMethodsAdapter adapter;
+    private String selectedMethod;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,33 +27,26 @@ public class SavedPaymentMethodsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_saved_payment_methods);
 
         paymentMethodsRecyclerView = findViewById(R.id.paymentMethodsRecyclerView);
-        paypalButton = findViewById(R.id.paypalButton);
+        continueButton = findViewById(R.id.continueButton);
         TextView backArrowText = findViewById(R.id.backArrowText);
 
-        // Back navigation
         backArrowText.setOnClickListener(v -> finish());
 
-        // Dummy data for saved payment methods
-        savedPaymentMethods = new ArrayList<>();
-        savedPaymentMethods.add("Visa •••• 1234");
-        savedPaymentMethods.add("MasterCard •••• 5678");
-        savedPaymentMethods.add("Amex •••• 9012");
+        Set<String> savedCards = CardDetails.getSavedCards();
+        paymentMethods = new ArrayList<>(savedCards);
 
-        // Set up RecyclerView
-        adapter = new PaymentMethodsAdapter(savedPaymentMethods, this::onPaymentMethodSelected);
+        adapter = new PaymentMethodsAdapter(paymentMethods, selected -> {
+            selectedMethod = selected;
+            continueButton.setEnabled(true);
+        });
+
         paymentMethodsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         paymentMethodsRecyclerView.setAdapter(adapter);
 
-        // Handle PayPal button click
-        paypalButton.setOnClickListener(v -> {
+        continueButton.setEnabled(false);
+        continueButton.setOnClickListener(v -> {
             Intent intent = new Intent(SavedPaymentMethodsActivity.this, PaymentProcessingActivity.class);
             startActivity(intent);
         });
-    }
-
-    private void onPaymentMethodSelected(String method) {
-        Intent intent = new Intent(SavedPaymentMethodsActivity.this, CardDetails.class);
-        intent.putExtra("SelectedPaymentMethod", method);
-        startActivity(intent);
     }
 }

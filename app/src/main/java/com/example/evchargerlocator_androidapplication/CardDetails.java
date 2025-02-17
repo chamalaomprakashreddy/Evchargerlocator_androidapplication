@@ -1,21 +1,27 @@
 package com.example.evchargerlocator_androidapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CardDetails extends AppCompatActivity {
     private EditText cardNumber, expiryDate, cvv, cardHolderName;
-    private Button saveCardButton;
+    private Button continueButton;
     private ImageView showHideCvv;
+    private CheckBox saveCardCheckBox;
     private boolean isCvvVisible = false;
+    private static Set<String> savedCards = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,27 +32,25 @@ public class CardDetails extends AppCompatActivity {
         expiryDate = findViewById(R.id.expiryDate);
         cvv = findViewById(R.id.cvv);
         cardHolderName = findViewById(R.id.cardHolderName);
-        saveCardButton = findViewById(R.id.saveCardButton);
+        continueButton = findViewById(R.id.continueButton);
         showHideCvv = findViewById(R.id.showHideCvv);
+        saveCardCheckBox = findViewById(R.id.saveCardCheckbox);
         TextView backArrowText = findViewById(R.id.backArrowText);
 
-        // Back navigation
         backArrowText.setOnClickListener(v -> finish());
 
-        // Show/Hide CVV functionality
         showHideCvv.setOnClickListener(v -> {
             if (isCvvVisible) {
-                cvv.setInputType(129); // numberPassword type
+                cvv.setInputType(129);
                 showHideCvv.setImageResource(R.drawable.ic_eye_closed);
             } else {
-                cvv.setInputType(145); // visible password type
+                cvv.setInputType(145);
                 showHideCvv.setImageResource(R.drawable.ic_eye_open);
             }
             isCvvVisible = !isCvvVisible;
             cvv.setSelection(cvv.getText().length());
         });
 
-        // Enable Save button only when all fields are filled
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -65,19 +69,18 @@ public class CardDetails extends AppCompatActivity {
         cvv.addTextChangedListener(textWatcher);
         cardHolderName.addTextChangedListener(textWatcher);
 
-        saveCardButton.setOnClickListener(v -> saveCard());
+        continueButton.setOnClickListener(v -> handlePayment());
     }
 
     private void validateFields() {
-        String cardNum = cardNumber.getText().toString().trim();
-        String expDate = expiryDate.getText().toString().trim();
-        String cvvCode = cvv.getText().toString().trim();
-        String cardHolder = cardHolderName.getText().toString().trim();
-
-        saveCardButton.setEnabled(!cardNum.isEmpty() && !expDate.isEmpty() && !cvvCode.isEmpty() && !cardHolder.isEmpty());
+        boolean isValid = !cardNumber.getText().toString().trim().isEmpty()
+                && !expiryDate.getText().toString().trim().isEmpty()
+                && !cvv.getText().toString().trim().isEmpty()
+                && !cardHolderName.getText().toString().trim().isEmpty();
+        continueButton.setEnabled(isValid);
     }
 
-    private void saveCard() {
+    private void handlePayment() {
         String cardNum = cardNumber.getText().toString().trim();
         String expDate = expiryDate.getText().toString().trim();
         String cvvCode = cvv.getText().toString().trim();
@@ -96,6 +99,17 @@ public class CardDetails extends AppCompatActivity {
             return;
         }
 
-        Toast.makeText(this, "Card Saved Successfully", Toast.LENGTH_SHORT).show();
+        if (saveCardCheckBox.isChecked()) {
+            String maskedCard = cardNum.substring(0, 4) + " •••• " + cardNum.substring(cardNum.length() - 4);
+            savedCards.add(maskedCard);
+            Toast.makeText(this, "Card Saved Successfully", Toast.LENGTH_SHORT).show();
+        }
+
+        Intent intent = new Intent(CardDetails.this, PaymentProcessingActivity.class);
+        startActivity(intent);
+    }
+
+    public static Set<String> getSavedCards() {
+        return savedCards;
     }
 }

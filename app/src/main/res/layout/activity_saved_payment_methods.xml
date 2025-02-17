@@ -43,14 +43,14 @@
         android:layout_width="348dp"
         android:layout_height="524dp"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toTopOf="@id/paypalButton"
+        app:layout_constraintBottom_toTopOf="@id/continueButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titleText" />
 
-    <!-- PayPal Button -->
+    <!-- continueButton -->
     <Button
-        android:id="@+id/paypalButton"
+        android:id="@+id/continueButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Continue Payment"
