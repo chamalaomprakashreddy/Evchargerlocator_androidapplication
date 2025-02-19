@@ -1,20 +1,21 @@
 package com.example.evchargerlocator_androidapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,147 +31,131 @@ public class ChatActivity extends AppCompatActivity {
     private EditText etMessage;
     private ImageButton btnSend;
     private String currentUserId;
-    private EditText searchMessageEditText; // Reference for the search bar
+    private TextView backButton;  // ✅ Back button reference
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Initialize Firebase and views
+        // Initialize Firebase
         database = FirebaseDatabase.getInstance();
         messagesRef = database.getReference("messages");
         auth = FirebaseAuth.getInstance();
         currentUserId = auth.getCurrentUser().getUid();
 
+        // Initialize Views
         recyclerView = findViewById(R.id.recyclerViewChat);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
-        searchMessageEditText = findViewById(R.id.searchMessageEditText); // Correct reference for search bar
+        backButton = findViewById(R.id.backArrowText);  // ✅ Find Back button
 
+        // Setup RecyclerView
         messageList = new ArrayList<>();
-        chatAdapter = new ChatAdapter(messageList, currentUserId);
+        chatAdapter = new ChatAdapter(messageList, currentUserId, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
 
-        // Attach SwipeToDeleteCallback to RecyclerView
+        // ✅ Set Click Listener for Back Button
+        backButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ChatActivity.this, HomePageActivity.class);
+            startActivity(intent);
+            finish();  // ✅ Close ChatActivity so it doesn't stay in the background
+        });
+
+        // Enable Swipe to Delete
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(chatAdapter));
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
-        // Listen for incoming messages
-        messagesRef.addChildEventListener(new com.google.firebase.database.ChildEventListener() {
+        Log.d("ChatActivity", "Firebase Database Reference: " + messagesRef.toString());
+
+        // ✅ Listen for messages from Firebase
+        messagesRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onChildAdded(com.google.firebase.database.DataSnapshot dataSnapshot, String previousChildName) {
-                Message message = dataSnapshot.getValue(Message.class);
-
-                // Add the message to the list
-                messageList.add(message);
-
-                // Notify the adapter that a new item has been added
-                chatAdapter.notifyItemInserted(messageList.size() - 1);
-
-                // Scroll to the last message
-                recyclerView.scrollToPosition(messageList.size() - 1);
+            public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
+                Message message = snapshot.getValue(Message.class);
+                if (message != null) {
+                    if (!message.isRead() && !message.getSenderId().equals(currentUserId)) {
+                        messagesRef.child(message.getMessageId()).child("read").setValue(true); // Mark as read
+                    }
+                    messageList.add(message);
+                    chatAdapter.notifyItemInserted(messageList.size() - 1);
+                    recyclerView.scrollToPosition(messageList.size() - 1);
+                }
             }
 
             @Override
-            public void onChildChanged(com.google.firebase.database.DataSnapshot dataSnapshot, String previousChildName) {}
+            public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {
+                Message updatedMessage = snapshot.getValue(Message.class);
+                if (updatedMessage != null) {
+                    for (int i = 0; i < messageList.size(); i++) {
+                        if (messageList.get(i).getMessageId().equals(updatedMessage.getMessageId())) {
+                            messageList.set(i, updatedMessage);
+                            chatAdapter.notifyItemChanged(i);
+                            break;
+                        }
+                    }
+                }
+            }
 
             @Override
-            public void onChildRemoved(com.google.firebase.database.DataSnapshot dataSnapshot) {}
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                Message removedMessage = snapshot.getValue(Message.class);
+                if (removedMessage != null) {
+                    for (int i = 0; i < messageList.size(); i++) {
+                        if (messageList.get(i).getMessageId().equals(removedMessage.getMessageId())) {
+                            messageList.remove(i);
+                            chatAdapter.notifyItemRemoved(i);
+                            break;
+                        }
+                    }
+                }
+            }
 
             @Override
-            public void onChildMoved(com.google.firebase.database.DataSnapshot dataSnapshot, String previousChildName) {}
+            public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
 
             @Override
-            public void onCancelled(com.google.firebase.database.DatabaseError databaseError) {
-                // Handle errors (e.g., show a message to the user)
-                Toast.makeText(ChatActivity.this, "Error receiving messages: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("ChatActivity", "Database Error: " + error.getMessage());
             }
         });
 
-        // Set up button click listener for sending messages
+        // ✅ Send Button Click Listener
         btnSend.setOnClickListener(v -> sendMessage());
-
-        // Handle search input in the search bar
-        searchMessageEditText.addTextChangedListener(new android.text.TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                // Filter messages as the user types
-                filterMessages(charSequence.toString());
-            }
-
-            @Override
-            public void afterTextChanged(android.text.Editable editable) {}
-        });
     }
 
     private void sendMessage() {
-        // Get the message text from the EditText
         String messageText = etMessage.getText().toString().trim();
 
-        // Check if the message is not empty
         if (!messageText.isEmpty()) {
-            // Disable the send button to prevent duplicate messages
             btnSend.setEnabled(false);
 
-            // Show a Toast or progress indicator to inform the user
-            Toast.makeText(this, "Sending message...", Toast.LENGTH_SHORT).show();
-
-            // Get the current timestamp
-            long timestamp = System.currentTimeMillis();
-
-            // Create a new Message object with a unique message ID
             String messageId = messagesRef.push().getKey();
-            Message message = new Message(currentUserId, messageText, timestamp, messageId);
+            long timestamp = System.currentTimeMillis();
+            Message message = new Message(currentUserId, messageText, timestamp, messageId, false, "");
 
-            // Push the message to Firebase Realtime Database
-            messagesRef.push().setValue(message)
+            messagesRef.child(messageId).setValue(message)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            // Reset the EditText after sending the message
+                            Log.d("ChatActivity", "Message sent successfully: " + messageText);
                             etMessage.setText("");
-                            hideKeyboard();  // Hide the keyboard after sending the message
+                            hideKeyboard();
                         } else {
-                            // Show an error message if sending fails
-                            Toast.makeText(ChatActivity.this, "Failed to send message. Please try again.", Toast.LENGTH_SHORT).show();
+                            Log.e("ChatActivity", "Failed to send message");
+                            Toast.makeText(ChatActivity.this, "Failed to send message.", Toast.LENGTH_SHORT).show();
                         }
-
-                        // Re-enable the send button
                         btnSend.setEnabled(true);
                     });
         } else {
-            // Show a message if the user tries to send an empty message
             Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // Method to hide the keyboard after sending the message
     private void hideKeyboard() {
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (inputMethodManager != null) {
             inputMethodManager.hideSoftInputFromWindow(etMessage.getWindowToken(), 0);
         }
-    }
-
-    // Scroll RecyclerView to show the latest message
-    @Override
-    public void onResume() {
-        super.onResume();
-        recyclerView.scrollToPosition(messageList.size() - 1); // Ensure we are scrolled to the latest message
-    }
-
-    // Filter the messages based on the search query
-    private void filterMessages(String query) {
-        List<Message> filteredMessages = new ArrayList<>();
-        for (Message message : messageList) {
-            if (message.getMessage().toLowerCase().contains(query.toLowerCase())) {
-                filteredMessages.add(message);
-            }
-        }
-        chatAdapter.updateMessages(filteredMessages);
     }
 }

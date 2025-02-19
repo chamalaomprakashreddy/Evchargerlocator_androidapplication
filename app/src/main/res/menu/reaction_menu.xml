@@ -1,0 +1,5 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/reaction_like" android:title="👍" />
+    <item android:id="@+id/reaction_love" android:title="❤️" />
+    <item android:id="@+id/reaction_laugh" android:title="😂" />
+</menu>

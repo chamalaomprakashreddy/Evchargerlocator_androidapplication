@@ -68,44 +68,46 @@
         app:layout_constraintBottom_toTopOf="@id/messageInputLayout" />
 
     <!-- Message Input Area -->
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/messageInputLayout"
-        android:layout_width="379dp"
-        android:layout_height="60dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
-        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <!-- EditText for typing messages -->
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/etMessage"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="50dp"
-            android:layout_weight="0.2"
+            android:layout_weight="1"
             android:background="@drawable/edit_text_bg"
             android:hint="Type your message"
             android:inputType="textMultiLine"
             android:maxLines="10"
             android:minLines="1"
-            android:padding="8dp" />
+            android:padding="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnSend"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <!-- Send button (ImageButton) -->
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btnSend"
-            android:layout_width="40dp"
+            android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginStart="8dp"
             android:background="@android:color/darker_gray"
             android:clipToOutline="true"
             android:contentDescription="Send message"
             android:elevation="4dp"
             android:padding="10dp"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_send" />
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            android:src="@drawable/ic_send"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

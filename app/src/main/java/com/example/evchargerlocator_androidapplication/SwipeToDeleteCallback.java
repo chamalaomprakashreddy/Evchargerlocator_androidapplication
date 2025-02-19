@@ -7,7 +7,7 @@ import android.view.View;
 
 public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
 
-    private ChatAdapter mAdapter;
+    private final ChatAdapter mAdapter;
 
     public SwipeToDeleteCallback(ChatAdapter adapter) {
         super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
@@ -21,14 +21,15 @@ public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        // Get position of swiped item
         int position = viewHolder.getAdapterPosition();
-        mAdapter.removeItem(position);
+        if (position != RecyclerView.NO_POSITION) {
+            mAdapter.removeItem(position);  // ✅ This now works!
+        }
     }
 
     @Override
     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-        // Optional: Add custom swipe effects (like background color change)
+        // Optional: Add swipe background or animation
     }
 }

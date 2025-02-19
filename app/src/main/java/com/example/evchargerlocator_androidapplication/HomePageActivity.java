@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 
 
+
 public class HomePageActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int FINE_PERMISSION_CODE = 1;
