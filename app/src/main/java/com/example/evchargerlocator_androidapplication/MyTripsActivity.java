@@ -15,6 +15,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +32,9 @@ public class MyTripsActivity extends AppCompatActivity {
     private ListView tripsListView;
     private ArrayList<String> tripsList;
     private ArrayAdapter<String> tripsAdapter;
-    private SharedPreferences sharedPreferences;
+    private DatabaseReference databaseRef;
+    private FirebaseAuth auth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,56 +50,44 @@ public class MyTripsActivity extends AppCompatActivity {
         backArrowText = findViewById(R.id.backArrowText);
         tripsListView = findViewById(R.id.tripsListView);
 
+        auth = FirebaseAuth.getInstance();
+        databaseRef = FirebaseDatabase.getInstance().getReference("Trips");
 
         // Set up the back arrow functionality
         backArrowText.setOnClickListener(v -> finish()); // Go back to the previous screen
-        sharedPreferences = getSharedPreferences("MyTrips", Context.MODE_PRIVATE);
 
-        // Load saved trips from SharedPreferences
         loadTrips();
-        // Set item click listener to open map
-        tripsListView.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedTrip = tripsList.get(position);
-            openMap(selectedTrip);
-        });
+
     }
+
 
     private void loadTrips() {
-        Set<String> tripsSet = sharedPreferences.getStringSet("trips", new HashSet<>());
-        tripsList = new ArrayList<>(tripsSet);
+        String userId = auth.getCurrentUser().getUid();
+        tripsList = new ArrayList<>();
 
-        if (tripsList.isEmpty()) {
-            Toast.makeText(this, "No trips found. Create a new trip!", Toast.LENGTH_SHORT).show();
-        }
+        databaseRef.child(userId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                tripsList.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Trip trip = snapshot.getValue(Trip.class);
+                    if (trip != null) {
+                        // Display trip with Start & End Point
+                        String tripDetails = "📍 " + trip.getStartPoint() + " ➝ " + trip.getEndPoint() + "\n🗓 " + trip.getDate() + " | " + trip.getName();
+                        tripsList.add(tripDetails);
+                    }
+                }
+                tripsAdapter = new ArrayAdapter<>(MyTripsActivity.this, android.R.layout.simple_list_item_1, tripsList);
+                tripsListView.setAdapter(tripsAdapter);
+            }
 
-        tripsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, tripsList);
-        tripsListView.setAdapter(tripsAdapter);
-    }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(MyTripsActivity.this, "Failed to load trips!", Toast.LENGTH_SHORT).show();
+            }
+        });
 
-    private void openMap(String tripDetails) {
-        String[] details = tripDetails.split(" - ");
-        if (details.length == 4) {
-            String tripName = details[0];
-            String tripDate = details[1];
-            String startPoint = details[2];
-            String endPoint = details[3];
 
-            // For now, use placeholder coordinates for the start and end points
-            double startLat = 37.7749;  // Example: Replace with actual location for your trip
-            double startLng = -122.4194;
-            double endLat = 37.7849;    // Example: Replace with actual location for your trip
-            double endLng = -122.4294;
 
-            Intent intent = new Intent(MyTripsActivity.this, HomePageActivity.class);
-            intent.putExtra("tripName", tripName);
-            intent.putExtra("tripDate", tripDate);
-            intent.putExtra("startPoint", startPoint);
-            intent.putExtra("endPoint", endPoint);
-            intent.putExtra("startLat", startLat);
-            intent.putExtra("startLng", startLng);
-            intent.putExtra("endLat", endLat);
-            intent.putExtra("endLng", endLng);
-            startActivity(intent);
-        }
     }
 }

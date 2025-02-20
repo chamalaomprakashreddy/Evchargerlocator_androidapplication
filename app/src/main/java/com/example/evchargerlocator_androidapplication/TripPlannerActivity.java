@@ -1,6 +1,8 @@
 package com.example.evchargerlocator_androidapplication;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -8,7 +10,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -31,9 +37,10 @@ public class TripPlannerActivity extends AppCompatActivity {
         startPoint = findViewById(R.id.startPoint);
         endPoint = findViewById(R.id.endPoint);
         submitButton = findViewById(R.id.submitButton);
+        //Initialize location Services
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Set up the back arrow functionality
+        // back arrow functionality
         backArrowText.setOnClickListener(v -> finish()); // Go back to the previous screen
 
         //Intent for CreateTripActivity
@@ -55,7 +62,7 @@ public class TripPlannerActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
+        //Handle trip submission
         submitButton.setOnClickListener(v -> {
             String start = startPoint.getText().toString();
             String end = endPoint.getText().toString();
@@ -65,18 +72,64 @@ public class TripPlannerActivity extends AppCompatActivity {
                 return;
             }
 
-            // Use user's location if start point is empty
+            // Fetch user location if start point is empty
             if (start.isEmpty()) {
-                start = userLatitude + "," + userLongitude;
+                getUserLocationAndProceed(end);
+            } else {
+                navigateToHomePage(start, end);
             }
-
-            // Pass locations to HomePageActivity for direction display
-            Intent intent = new Intent(TripPlannerActivity.this, HomePageActivity.class);
-            intent.putExtra("startLocation", start.isEmpty() ? userLatitude + "," + userLongitude : start);
-            intent.putExtra("endLocation", end);
-            startActivity(intent);
         });
+        // Request location permission
+        checkLocationPermission();
     }
 
+    private void getUserLocationAndProceed(String endLocation) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
+                if (location != null) {
+                    userLatitude = location.getLatitude();
+                    userLongitude = location.getLongitude();
+                    String userLocation = userLatitude + "," + userLongitude;
+                    navigateToHomePage(userLocation, endLocation);
+                } else {
+                    Toast.makeText(this, "Could not get current location. Please enter start point.", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
 
+    private void navigateToHomePage(String startLocation, String endLocation) {
+        Intent intent = new Intent(TripPlannerActivity.this, HomePageActivity.class);
+        intent.putExtra("startLocation", startLocation);
+        intent.putExtra("endLocation", endLocation);
+        startActivity(intent);
+    }
+
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    // Handle permission request result
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Location permission granted!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Location permission denied! Please enter start point manually.", Toast.LENGTH_LONG).show();
+            }
+
+        }
+
+
+    }
 }
