@@ -114,9 +114,15 @@ public class CardDetails extends AppCompatActivity {
         int currentYear = calendar.get(Calendar.YEAR);
         int currentMonth = calendar.get(Calendar.MONTH) + 1; // Months are 0-based
 
-        // Ensure expiry date is in the future
-        if (expYear < currentYear || (expYear == currentYear && expMonth < currentMonth)) {
-            Toast.makeText(this, "Expiry date must be in the future", Toast.LENGTH_SHORT).show();
+        // Ensure expiry date is in the present or future
+        if (expYear < currentYear) {
+            Toast.makeText(this, "Expiry year must be the current year or later", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Ensure expiry month is valid if year is the same as the current year
+        if (expYear == currentYear && expMonth < currentMonth) {
+            Toast.makeText(this, "Expiry month must be in the future", Toast.LENGTH_SHORT).show();
             return;
         }
 
