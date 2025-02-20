@@ -31,7 +31,7 @@
         android:queryHint="Search..." />
 
     <Button
-        android:id="@+id/btn_add_station"
+        android:id="@+id/btnAddStation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add Station"
@@ -39,14 +39,6 @@
         android:layout_alignParentLeft="true"
         android:layout_margin="16dp"/>
 
-    <!-- Chat Button -->
-    <Button
-        android:id="@+id/activity_chat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Chat"
-        android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@id/btn_add_station"
-        android:layout_margin="16dp"/>
+
 
 </RelativeLayout>

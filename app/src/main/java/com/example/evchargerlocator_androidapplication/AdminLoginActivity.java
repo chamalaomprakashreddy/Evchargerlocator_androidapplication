@@ -10,7 +10,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class AdminLoginActivity extends AppCompatActivity {
 
@@ -22,12 +31,18 @@ public class AdminLoginActivity extends AppCompatActivity {
     private ImageView showHidePasswordButton;
     private boolean isPasswordVisible = false;
 
+    private FirebaseAuth firebaseAuth;
+    private DatabaseReference adminRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_login);
 
-        
+        // Initialize Firebase
+        firebaseAuth = FirebaseAuth.getInstance();
+        adminRef = FirebaseDatabase.getInstance().getReference("admins");
+
         // Initialize views
         usernameInput = findViewById(R.id.usernameInput);
         passwordEditText = findViewById(R.id.passwordEditText);
@@ -54,31 +69,59 @@ public class AdminLoginActivity extends AppCompatActivity {
 
         // Set up the login button functionality
         loginButton.setOnClickListener(v -> {
-            String username = usernameInput.getText().toString().trim();
+            String email = usernameInput.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
-            if (username.isEmpty() || password.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(AdminLoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             } else {
-                // Admin login logic (use hardcoded credentials)
-                if (isAdmin(username, password)) {
-                    Toast.makeText(AdminLoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(AdminLoginActivity.this, "Invalid admin credentials", Toast.LENGTH_SHORT).show();
-                }
+                authenticateAdmin(email, password);
             }
         });
 
-        // Setup Password Intent
+        // Forgot Password Intent
         forgotPassword.setOnClickListener(v -> {
             Intent forgotPasswordIntent = new Intent(AdminLoginActivity.this, ForgetPasswordActivity.class);
             startActivity(forgotPasswordIntent);
         });
     }
 
-    private boolean isAdmin(String username, String password) {
-        return username.equals("evlocator1834@gmail.com") && password.equals("Admin@1834");
+    private void authenticateAdmin(String email, String password) {
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        if (user != null) {
+                            checkAdminInDatabase(user.getUid(), email);
+                        }
+                    } else {
+                        Toast.makeText(AdminLoginActivity.this, "Login Failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void checkAdminInDatabase(String userId, String email) {
+        adminRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // Login successful - Redirect to Admin Dashboard
+                    Toast.makeText(AdminLoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(AdminLoginActivity.this, AdminDashboardActivity.class);
+                    intent.putExtra("adminEmail", email);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    // User is not an admin
+                    firebaseAuth.signOut();
+                    Toast.makeText(AdminLoginActivity.this, "Unauthorized! Not an admin.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(AdminLoginActivity.this, "Database Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
