@@ -2,7 +2,6 @@ package com.example.evchargerlocator_androidapplication;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,17 +9,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
 
 
 public class CreateTripActivity extends AppCompatActivity {
 
     private EditText tripName, tripDate, startPoint, endPoint;
     private Button saveTripButton;
-    private SharedPreferences sharedPreferences;
     private TextView backArrowText;
+    private DatabaseReference databaseRef;
+    private FirebaseAuth auth; // Firebase Authentication
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +37,12 @@ public class CreateTripActivity extends AppCompatActivity {
         endPoint = findViewById(R.id.endPoint);  // Ending point
         saveTripButton = findViewById(R.id.saveTripButton);
         backArrowText = findViewById(R.id.backArrowText);
+
+        auth = FirebaseAuth.getInstance();
+        databaseRef = FirebaseDatabase.getInstance().getReference("Trips");
+
         // Set up the back arrow functionality
         backArrowText.setOnClickListener(v -> finish()); // Go back to the previous screen
-
-        sharedPreferences = getSharedPreferences("MyTrips", Context.MODE_PRIVATE);
 
         // Date Picker
         tripDate.setOnClickListener(v -> showDatePicker());
@@ -60,6 +65,7 @@ public class CreateTripActivity extends AppCompatActivity {
         }
 
     private void saveTrip() {
+        String userId = auth.getCurrentUser().getUid();
         String name = tripName.getText().toString().trim();
         String date = tripDate.getText().toString().trim();
         String start = startPoint.getText().toString().trim();
@@ -70,17 +76,24 @@ public class CreateTripActivity extends AppCompatActivity {
             return;
         }
 
-        SharedPreferences sharedPreferences = getSharedPreferences("MyTrips", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        String tripId = databaseRef.child(userId).push().getKey();
+        if (tripId == null) {
+            Toast.makeText(this, "Error creating trip ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Trip trip = new Trip(tripId, name, date, start, end);
 
-        // Save the trip details as a unique string
-        Set<String> tripsSet = new HashSet<>(sharedPreferences.getStringSet("trips", new HashSet<>()));
-        tripsSet.add(name + " - " + date + " - " + start + " - " + end);  // Save complete trip details
-        editor.putStringSet("trips", tripsSet); // Save updated set
-        editor.apply();
 
-        Toast.makeText(this, "Trip saved successfully!", Toast.LENGTH_SHORT).show();
-        finish();
+        // Store under the user's ID
+        databaseRef.child(userId).child(tripId).setValue(trip).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(this, "Trip saved successfully!", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "Failed to save trip", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
 
