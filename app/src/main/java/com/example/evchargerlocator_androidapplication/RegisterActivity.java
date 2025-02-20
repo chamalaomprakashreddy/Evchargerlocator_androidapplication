@@ -51,6 +51,14 @@ public class RegisterActivity extends AppCompatActivity {
         adminKey = findViewById(R.id.adminKey);
         togglePasswordVisibility = findViewById(R.id.togglePasswordVisibility);
         toggleConfirmPasswordVisibility = findViewById(R.id.toggleConfirmPasswordVisibility);
+        TextView backArrowText = findViewById(R.id.backArrowText);
+
+        // Back Arrow Functionality
+        backArrowText.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
         // Show/Hide Admin Key field
         adminCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
