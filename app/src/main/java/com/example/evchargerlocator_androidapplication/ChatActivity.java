@@ -2,6 +2,8 @@ package com.example.evchargerlocator_androidapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -28,10 +30,11 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
     private List<Message> messageList;
-    private EditText etMessage;
+    private List<Message> filteredList; // List for search filtering
+    private EditText searchMessageEditText, etMessage;
     private ImageButton btnSend;
     private String currentUserId;
-    private TextView backButton;  // ✅ Back button reference
+    private TextView backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,21 +49,23 @@ public class ChatActivity extends AppCompatActivity {
 
         // Initialize Views
         recyclerView = findViewById(R.id.recyclerViewChat);
+        searchMessageEditText = findViewById(R.id.searchMessageEditText);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
-        backButton = findViewById(R.id.backArrowText);  // ✅ Find Back button
+        backButton = findViewById(R.id.backArrowText);
 
         // Setup RecyclerView
         messageList = new ArrayList<>();
-        chatAdapter = new ChatAdapter(messageList, currentUserId, this);
+        filteredList = new ArrayList<>();
+        chatAdapter = new ChatAdapter(filteredList, currentUserId, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
 
-        // ✅ Set Click Listener for Back Button
+        // Set Click Listener for Back Button
         backButton.setOnClickListener(v -> {
             Intent intent = new Intent(ChatActivity.this, HomePageActivity.class);
             startActivity(intent);
-            finish();  // ✅ Close ChatActivity so it doesn't stay in the background
+            finish();
         });
 
         // Enable Swipe to Delete
@@ -69,7 +74,7 @@ public class ChatActivity extends AppCompatActivity {
 
         Log.d("ChatActivity", "Firebase Database Reference: " + messagesRef.toString());
 
-        // ✅ Listen for messages from Firebase
+        // Listen for messages from Firebase
         messagesRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
@@ -79,8 +84,7 @@ public class ChatActivity extends AppCompatActivity {
                         messagesRef.child(message.getMessageId()).child("read").setValue(true); // Mark as read
                     }
                     messageList.add(message);
-                    chatAdapter.notifyItemInserted(messageList.size() - 1);
-                    recyclerView.scrollToPosition(messageList.size() - 1);
+                    filterMessages(searchMessageEditText.getText().toString()); // Filter messages dynamically
                 }
             }
 
@@ -91,7 +95,7 @@ public class ChatActivity extends AppCompatActivity {
                     for (int i = 0; i < messageList.size(); i++) {
                         if (messageList.get(i).getMessageId().equals(updatedMessage.getMessageId())) {
                             messageList.set(i, updatedMessage);
-                            chatAdapter.notifyItemChanged(i);
+                            filterMessages(searchMessageEditText.getText().toString());
                             break;
                         }
                     }
@@ -105,7 +109,7 @@ public class ChatActivity extends AppCompatActivity {
                     for (int i = 0; i < messageList.size(); i++) {
                         if (messageList.get(i).getMessageId().equals(removedMessage.getMessageId())) {
                             messageList.remove(i);
-                            chatAdapter.notifyItemRemoved(i);
+                            filterMessages(searchMessageEditText.getText().toString());
                             break;
                         }
                     }
@@ -119,6 +123,20 @@ public class ChatActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e("ChatActivity", "Database Error: " + error.getMessage());
             }
+        });
+
+        // ✅ Search Functionality
+        searchMessageEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                filterMessages(charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
         });
 
         // ✅ Send Button Click Listener
@@ -157,5 +175,19 @@ public class ChatActivity extends AppCompatActivity {
         if (inputMethodManager != null) {
             inputMethodManager.hideSoftInputFromWindow(etMessage.getWindowToken(), 0);
         }
+    }
+
+    private void filterMessages(String query) {
+        filteredList.clear();
+        if (query.isEmpty()) {
+            filteredList.addAll(messageList);
+        } else {
+            for (Message message : messageList) {
+                if (message.getMessage().toLowerCase().contains(query.toLowerCase())) {
+                    filteredList.add(message);
+                }
+            }
+        }
+        chatAdapter.notifyDataSetChanged();
     }
 }
