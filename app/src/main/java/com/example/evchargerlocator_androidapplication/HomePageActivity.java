@@ -3,12 +3,8 @@ package com.example.evchargerlocator_androidapplication;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
 import android.os.Bundle;
 import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,22 +15,18 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
-
 
 public class HomePageActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -42,9 +34,9 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
     private GoogleMap myMap;
     private SearchView mapSearchView;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private DatabaseReference databaseReference;
     private BottomNavigationView bottomNavigationView;
-    private TextView distanceText, durationText;
-    private String startLocation, endLocation;
+    private List<ChargingStation> stationList = new ArrayList<>(); // Store all stations
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +46,8 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         mapSearchView = findViewById(R.id.mapSearch);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        Intent intent = getIntent();
-        startLocation = intent.getStringExtra("startLocation");
-        endLocation = intent.getStringExtra("endLocation");
+        // Initialize Firebase
+        databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
 
         // Initialize Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -66,45 +57,107 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         getLastLocation();
-        fetchDirections();
-        setupSearch();
         setupBottomNavigation();
+        setupSearch();
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        myMap = googleMap;
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            myMap.setMyLocationEnabled(true);
+        }
+
+        // Enable Zoom Controls inside the Map UI
+        myMap.getUiSettings().setZoomControlsEnabled(true); // Enables zoom in/out buttons inside the map
+        myMap.getUiSettings().setZoomGesturesEnabled(true); // Enables pinch zooming
+
+        loadStationsFromFirebase(); // Load charging stations
+    }
+
+    private void loadStationsFromFirebase() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                myMap.clear(); // Clear existing markers
+                stationList.clear(); // Clear old station data
+
+                for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
+                    ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
+                    if (station != null) {
+                        stationList.add(station); // Store stations for searching
+                        addStationMarker(station); // Add marker to map
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HomePageActivity.this, "Failed to load stations", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void addStationMarker(ChargingStation station) {
+        LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
+
+        // Customize marker color based on availability
+        float markerColor = station.getAvailability().equalsIgnoreCase("Available") ?
+                BitmapDescriptorFactory.HUE_GREEN :
+                BitmapDescriptorFactory.HUE_RED;
+
+        Marker marker = myMap.addMarker(new MarkerOptions()
+                .position(location)
+                .title(station.getName())
+                .snippet("Power: " + station.getPowerOutput() + "\nStatus: " + station.getAvailability())
+                .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+
+        if (marker != null) {
+            marker.showInfoWindow(); // Show station details
+        }
     }
 
     private void setupSearch() {
         mapSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if (query == null || query.trim().isEmpty()) {
-                    Toast.makeText(HomePageActivity.this, "Enter a valid location", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-
-                Geocoder geocoder = new Geocoder(HomePageActivity.this, Locale.getDefault());
-                try {
-                    List<Address> addressList = geocoder.getFromLocationName(query, 1);
-                    if (addressList != null && !addressList.isEmpty()) {
-                        Address address = addressList.get(0);
-                        LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-
-                        if (myMap != null) {
-                            myMap.clear();
-                            myMap.addMarker(new MarkerOptions().position(latLng).title(query));
-                            myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
-                        }
-                    } else {
-                        Toast.makeText(HomePageActivity.this, "Location not found", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (IOException e) {
-                    Toast.makeText(HomePageActivity.this, "Error fetching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-
+                filterStations(query);
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String s) {
+            public boolean onQueryTextChange(String query) {
+                filterStations(query);
                 return false;
+            }
+        });
+    }
+
+    private void filterStations(String query) {
+        myMap.clear(); // Clear old markers
+
+        for (ChargingStation station : stationList) {
+            if (station.getName().toLowerCase().contains(query.toLowerCase())) {
+                addStationMarker(station); // Show only matching stations
+            }
+        }
+    }
+
+    private void getLastLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_PERMISSION_CODE);
+            return;
+        }
+
+        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                if (myMap != null) {
+                    myMap.addMarker(new MarkerOptions().position(userLatLng).title("Your Location"));
+                    myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12));
+                }
             }
         });
     }
@@ -112,9 +165,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
     private void setupBottomNavigation() {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
-            if(itemId==R.id.activity_home_page){
-                startActivity(new Intent(this, HomePageActivity.class));
-            } else if  (itemId == R.id.activity_trip_planner) {
+            if  (itemId == R.id.activity_trip_planner) {
                 startActivity(new Intent(this, TripPlannerActivity.class));
             } else if (itemId == R.id.activity_chat) {
                 startActivity(new Intent(this, ChatActivity.class));
@@ -125,94 +176,5 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             }
             return true;
         });
-    }
-
-    private void getLastLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_PERMISSION_CODE);
-            return;
-        }
-
-        Task<Location> task = fusedLocationProviderClient.getLastLocation();
-        task.addOnSuccessListener(location -> {
-            if (location != null) {
-                LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                if (myMap != null) {
-                    myMap.clear();
-                    myMap.addMarker(new MarkerOptions().position(userLatLng).title("Your Location"));
-                    myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12));
-                }
-            }
-        });
-    }
-
-    private void fetchDirections() {
-        if (startLocation == null || endLocation == null) return;
-        new Thread(() -> {
-            try {
-                String urlString = "https://maps.googleapis.com/maps/api/directions/json?origin="
-                        + startLocation + "&destination=" + endLocation + "&key=AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs";
-                URL url = new URL(urlString);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-
-                JSONObject jsonResponse = new JSONObject(response.toString());
-                JSONArray routes = jsonResponse.getJSONArray("routes");
-                if (routes.length() > 0) {
-                    JSONObject route = routes.getJSONObject(0);
-                    JSONObject leg = route.getJSONArray("legs").getJSONObject(0);
-
-                    String distance = leg.getJSONObject("distance").getString("text");
-                    String duration = leg.getJSONObject("duration").getString("text");
-
-                    runOnUiThread(() -> {
-                        distanceText.setText("Distance: " + distance);
-                        durationText.setText("Duration: " + duration);
-                    });
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        myMap = googleMap;
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            myMap.setMyLocationEnabled(true);
-        }
-
-        if (startLocation != null && endLocation != null) {
-            String[] startCoords = startLocation.split(",");
-            String[] endCoords = endLocation.split(",");
-
-            LatLng startLatLng = new LatLng(Double.parseDouble(startCoords[0]), Double.parseDouble(startCoords[1]));
-            LatLng endLatLng = new LatLng(Double.parseDouble(endCoords[0]), Double.parseDouble(endCoords[1]));
-
-            myMap.addMarker(new MarkerOptions().position(startLatLng).title("Start Location"));
-            myMap.addMarker(new MarkerOptions().position(endLatLng).title("Destination"));
-            myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startLatLng, 10));
-        }
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == FINE_PERMISSION_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            getLastLocation();
-        } else {
-            Toast.makeText(this, "Location permission denied. Please enable it in settings.", Toast.LENGTH_SHORT).show();
-        }
     }
 }

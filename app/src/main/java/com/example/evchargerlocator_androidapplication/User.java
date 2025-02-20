@@ -5,6 +5,7 @@ public class User {
     private String fullName;
     private String phoneNumber;
     private String vehicle;
+    private String role;
 
     public User() {
         // Default constructor required for Firebase
@@ -16,6 +17,14 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.vehicle = vehicle;
     }
+    public User(String email, String fullName, String phoneNumber, String vehicle, String role) {
+        this.email = email;
+        this.fullName = fullName;
+        this.phoneNumber = phoneNumber;
+        this.vehicle = vehicle;
+        this.role = role;
+    }
+
 
     public String getEmail() {
         return email;

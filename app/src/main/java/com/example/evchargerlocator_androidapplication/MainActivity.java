@@ -9,9 +9,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,20 +29,23 @@ public class MainActivity extends AppCompatActivity {
     private ImageView showHidePasswordButton;
     private boolean isPasswordVisible = false;
 
+    private DatabaseReference usersRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize Firebase Auth
+        // Initialize Firebase Auth and Database
         firebaseAuth = FirebaseAuth.getInstance();
+        usersRef = FirebaseDatabase.getInstance().getReference("users");
 
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         loginButton = findViewById(R.id.loginButton);
         registerTextView = findViewById(R.id.registerTextView);
         adminLoginButton = findViewById(R.id.adminLoginButton);
-        forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView); // Reference the new TextView
+        forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
         showHidePasswordButton = findViewById(R.id.showHidePasswordButton);
 
         // Toggle password visibility
@@ -64,10 +74,10 @@ public class MainActivity extends AppCompatActivity {
             firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(MainActivity.this, HomePageActivity.class);
-                            startActivity(intent);
-                            finish();
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            if (user != null) {
+                                checkUserInDatabase(user.getUid());
+                            }
                         } else {
                             Toast.makeText(MainActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
                         }
@@ -90,6 +100,30 @@ public class MainActivity extends AppCompatActivity {
         forgotPasswordTextView.setOnClickListener(v -> {
             Intent forgotPasswordIntent = new Intent(MainActivity.this, ForgetPasswordActivity.class);
             startActivity(forgotPasswordIntent);
+        });
+    }
+
+    private void checkUserInDatabase(String userId) {
+        usersRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // The user exists in the "users" collection -> Proceed to Homepage
+                    Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this, HomePageActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    // User is not found in "users" collection -> Log out
+                    firebaseAuth.signOut();
+                    Toast.makeText(MainActivity.this, "Unauthorized! Only registered users can log in.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, "Database Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }
