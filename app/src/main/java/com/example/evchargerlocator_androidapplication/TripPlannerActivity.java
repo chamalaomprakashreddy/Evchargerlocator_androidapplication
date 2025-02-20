@@ -43,6 +43,14 @@ public class TripPlannerActivity extends AppCompatActivity {
         // back arrow functionality
         backArrowText.setOnClickListener(v -> finish()); // Go back to the previous screen
 
+
+        // Intent for Select Filters Button to redirect to FilterActivity
+        Button selectFiltersButton = findViewById(R.id.selectFiltersButton);
+        selectFiltersButton.setOnClickListener(v -> {
+            Intent intent = new Intent(TripPlannerActivity.this, FilterActivity.class);
+            startActivity(intent);  // Redirect to FilterActivity
+        });
+
         //Intent for CreateTripActivity
         Button createTripButton = findViewById(R.id.createTripButton);
         createTripButton.setOnClickListener(new View.OnClickListener() {

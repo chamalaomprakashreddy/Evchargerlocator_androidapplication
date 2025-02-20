@@ -2,6 +2,7 @@ package com.example.evchargerlocator_androidapplication;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,7 +21,7 @@ import java.util.Calendar;
 public class CreateTripActivity extends AppCompatActivity {
 
     private EditText tripName, tripDate, startPoint, endPoint;
-    private Button saveTripButton;
+    private Button saveTripButton, selectFiltersButton;
     private TextView backArrowText;
     private DatabaseReference databaseRef;
     private FirebaseAuth auth; // Firebase Authentication
@@ -37,6 +38,7 @@ public class CreateTripActivity extends AppCompatActivity {
         endPoint = findViewById(R.id.endPoint);  // Ending point
         saveTripButton = findViewById(R.id.saveTripButton);
         backArrowText = findViewById(R.id.backArrowText);
+        selectFiltersButton = findViewById(R.id.selectFiltersButton);
 
         auth = FirebaseAuth.getInstance();
         databaseRef = FirebaseDatabase.getInstance().getReference("Trips");
@@ -49,7 +51,16 @@ public class CreateTripActivity extends AppCompatActivity {
 
         // Save Trip Button Click
         saveTripButton.setOnClickListener(v -> saveTrip());
+
+        // Select Filters Button Click
+        selectFiltersButton.setOnClickListener(v -> {
+            // Redirect to FilterActivity
+            Intent intent = new Intent(CreateTripActivity.this, FilterActivity.class);
+            startActivity(intent);
+        });
     }
+
+
         private void showDatePicker () {
             final Calendar calendar = Calendar.getInstance();
             int year = calendar.get(Calendar.YEAR);
