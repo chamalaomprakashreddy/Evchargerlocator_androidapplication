@@ -1,4 +1,5 @@
 package com.example.evchargerlocator_androidapplication;
+
 import static android.util.Log.*;
 
 import android.content.Intent;
@@ -11,25 +12,31 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import java.util.ArrayList;
-import java.util.List;
 import android.content.pm.PackageManager;
 import android.Manifest;
+import android.location.Location;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HomePageActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -40,7 +47,12 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private ImageView navIcon;
-    private List<ChargingStation> stationList = new ArrayList<>(); // Store all stations
+    private List<ChargingStation> stationList = new ArrayList<>();
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+    private LatLng userLocation;
+    private MarkerOptions userLocationMarker; // Marker for user's location
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +68,10 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         navIcon.setOnClickListener(v -> drawerLayout.openDrawer(Gravity.LEFT));
 
         // Initialize the SearchView
-        mapSearchView = findViewById(R.id.mapSearch); // Ensure this ID matches the one in XML
+        mapSearchView = findViewById(R.id.mapSearch);
         if (mapSearchView != null) {
             setupSearch();
         } else {
-            // Handle the case where mapSearchView is not found
             e("HomePageActivity", "SearchView not found.");
         }
 
@@ -71,8 +82,42 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             mapFragment.getMapAsync(this);
         }
 
-        // Set up drawer menu click handling
+        // Initialize FusedLocationProviderClient for live location tracking
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Setup LocationRequest for continuous updates
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000); // 10 seconds
+        locationRequest.setFastestInterval(5000); // 5 seconds
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        // Setup LocationCallback to handle location updates
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                if (locationResult != null && locationResult.getLocations() != null) {
+                    for (Location location : locationResult.getLocations()) {
+                        if (location != null) {
+                            userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                            updateMapWithLocation(location); // Update live location marker
+                        }
+                    }
+                }
+            }
+        };
+
+        // Setup drawer menu click handling
         setupDrawer();
+
+        // Floating action button (FAB) for recentering the map to the live location
+        FloatingActionButton fabCenter = findViewById(R.id.fab_center);
+        fabCenter.setOnClickListener(v -> {
+            if (userLocation != null) {
+                // Recenter the map to the most recent live location and keep the charging stations visible
+                myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+            }
+        });
     }
 
     @Override
@@ -83,6 +128,9 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             myMap.setMyLocationEnabled(true);
         }
+
+        // Start location updates
+        getCurrentLocation();
 
         // Enable zoom controls
         myMap.getUiSettings().setZoomControlsEnabled(true);
@@ -99,12 +147,23 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                 myMap.clear(); // Clear existing markers
                 stationList.clear(); // Clear old station data
 
+                // Add charging stations markers first (they should be on top of the live location marker)
                 for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
                     if (station != null) {
                         stationList.add(station); // Store stations for searching
                         addStationMarker(station); // Add marker to map
                     }
+                }
+
+                // Add live location marker after the charging station markers (so it appears below them)
+                if (userLocation != null) {
+                    addUserLocationMarker(userLocation);
+                }
+
+                // Ensure that the map zoom level is appropriate
+                if (userLocation != null) {
+                    myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15)); // Adjust zoom level if needed
                 }
             }
 
@@ -123,15 +182,25 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                 BitmapDescriptorFactory.HUE_GREEN :
                 BitmapDescriptorFactory.HUE_RED;
 
-        Marker marker = myMap.addMarker(new MarkerOptions()
+        myMap.addMarker(new MarkerOptions()
                 .position(location)
                 .title(station.getName())
                 .snippet("Power: " + station.getPowerOutput() + "\nStatus: " + station.getAvailability())
                 .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+    }
 
-        if (marker != null) {
-            marker.showInfoWindow(); // Show station details
+    private void addUserLocationMarker(LatLng userLocation) {
+        // Remove the old marker if it exists
+        if (userLocationMarker != null) {
+            myMap.clear(); // Remove previous user location marker
         }
+
+        // Add a new marker for the user's current location
+        userLocationMarker = new MarkerOptions()
+                .position(userLocation)
+                .title("Your Location")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+        myMap.addMarker(userLocationMarker);
     }
 
     private void setupSearch() {
@@ -153,10 +222,16 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
     private void filterStations(String query) {
         myMap.clear(); // Clear old markers
 
+        // Add charging stations markers first (they should be on top of the live location marker)
         for (ChargingStation station : stationList) {
             if (station.getName().toLowerCase().contains(query.toLowerCase())) {
                 addStationMarker(station); // Show only matching stations
             }
+        }
+
+        // Add live location marker back on top
+        if (userLocation != null) {
+            addUserLocationMarker(userLocation);
         }
     }
 
@@ -175,5 +250,39 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             drawerLayout.closeDrawer(Gravity.LEFT); // Close drawer after selection
             return true;
         });
+    }
+
+    private void getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_PERMISSION_CODE);
+        }
+    }
+
+    private void updateMapWithLocation(Location location) {
+        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        // Do not automatically move the map to the user location.
+        // Only update the location variable to be used later when FAB is clicked.
+        addUserLocationMarker(userLocation); // Optional: Always show live location marker
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        fusedLocationClient.removeLocationUpdates(locationCallback);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == FINE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getCurrentLocation(); // Retry getting location if permission is granted
+            } else {
+                Toast.makeText(this, "Permission denied. Unable to get location.", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

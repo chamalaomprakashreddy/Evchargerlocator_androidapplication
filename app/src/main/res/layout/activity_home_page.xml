@@ -30,11 +30,11 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/nav"
-            android:contentDescription="Open Navigation Drawer"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="20dp"
-            android:layout_marginStart="16dp"/>
+        android:contentDescription="Open Navigation Drawer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"/>
 
         <!-- SearchView floating below the navigation icon -->
         <SearchView
@@ -49,6 +49,20 @@
             android:queryHint="Search charging stations..."
             app:layout_constraintStart_toEndOf="@+id/nav_icon"
             app:layout_constraintTop_toTopOf="@+id/map" />
+
+        <!-- Floating Action Button for recentering the map -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="Recenter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mapSearch"
+            app:srcCompat="@android:drawable/ic_menu_mylocation" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
