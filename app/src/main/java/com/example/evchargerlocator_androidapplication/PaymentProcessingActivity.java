@@ -14,7 +14,7 @@ public class PaymentProcessingActivity extends AppCompatActivity {
         TextView statusText = findViewById(R.id.paymentStatusText);
         statusText.setText("Processing your payment...");
 
-        // Simulate payment processing (you can integrate PayPal SDK or any other payment method here)
+        // Simulate payment processing (3 seconds delay)
         new android.os.Handler().postDelayed(() -> statusText.setText("Payment Successful!"), 3000);
     }
 }

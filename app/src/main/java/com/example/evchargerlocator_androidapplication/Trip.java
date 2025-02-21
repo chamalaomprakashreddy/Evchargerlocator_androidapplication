@@ -2,16 +2,20 @@ package com.example.evchargerlocator_androidapplication;
 
 public class Trip {
     private String tripId, name, date, startPoint, endPoint;
+    private String level, connector, network;
 
     public Trip() {
     }
 
-    public Trip(String tripId, String name, String date, String startPoint, String endPoint) {
+    public Trip(String tripId, String name, String date, String startPoint, String endPoint, String level, String connector, String network) {
         this.tripId = tripId;
         this.name = name;
         this.date = date;
         this.startPoint = startPoint;
         this.endPoint = endPoint;
+        this.level = level;
+        this.connector = connector;
+        this.network = network;
     }
 
     public String getTripId() {
@@ -34,4 +38,15 @@ public class Trip {
         return endPoint;
     }
 
+    public String getLevel() {
+        return level;
+    }
+
+    public String getConnector() {
+        return connector;
+    }
+
+    public String getNetwork() {
+        return network;
+    }
 }

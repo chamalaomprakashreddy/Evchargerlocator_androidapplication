@@ -19,7 +19,9 @@
         android:textSize="32sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/titleMyTrips"/>
+        app:layout_constraintBottom_toBottomOf="@id/titleMyTrips" />
+
+    <!-- Title for My Trips -->
     <TextView
         android:id="@+id/titleMyTrips"
         android:layout_width="wrap_content"
@@ -31,8 +33,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp"/>
+        android:layout_marginTop="40dp" />
 
+    <!-- List of Trips -->
     <ListView
         android:id="@+id/tripsListView"
         android:layout_width="0dp"
@@ -41,6 +44,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_margin="40dp"/>
+        android:layout_margin="20dp"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp" />
+
+    <!-- Empty View Message -->
+    <TextView
+        android:id="@+id/emptyView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No trips found. Start planning your next trip!"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:textStyle="italic"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/titleMyTrips"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

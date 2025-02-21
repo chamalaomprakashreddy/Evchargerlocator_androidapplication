@@ -9,25 +9,38 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHolder> {
+
     private List<Message> messages;
     private String currentUserId;
-    private DatabaseReference messagesRef;
+    private DatabaseReference messagesRef, usersRef;
     private Context context;
+    private HashMap<String, String> userNamesCache;  // Cache usernames for better performance
 
     public ChatAdapter(List<Message> messages, String currentUserId, Context context) {
         this.messages = messages;
         this.currentUserId = currentUserId;
         this.context = context;
         this.messagesRef = FirebaseDatabase.getInstance().getReference("messages");
+        this.usersRef = FirebaseDatabase.getInstance().getReference("users");
+        this.userNamesCache = new HashMap<>();
     }
 
     @NonNull
@@ -40,10 +53,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         Message message = messages.get(position);
-        holder.messageText.setText(message.getMessage());
-        holder.messageTime.setText(message.getFormattedTime());
 
-        // ✅ Handle Sent/Received Messages & Read Receipts
+        holder.messageText.setText(message.getMessage());
+        holder.messageTime.setText(getFormattedTime(message.getTimestamp()));
+        fetchUserName(message.getSenderId(), holder);
+
+        // Sent/Received messages appearance
         if (message.getSenderId().equals(currentUserId)) {
             holder.messageText.setBackgroundResource(R.drawable.message_bubble_sent);
             holder.readReceipt.setVisibility(View.VISIBLE);
@@ -53,7 +68,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
             holder.readReceipt.setVisibility(View.GONE);
         }
 
-        // ✅ Show reactions
+        // Display reactions
         if (message.getReaction() != null && !message.getReaction().isEmpty()) {
             holder.reactionIcon.setVisibility(View.VISIBLE);
             holder.reactionIcon.setImageResource(getReactionDrawable(message.getReaction()));
@@ -61,7 +76,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
             holder.reactionIcon.setVisibility(View.GONE);
         }
 
-        // ✅ Enable Long Press for Edit, Delete, and Reactions
+        // Long-press for message options (edit, delete, react)
         holder.itemView.setOnLongClickListener(v -> {
             showMessageOptions(holder, message);
             return true;
@@ -73,28 +88,37 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
         return messages.size();
     }
 
-    public void updateMessages(List<Message> newMessages) {
-        this.messages.clear();
-        this.messages.addAll(newMessages);
-        notifyDataSetChanged();
-    }
+    // ✅ Fetch user name from Firebase and cache it
+    private void fetchUserName(String senderId, MessageViewHolder holder) {
+        if (userNamesCache.containsKey(senderId)) {
+            holder.userNameText.setText(userNamesCache.get(senderId));
+        } else {
+            usersRef.child(senderId).child("fullName").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String fullName = snapshot.getValue(String.class);
+                    if (fullName != null) {
+                        userNamesCache.put(senderId, fullName);
+                        holder.userNameText.setText(fullName);
+                    } else {
+                        holder.userNameText.setText("Unknown User");
+                    }
+                }
 
-    // ✅ Swipe-to-Delete Method
-    public void removeItem(int position) {
-        if (position >= 0 && position < messages.size()) {
-            Message message = messages.get(position);
-            messagesRef.child(message.getMessageId()).removeValue();
-            messages.remove(position);
-            notifyItemRemoved(position);
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    holder.userNameText.setText("Error Loading");
+                }
+            });
         }
     }
 
-    // ✅ Show Message Options (Edit, Delete, Reactions)
+    // ✅ Display message options: react, edit, delete
     private void showMessageOptions(MessageViewHolder holder, Message message) {
         PopupMenu popup = new PopupMenu(holder.itemView.getContext(), holder.messageText);
         popup.getMenuInflater().inflate(R.menu.message_options_menu, popup.getMenu());
 
-        // Add Reaction Options
+        // Add reaction options
         popup.getMenu().add("React 👍");
         popup.getMenu().add("React ❤️");
         popup.getMenu().add("React 😂");
@@ -102,7 +126,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
         popup.setOnMenuItemClickListener(item -> {
             String title = item.getTitle().toString();
             if (title.startsWith("React")) {
-                updateReaction(message, title.substring(6));
+                updateReaction(message, title.substring(6)); // Removes "React " and updates the emoji
                 return true;
             } else if (item.getItemId() == R.id.edit_message) {
                 editMessage(message);
@@ -116,36 +140,64 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
         popup.show();
     }
 
-    // ✅ Edit Message Feature
-    private void editMessage(Message message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Edit Message");
-
-        final EditText input = new EditText(context);
-        input.setText(message.getMessage());
-        builder.setView(input);
-
-        builder.setPositiveButton("Update", (dialog, which) -> {
-            String newText = input.getText().toString().trim();
-            if (!newText.isEmpty()) {
-                messagesRef.child(message.getMessageId()).child("message").setValue(newText);
-                message.setMessage(newText);
-                notifyDataSetChanged();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-        builder.show();
-    }
-
-    // ✅ Update Reaction
+    // ✅ Update the message reaction in Firebase
     private void updateReaction(Message message, String reaction) {
         messagesRef.child(message.getMessageId()).child("reaction").setValue(reaction);
         message.setReaction(reaction);
         notifyDataSetChanged();
     }
 
-    // ✅ Map reactions to drawable resources
+    // ✅ Edit message text
+    // ✅ Method to edit message and update in Firebase
+    private void editMessage(Message message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Edit Message");
+
+        // Create EditText for input
+        final EditText input = new EditText(context);
+        input.setText(message.getMessage());  // Pre-fill existing message
+        builder.setView(input);
+
+        // Handle the update
+        builder.setPositiveButton("Update", (dialog, which) -> {
+            String newText = input.getText().toString().trim();
+            if (!newText.isEmpty() && !newText.equals(message.getMessage())) {
+                // ✅ Update message in Firebase
+                messagesRef.child(message.getMessageId()).child("message").setValue(newText)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                message.setMessage(newText);  // Update locally
+                                notifyDataSetChanged();  // Refresh RecyclerView
+                            } else {
+                                Toast.makeText(context, "Failed to update message", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        });
+
+        // Cancel Button
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+
+    // ✅ Swipe/Delete Functionality
+    public void removeItem(int position) {
+        if (position >= 0 && position < messages.size()) {
+            Message message = messages.get(position);
+            messagesRef.child(message.getMessageId()).removeValue();
+            messages.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    // ✅ Convert timestamp to readable time
+    private String getFormattedTime(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        return sdf.format(new Date(timestamp));
+    }
+
+    // ✅ Map reaction string to drawable icon
     private int getReactionDrawable(String reaction) {
         switch (reaction) {
             case "👍": return R.drawable.ic_thumb_up;
@@ -155,15 +207,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
         }
     }
 
-    // ✅ ViewHolder Class
+    // ✅ ViewHolder class with username, message text, timestamp, read receipt, and reactions
     public static class MessageViewHolder extends RecyclerView.ViewHolder {
-        TextView messageText, messageTime;
+        TextView messageText, messageTime, userNameText;
         ImageView readReceipt, reactionIcon;
 
         public MessageViewHolder(View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.messageText);
             messageTime = itemView.findViewById(R.id.messageTime);
+            userNameText = itemView.findViewById(R.id.userNameText);
             readReceipt = itemView.findViewById(R.id.readReceipt);
             reactionIcon = itemView.findViewById(R.id.reactionIcon);
         }

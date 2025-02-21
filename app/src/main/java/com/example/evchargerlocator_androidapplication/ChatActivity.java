@@ -11,11 +11,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
@@ -30,7 +32,7 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
     private List<Message> messageList;
-    private List<Message> filteredList; // List for search filtering
+    private List<Message> filteredList;
     private EditText searchMessageEditText, etMessage;
     private ImageButton btnSend;
     private String currentUserId;
@@ -41,50 +43,49 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Initialize Firebase
+        // Initialize Firebase & UI Components
         database = FirebaseDatabase.getInstance();
         messagesRef = database.getReference("messages");
         auth = FirebaseAuth.getInstance();
         currentUserId = auth.getCurrentUser().getUid();
 
-        // Initialize Views
         recyclerView = findViewById(R.id.recyclerViewChat);
         searchMessageEditText = findViewById(R.id.searchMessageEditText);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
         backButton = findViewById(R.id.backArrowText);
 
-        // Setup RecyclerView
         messageList = new ArrayList<>();
         filteredList = new ArrayList<>();
+
+        // Initialize Chat Adapter
         chatAdapter = new ChatAdapter(filteredList, currentUserId, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
 
-        // Set Click Listener for Back Button
+        // Implement Swipe-to-Delete
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(chatAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        // Navigate Back to HomePage
         backButton.setOnClickListener(v -> {
             Intent intent = new Intent(ChatActivity.this, HomePageActivity.class);
             startActivity(intent);
             finish();
         });
 
-        // Enable Swipe to Delete
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(chatAdapter));
-        itemTouchHelper.attachToRecyclerView(recyclerView);
-
-        Log.d("ChatActivity", "Firebase Database Reference: " + messagesRef.toString());
-
-        // Listen for messages from Firebase
+        // Real-time Firebase Database Listener
         messagesRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
                 Message message = snapshot.getValue(Message.class);
                 if (message != null) {
                     if (!message.isRead() && !message.getSenderId().equals(currentUserId)) {
-                        messagesRef.child(message.getMessageId()).child("read").setValue(true); // Mark as read
+                        messagesRef.child(message.getMessageId()).child("read").setValue(true);
                     }
                     messageList.add(message);
-                    filterMessages(searchMessageEditText.getText().toString()); // Filter messages dynamically
+                    filterMessages(searchMessageEditText.getText().toString());
                 }
             }
 
@@ -106,13 +107,8 @@ public class ChatActivity extends AppCompatActivity {
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 Message removedMessage = snapshot.getValue(Message.class);
                 if (removedMessage != null) {
-                    for (int i = 0; i < messageList.size(); i++) {
-                        if (messageList.get(i).getMessageId().equals(removedMessage.getMessageId())) {
-                            messageList.remove(i);
-                            filterMessages(searchMessageEditText.getText().toString());
-                            break;
-                        }
-                    }
+                    messageList.removeIf(msg -> msg.getMessageId().equals(removedMessage.getMessageId()));
+                    filterMessages(searchMessageEditText.getText().toString());
                 }
             }
 
@@ -125,55 +121,29 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // ✅ Search Functionality
+        // Add a search functionality
         searchMessageEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 filterMessages(charSequence.toString());
             }
 
-            @Override
-            public void afterTextChanged(Editable editable) {}
+            @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override public void afterTextChanged(Editable editable) {}
         });
 
-        // ✅ Send Button Click Listener
+        // Send button functionality
         btnSend.setOnClickListener(v -> sendMessage());
     }
 
     private void sendMessage() {
         String messageText = etMessage.getText().toString().trim();
-
         if (!messageText.isEmpty()) {
-            btnSend.setEnabled(false);
-
             String messageId = messagesRef.push().getKey();
             long timestamp = System.currentTimeMillis();
             Message message = new Message(currentUserId, messageText, timestamp, messageId, false, "");
-
-            messagesRef.child(messageId).setValue(message)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Log.d("ChatActivity", "Message sent successfully: " + messageText);
-                            etMessage.setText("");
-                            hideKeyboard();
-                        } else {
-                            Log.e("ChatActivity", "Failed to send message");
-                            Toast.makeText(ChatActivity.this, "Failed to send message.", Toast.LENGTH_SHORT).show();
-                        }
-                        btnSend.setEnabled(true);
-                    });
-        } else {
-            Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void hideKeyboard() {
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        if (inputMethodManager != null) {
-            inputMethodManager.hideSoftInputFromWindow(etMessage.getWindowToken(), 0);
+            messagesRef.child(messageId).setValue(message);
+            etMessage.setText("");
         }
     }
 

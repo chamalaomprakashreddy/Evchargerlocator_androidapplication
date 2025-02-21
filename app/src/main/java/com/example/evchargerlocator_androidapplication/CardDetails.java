@@ -2,154 +2,100 @@ package com.example.evchargerlocator_androidapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import java.util.Calendar;
 
 public class CardDetails extends AppCompatActivity {
-    private EditText cardNumber, expiryDate, cvv, cardHolderName;
+
+    private EditText cardNumberInput, cardHolderInput, expiryDateInput, cvvInput;
     private Button continueButton;
-    private ImageView showHideCvv;
-    private CheckBox saveCardCheckBox;
-    private boolean isCvvVisible = false;
-    private DatabaseReference databaseRef;
+    private CheckBox saveCardCheckbox;
     private FirebaseAuth auth;
+    private DatabaseReference databaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_details);
 
-        cardNumber = findViewById(R.id.cardNumber);
-        expiryDate = findViewById(R.id.expiryDate);
-        cvv = findViewById(R.id.cvv);
-        cardHolderName = findViewById(R.id.cardHolderName);
-        continueButton = findViewById(R.id.continueButton);
-        showHideCvv = findViewById(R.id.showHideCvv);
-        saveCardCheckBox = findViewById(R.id.saveCardCheckbox);
-        TextView backArrowText = findViewById(R.id.backArrowText);
-
+        // Initialize Firebase
         auth = FirebaseAuth.getInstance();
         databaseRef = FirebaseDatabase.getInstance().getReference("SavedCards");
 
+        // Initialize UI elements
+        cardNumberInput = findViewById(R.id.cardNumberInput);
+        cardHolderInput = findViewById(R.id.cardHolderInput);
+        expiryDateInput = findViewById(R.id.expiryDateInput);
+        cvvInput = findViewById(R.id.cvvInput);
+        continueButton = findViewById(R.id.continueButton);
+        saveCardCheckbox = findViewById(R.id.saveCardCheckbox);
+        TextView backArrowText = findViewById(R.id.backArrowText);
+
+        // Back button functionality
         backArrowText.setOnClickListener(v -> finish());
 
-        showHideCvv.setOnClickListener(v -> {
-            if (isCvvVisible) {
-                cvv.setInputType(129); // Hide CVV
-                showHideCvv.setImageResource(R.drawable.ic_eye_closed);
-            } else {
-                cvv.setInputType(145); // Show CVV
-                showHideCvv.setImageResource(R.drawable.ic_eye_open);
-            }
-            isCvvVisible = !isCvvVisible;
-            cvv.setSelection(cvv.getText().length());
-        });
-
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                validateFields();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        };
-
-        cardNumber.addTextChangedListener(textWatcher);
-        expiryDate.addTextChangedListener(textWatcher);
-        cvv.addTextChangedListener(textWatcher);
-        cardHolderName.addTextChangedListener(textWatcher);
-
-        continueButton.setOnClickListener(v -> handlePayment());
+        // Continue button functionality
+        continueButton.setOnClickListener(v -> saveCardDetails());
     }
 
-    private void validateFields() {
-        boolean isValid = !cardNumber.getText().toString().trim().isEmpty()
-                && !expiryDate.getText().toString().trim().isEmpty()
-                && !cvv.getText().toString().trim().isEmpty()
-                && !cardHolderName.getText().toString().trim().isEmpty();
-        continueButton.setEnabled(isValid);
-    }
-
-    private void handlePayment() {
+    private void saveCardDetails() {
         String userId = auth.getCurrentUser().getUid();
-        String cardNum = cardNumber.getText().toString().trim();
-        String expDate = expiryDate.getText().toString().trim();
-        String cvvCode = cvv.getText().toString().trim();
-        String cardHolder = cardHolderName.getText().toString().trim();
+        String cardNumber = cardNumberInput.getText().toString().trim();
+        String cardHolderName = cardHolderInput.getText().toString().trim();
+        String expiryDate = expiryDateInput.getText().toString().trim();
+        String cvv = cvvInput.getText().toString().trim();
 
-        // Validate Card Number Length
-        if (cardNum.length() < 12 || cardNum.length() > 19) {
-            Toast.makeText(this, "Invalid Card Number", Toast.LENGTH_SHORT).show();
+        // Validate inputs
+        if (cardNumber.isEmpty() || cardHolderName.isEmpty() || expiryDate.isEmpty() || cvv.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Validate Expiry Date Format (MM/YY) and Expiry Year
-        if (!expDate.matches("^(0[1-9]|1[0-2])/([0-9]{2})$")) {
-            Toast.makeText(this, "Invalid Expiry Date (MM/YY)", Toast.LENGTH_SHORT).show();
+        if (cardNumber.length() < 16) {
+            Toast.makeText(this, "Enter a valid 16-digit card number", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Extract month and year from expiry date
-        String[] parts = expDate.split("/");
-        int expMonth = Integer.parseInt(parts[0]);
-        int expYear = Integer.parseInt(parts[1]) + 2000; // Convert YY to YYYY
-
-        // Get current year and month
-        Calendar calendar = Calendar.getInstance();
-        int currentYear = calendar.get(Calendar.YEAR);
-        int currentMonth = calendar.get(Calendar.MONTH) + 1; // Months are 0-based
-
-        // Ensure expiry date is in the present or future
-        if (expYear < currentYear) {
-            Toast.makeText(this, "Expiry year must be the current year or later", Toast.LENGTH_SHORT).show();
+        if (!expiryDate.matches("(0[1-9]|1[0-2])/(\\d{2})")) {
+            Toast.makeText(this, "Enter a valid expiry date (MM/YY)", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Ensure expiry month is valid if year is the same as the current year
-        if (expYear == currentYear && expMonth < currentMonth) {
-            Toast.makeText(this, "Expiry month must be in the future", Toast.LENGTH_SHORT).show();
+        if (cvv.length() < 3) {
+            Toast.makeText(this, "Enter a valid 3-digit CVV", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Validate CVV
-        if (cvvCode.length() < 3 || cvvCode.length() > 4) {
-            Toast.makeText(this, "Invalid CVV", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Mask the card number (Only show last 4 digits)
+        String maskedCardNumber = "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
 
-        // Save card if checkbox is checked
-        if (saveCardCheckBox.isChecked()) {
-            String maskedCard = cardNum.substring(0, 4) + " •••• " + cardNum.substring(cardNum.length() - 4);
-            Card card = new Card(maskedCard, expDate, cardHolder);
+        if (saveCardCheckbox.isChecked()) {
             String cardId = databaseRef.child(userId).push().getKey();
+            Card card = new Card(maskedCardNumber, cardHolderName, expiryDate);
 
+            // Save the card details to Firebase
             databaseRef.child(userId).child(cardId).setValue(card).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    Toast.makeText(this, "Card Saved Successfully", Toast.LENGTH_SHORT).show();
-                    finish();
+                    Toast.makeText(CardDetails.this, "Card saved successfully!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "Failed to save card", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CardDetails.this, "Failed to save card", Toast.LENGTH_SHORT).show();
                 }
             });
         }
 
-        // Proceed to payment processing screen
+        // Redirect to PaymentProcessingActivity
         Intent intent = new Intent(CardDetails.this, PaymentProcessingActivity.class);
         startActivity(intent);
+        finish();
     }
 }

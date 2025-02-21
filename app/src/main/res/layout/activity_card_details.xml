@@ -9,7 +9,7 @@
     android:padding="16dp"
     tools:context=".CardDetails">
 
-    <!-- Back Arrow -->
+    <!-- Back Button -->
     <TextView
         android:id="@+id/backArrowText"
         android:layout_width="wrap_content"
@@ -19,9 +19,10 @@
         android:text="\u2190"
         android:textColor="@color/black"
         android:textSize="34sp"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/titleText"/>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <!-- Title -->
     <TextView
@@ -39,7 +40,7 @@
 
     <!-- Card Number -->
     <EditText
-        android:id="@+id/cardNumber"
+        android:id="@+id/cardNumberInput"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Card Number"
@@ -52,20 +53,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp" />
 
-    <!-- Expiry Date and CVV Layout -->
+    <!-- Expiry Date and CVV -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/expiryCvvContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        app:layout_constraintTop_toBottomOf="@id/cardNumber"
+        app:layout_constraintTop_toBottomOf="@id/cardNumberInput"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="14dp">
 
         <!-- Expiry Date -->
         <EditText
-            android:id="@+id/expiryDate"
+            android:id="@+id/expiryDateInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="MM/YY"
@@ -73,47 +74,33 @@
             android:padding="12dp"
             android:background="@android:drawable/editbox_background"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/cvv"
+            app:layout_constraintEnd_toStartOf="@id/cvvInput"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginEnd="8dp" />
 
         <!-- CVV -->
         <EditText
-            android:id="@+id/cvv"
+            android:id="@+id/cvvInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="CVV"
             android:inputType="numberPassword"
             android:padding="12dp"
-            app:layout_constraintStart_toEndOf="@id/expiryDate"
             android:background="@android:drawable/editbox_background"
+            app:layout_constraintStart_toEndOf="@id/expiryDateInput"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="10dp" />
 
-        <!-- Show/Hide CVV Icon -->
-        <ImageView
-            android:id="@+id/showHideCvv"
-            android:layout_width="30dp"
-            android:layout_height="20dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="5dp"
-            android:src="@drawable/ic_eye_closed"
-            android:contentDescription="Show/Hide CVV"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/cvv"
-            app:layout_constraintBottom_toBottomOf="@id/cvv" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Card Holder Name -->
     <EditText
-        android:id="@+id/cardHolderName"
+        android:id="@+id/cardHolderInput"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Cardholder Name"
         android:inputType="text"
-        android:layout_marginHorizontal="20dp"
         android:padding="12dp"
         android:background="@android:drawable/editbox_background"
         app:layout_constraintTop_toBottomOf="@id/expiryCvvContainer"
@@ -121,24 +108,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="14dp" />
 
-    <!-- Save Card for Future Payments Checkbox -->
+    <!-- Save Card Checkbox -->
     <CheckBox
         android:id="@+id/saveCardCheckbox"
-        android:layout_width="250dp"
-        android:layout_height="45dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Save card for future payments"
         android:textColor="@android:color/black"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/cardHolderName"
+        app:layout_constraintTop_toBottomOf="@id/cardHolderInput"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_marginTop="20dp"/>
+
     <!-- Continue Button -->
     <Button
         android:id="@+id/continueButton"
-        android:layout_width="250dp"
-        android:layout_height="45dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Continue Payment"
-        android:textSize="16dp"
+        android:textSize="16sp"
         android:textColor="@android:color/white"
         android:backgroundTint="@color/black"
         app:layout_constraintTop_toBottomOf="@id/saveCardCheckbox"

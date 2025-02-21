@@ -7,21 +7,28 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
 
 public class PaymentMethodsAdapter extends RecyclerView.Adapter<PaymentMethodsAdapter.ViewHolder> {
 
     private List<Card> cardList;
     private OnCardSelectedListener listener;
+    private OnCardDeleteListener deleteListener;
     private int selectedPosition = -1;
 
     public interface OnCardSelectedListener {
         void onCardSelected(String cardNumber);
     }
 
-    public PaymentMethodsAdapter(List<Card> cardList, OnCardSelectedListener listener) {
+    public interface OnCardDeleteListener {
+        void onDeleteCard(Card card);
+    }
+
+    public PaymentMethodsAdapter(List<Card> cardList, OnCardSelectedListener listener, OnCardDeleteListener deleteListener) {
         this.cardList = cardList;
         this.listener = listener;
+        this.deleteListener = deleteListener;
     }
 
     @NonNull
@@ -55,6 +62,12 @@ public class PaymentMethodsAdapter extends RecyclerView.Adapter<PaymentMethodsAd
             notifyItemChanged(previousSelection);
             notifyItemChanged(selectedPosition);
             listener.onCardSelected(card.getCardNumber());
+        });
+
+        // Long press to delete
+        holder.itemView.setOnLongClickListener(v -> {
+            deleteListener.onDeleteCard(card);
+            return true;
         });
     }
 
