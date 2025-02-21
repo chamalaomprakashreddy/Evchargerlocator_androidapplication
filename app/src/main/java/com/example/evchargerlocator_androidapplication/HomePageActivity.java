@@ -1,16 +1,17 @@
 package com.example.evchargerlocator_androidapplication;
+import static android.util.Log.*;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -19,7 +20,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,15 +28,18 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
+import android.content.pm.PackageManager;
+import android.Manifest;
 
 public class HomePageActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int FINE_PERMISSION_CODE = 1;
     private GoogleMap myMap;
     private SearchView mapSearchView;
-    private FusedLocationProviderClient fusedLocationProviderClient;
     private DatabaseReference databaseReference;
-    private BottomNavigationView bottomNavigationView;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private ImageView navIcon;
     private List<ChargingStation> stationList = new ArrayList<>(); // Store all stations
 
     @Override
@@ -43,43 +47,55 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        mapSearchView = findViewById(R.id.mapSearch);
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        // Initialize Drawer and Navigation Views
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        navIcon = findViewById(R.id.nav_icon);
 
-        // Initialize Firebase
+        // Set up nav icon to open the navigation drawer
+        navIcon.setOnClickListener(v -> drawerLayout.openDrawer(Gravity.LEFT));
+
+        // Initialize the SearchView
+        mapSearchView = findViewById(R.id.mapSearch); // Ensure this ID matches the one in XML
+        if (mapSearchView != null) {
+            setupSearch();
+        } else {
+            // Handle the case where mapSearchView is not found
+            e("HomePageActivity", "SearchView not found.");
+        }
+
+        // Initialize Firebase and map
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
-
-        // Initialize Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        getLastLocation();
-        setupBottomNavigation();
-        setupSearch();
+        // Set up drawer menu click handling
+        setupDrawer();
     }
 
     @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
+    public void onMapReady(GoogleMap googleMap) {
         myMap = googleMap;
 
+        // Check for permissions
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             myMap.setMyLocationEnabled(true);
         }
 
-        // Enable Zoom Controls inside the Map UI
-        myMap.getUiSettings().setZoomControlsEnabled(true); // Enables zoom in/out buttons inside the map
-        myMap.getUiSettings().setZoomGesturesEnabled(true); // Enables pinch zooming
+        // Enable zoom controls
+        myMap.getUiSettings().setZoomControlsEnabled(true);
+        myMap.getUiSettings().setZoomGesturesEnabled(true);
 
-        loadStationsFromFirebase(); // Load charging stations
+        // Load charging stations from Firebase
+        loadStationsFromFirebase();
     }
 
     private void loadStationsFromFirebase() {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onDataChange(DataSnapshot snapshot) {
                 myMap.clear(); // Clear existing markers
                 stationList.clear(); // Clear old station data
 
@@ -93,7 +109,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(DatabaseError error) {
                 Toast.makeText(HomePageActivity.this, "Failed to load stations", Toast.LENGTH_SHORT).show();
             }
         });
@@ -144,28 +160,10 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
-    private void getLastLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_PERMISSION_CODE);
-            return;
-        }
-
-        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-            if (location != null) {
-                LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                if (myMap != null) {
-                    myMap.addMarker(new MarkerOptions().position(userLatLng).title("Your Location"));
-                    myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12));
-                }
-            }
-        });
-    }
-
-    private void setupBottomNavigation() {
-        bottomNavigationView.setOnItemSelectedListener(item -> {
+    private void setupDrawer() {
+        navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
-            if  (itemId == R.id.activity_trip_planner) {
+            if (itemId == R.id.activity_trip_planner) {
                 startActivity(new Intent(this, TripPlannerActivity.class));
             } else if (itemId == R.id.activity_chat) {
                 startActivity(new Intent(this, ChatActivity.class));
@@ -174,6 +172,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             } else if (itemId == R.id.activity_user_profile) {
                 startActivity(new Intent(this, UserProfileActivity.class));
             }
+            drawerLayout.closeDrawer(Gravity.LEFT); // Close drawer after selection
             return true;
         });
     }
