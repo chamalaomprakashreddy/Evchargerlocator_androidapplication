@@ -10,26 +10,31 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Search View -->
-    <!-- Search View -->
-
-
-    <!-- Add Station Button -->
-
-    <SearchView
-        android:id="@+id/mapSearch"
+    <!-- Combined Search Bar -->
+    <EditText
+        android:id="@+id/searchBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="40dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:background="#92B669"
-        android:elevation="5dp"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:iconifiedByDefault="false"
-        android:queryHint="Search..." />
+        android:hint="Search for a place or charging station"
+        android:padding="10dp"
+        android:background="#FFFFFF"
+        android:elevation="5dp" />
 
+    <!-- Search Button -->
+    <Button
+        android:id="@+id/searchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Search"
+        android:layout_below="@id/searchBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp" />
+
+    <!-- Add Station Button -->
     <Button
         android:id="@+id/btnAddStation"
         android:layout_width="wrap_content"
@@ -37,8 +42,6 @@
         android:text="Add Station"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_margin="16dp"/>
-
-
+        android:layout_margin="16dp" />
 
 </RelativeLayout>
