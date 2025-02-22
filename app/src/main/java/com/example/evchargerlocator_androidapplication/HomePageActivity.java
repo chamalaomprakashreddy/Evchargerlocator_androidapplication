@@ -1,10 +1,14 @@
 package com.example.evchargerlocator_androidapplication;
 
-import static android.util.Log.*;
+import static android.util.Log.e;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -21,19 +25,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import android.content.pm.PackageManager;
-import android.Manifest;
-import android.location.Location;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,14 +46,15 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
     private SearchView mapSearchView;
     private DatabaseReference databaseReference;
     private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
     private ImageView navIcon;
+    private NavigationView navigationView;  // Declare NavigationView
     private List<ChargingStation> stationList = new ArrayList<>();
     private FusedLocationProviderClient fusedLocationClient;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
     private LatLng userLocation;
     private MarkerOptions userLocationMarker; // Marker for user's location
+    private Marker searchMarker;  // Marker for search result
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +63,8 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
         // Initialize Drawer and Navigation Views
         drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
         navIcon = findViewById(R.id.nav_icon);
+        navigationView = findViewById(R.id.nav_view);  // Initialize NavigationView
 
         // Set up nav icon to open the navigation drawer
         navIcon.setOnClickListener(v -> drawerLayout.openDrawer(Gravity.LEFT));
@@ -107,9 +109,6 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             }
         };
 
-        // Setup drawer menu click handling
-        setupDrawer();
-
         // Floating action button (FAB) for recentering the map to the live location
         FloatingActionButton fabCenter = findViewById(R.id.fab_center);
         fabCenter.setOnClickListener(v -> {
@@ -118,6 +117,30 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                 myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
             }
         });
+
+        // Set up Drawer Navigation
+        setupDrawer();
+    }
+
+    private void setupDrawer() {
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.activity_trip_planner) {
+                startActivity(new Intent(this, TripPlannerActivity.class));
+            } else if (itemId == R.id.activity_chat) {
+                startActivity(new Intent(this, ChatActivity.class));
+            } else if (itemId == R.id.activity_filter) {
+                startActivity(new Intent(this, FilterActivity.class));
+            } else if (itemId == R.id.activity_user_profile) {
+                startActivity(new Intent(this, UserProfileActivity.class));
+            }
+            drawerLayout.closeDrawer(Gravity.LEFT); // Close drawer after selection
+            return true;
+        });
+    }
+
+    private void updateMapWithLocation(Location location) {
+        // Update the map with the user's current location (optional)
     }
 
     @Override
@@ -176,17 +199,10 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void addStationMarker(ChargingStation station) {
         LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
-
-        // Customize marker color based on availability
-        float markerColor = station.getAvailability().equalsIgnoreCase("Available") ?
-                BitmapDescriptorFactory.HUE_GREEN :
-                BitmapDescriptorFactory.HUE_RED;
-
         myMap.addMarker(new MarkerOptions()
                 .position(location)
                 .title(station.getName())
-                .snippet("Power: " + station.getPowerOutput() + "\nStatus: " + station.getAvailability())
-                .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+                .snippet("Power: " + station.getPowerOutput() + "\nStatus: " + station.getAvailability()));
     }
 
     private void addUserLocationMarker(LatLng userLocation) {
@@ -198,8 +214,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         // Add a new marker for the user's current location
         userLocationMarker = new MarkerOptions()
                 .position(userLocation)
-                .title("Your Location")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                .title("Your Location");
         myMap.addMarker(userLocationMarker);
     }
 
@@ -207,49 +222,68 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         mapSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                filterStations(query);
+                searchPlace(query);
+                searchStations(query);
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String query) {
-                filterStations(query);
+            public boolean onQueryTextChange(String newText) {
+                if (searchMarker != null) {
+                    searchMarker.remove();  // Clear the previous search marker
+                }
                 return false;
             }
         });
     }
 
-    private void filterStations(String query) {
-        myMap.clear(); // Clear old markers
+    private void searchPlace(String query) {
+        Geocoder geocoder = new Geocoder(HomePageActivity.this);
+        try {
+            List<Address> addressList = geocoder.getFromLocationName(query, 1);
+            if (addressList != null && !addressList.isEmpty()) {
+                Address address = addressList.get(0);
+                LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
+                myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
 
-        // Add charging stations markers first (they should be on top of the live location marker)
-        for (ChargingStation station : stationList) {
-            if (station.getName().toLowerCase().contains(query.toLowerCase())) {
-                addStationMarker(station); // Show only matching stations
+                // Clear any previous search marker before adding a new one
+                if (searchMarker != null) {
+                    searchMarker.remove();
+                }
+
+                // Add a marker for the search result
+                searchMarker = myMap.addMarker(new MarkerOptions().position(location).title(query));
+            } else {
+                Toast.makeText(HomePageActivity.this, "it is ev station", Toast.LENGTH_SHORT).show();
             }
-        }
-
-        // Add live location marker back on top
-        if (userLocation != null) {
-            addUserLocationMarker(userLocation);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(HomePageActivity.this, "Error in searching place", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void setupDrawer() {
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.activity_trip_planner) {
-                startActivity(new Intent(this, TripPlannerActivity.class));
-            } else if (itemId == R.id.activity_chat) {
-                startActivity(new Intent(this, ChatActivity.class));
-            } else if (itemId == R.id.activity_filter) {
-                startActivity(new Intent(this, FilterActivity.class));
-            } else if (itemId == R.id.activity_user_profile) {
-                startActivity(new Intent(this, UserProfileActivity.class));
+    private void searchStations(String query) {
+        // Clear any previous station markers
+        myMap.clear();
+
+        // Add matching stations
+        boolean stationFound = false;
+        for (ChargingStation station : stationList) {
+            if (station.getName().toLowerCase().contains(query.toLowerCase())) {
+                addStationMarker(station); // Add marker for matching stations
+                if (!stationFound) {
+                    // Zoom in on the first matching station
+                    LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
+                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
+                    stationFound = true;
+                }
             }
-            drawerLayout.closeDrawer(Gravity.LEFT); // Close drawer after selection
-            return true;
-        });
+        }
+
+        // If no stations were found, show a message
+        if (!stationFound) {
+            Toast.makeText(HomePageActivity.this, "it is a place", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getCurrentLocation() {
@@ -258,13 +292,6 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_PERMISSION_CODE);
         }
-    }
-
-    private void updateMapWithLocation(Location location) {
-        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        // Do not automatically move the map to the user location.
-        // Only update the location variable to be used later when FAB is clicked.
-        addUserLocationMarker(userLocation); // Optional: Always show live location marker
     }
 
     @Override

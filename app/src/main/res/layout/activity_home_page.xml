@@ -46,7 +46,7 @@
             android:background="@android:color/white"
             android:iconifiedByDefault="false"
             android:padding="8dp"
-            android:queryHint="Search charging stations..."
+            android:queryHint="search"
             app:layout_constraintStart_toEndOf="@+id/nav_icon"
             app:layout_constraintTop_toTopOf="@+id/map" />
 
