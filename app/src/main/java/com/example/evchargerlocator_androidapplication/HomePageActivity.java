@@ -10,8 +10,10 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -123,20 +125,19 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     private void setupDrawer() {
-        navigationView.setNavigationItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.activity_trip_planner) {
-                startActivity(new Intent(this, TripPlannerActivity.class));
-            } else if (itemId == R.id.activity_chat) {
-                startActivity(new Intent(this, ChatActivity.class));
-            } else if (itemId == R.id.activity_filter) {
-                startActivity(new Intent(this, FilterActivity.class));
-            } else if (itemId == R.id.activity_user_profile) {
-                startActivity(new Intent(this, UserProfileActivity.class));
-            }
-            drawerLayout.closeDrawer(Gravity.LEFT); // Close drawer after selection
-            return true;
-        });
+        View headerView = navigationView.getHeaderView(0);
+
+        // Initialize menu items
+        TextView tripPlanner = headerView.findViewById(R.id.menu_trip_planner);
+        TextView chat = headerView.findViewById(R.id.menu_chat);
+        TextView filter = headerView.findViewById(R.id.menu_filter);
+        TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
+
+        // Set click listeners
+        tripPlanner.setOnClickListener(v -> startActivity(new Intent(this, TripPlannerActivity.class)));
+        chat.setOnClickListener(v -> startActivity(new Intent(this, ChatActivity.class)));
+        filter.setOnClickListener(v -> startActivity(new Intent(this, FilterActivity.class)));
+        userProfile.setOnClickListener(v -> startActivity(new Intent(this, UserProfileActivity.class)));
     }
 
     private void updateMapWithLocation(Location location) {

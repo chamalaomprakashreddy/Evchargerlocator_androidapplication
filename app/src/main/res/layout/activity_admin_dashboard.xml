@@ -15,13 +15,12 @@
         android:id="@+id/searchBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="40dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_margin="30dp"
         android:hint="Search for a place or charging station"
         android:padding="10dp"
         android:background="#FFFFFF"
-        android:elevation="5dp" />
+        android:elevation="5dp"
+        android:layout_alignParentTop="true" />
 
     <!-- Search Button -->
     <Button
@@ -29,10 +28,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Search"
-        android:layout_below="@id/searchBar"
+        android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp" />
+        android:backgroundTint="@android:color/holo_blue_dark"
+        android:layout_below="@id/searchBar" />
 
     <!-- Add Station Button -->
     <Button
@@ -41,7 +40,19 @@
         android:layout_height="wrap_content"
         android:text="Add Station"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_margin="16dp" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="80dp"
+        android:backgroundTint="@android:color/holo_green_dark" />
+
+    <!-- Logout Button -->
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="@android:color/holo_red_dark"
+        android:text="Logout" />
 
 </RelativeLayout>

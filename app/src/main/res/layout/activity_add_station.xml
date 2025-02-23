@@ -5,75 +5,185 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+
+
+    <!-- Charging Level Layout -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="26dp"
+        android:layout_marginHorizontal="20dp"> <!-- Back Arrow -->
+        <TextView
+            android:id="@+id/backArrowText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:textColor="@color/black"
+            android:textSize="32sp"/>
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="70dp"
+            android:text="Add Station"
+            android:textColor="@color/black"
+            android:textSize="24dp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- Location TextView -->
     <TextView
         android:id="@+id/txtLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Location: "
-        android:textSize="16sp"
+        android:layout_marginTop="40dp"
+        android:layout_marginLeft="25dp"
+        android:text="Location:"
+        android:textSize="20dp"
         android:textStyle="bold" />
 
+    <!-- Station Name EditText -->
     <EditText
         android:id="@+id/edtStationName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="15dp"
+        android:padding="10dp"
+        android:background="@android:drawable/editbox_background"
         android:hint="Station Name"
         android:inputType="text" />
 
+    <!-- Power Output EditText -->
     <EditText
         android:id="@+id/edtPowerOutput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
         android:hint="Power Output (kW)"
-        android:inputType="numberDecimal" />
+        android:padding="10dp"
+        android:layout_marginTop="6dp"
+        android:inputType="numberDecimal"
+        android:background="@android:drawable/editbox_background"/>
 
+    <!-- Availability EditText -->
     <EditText
         android:id="@+id/edtAvailability"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Availability"
+        android:layout_marginHorizontal="20dp"
+        android:padding="10dp"
+        android:layout_marginTop="6dp"
+        android:background="@android:drawable/editbox_background"
         android:inputType="text" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Charging Level"
-        android:textStyle="bold" />
-
-    <Spinner
-        android:id="@+id/spinnerChargingLevel"
+    <!-- Charging Level Layout -->
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Connector Type"
-        android:textStyle="bold" />
+        android:layout_marginTop="26dp"
+        android:layout_marginHorizontal="20dp">
 
-    <Spinner
-        android:id="@+id/spinnerConnectorType"
+        <!-- Charging Level TextView -->
+        <TextView
+            android:id="@+id/label_charging_level"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Charging Level"
+            android:textColor="@color/black"
+            android:textSize="16dp"
+            android:layout_margin="6dp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Charging Level Spinner -->
+        <Spinner
+            android:id="@+id/spinnerChargingLevel"
+            android:layout_width="150dp"
+            android:background="@drawable/spinner_background"
+            android:layout_height="35dp"
+            android:layout_gravity="right"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Network"
-        android:textStyle="bold" />
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp">
 
-    <Spinner
-        android:id="@+id/spinnerNetwork"
+        <!-- Connector Type TextView -->
+        <TextView
+            android:id="@+id/label_connector_type"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Connector Type"
+            android:textColor="@color/black"
+            android:layout_margin="6dp"
+            android:textSize="16dp"
+            android:textStyle="bold" />
+
+        <!-- Connector Type Spinner -->
+        <Spinner
+            android:id="@+id/spinnerConnectorType"
+            android:layout_width="150dp"
+            android:layout_height="35dp"
+            android:layout_gravity="right"
+            android:layout_marginStart="15dp"
+            android:background="@drawable/spinner_background"
+            android:layout_marginEnd="15dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp">
 
+        <!-- Network TextView -->
+        <TextView
+            android:id="@+id/label_network"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Network"
+            android:textColor="@color/black"
+            android:layout_margin="6dp"
+            android:textSize="16dp"
+            android:textStyle="bold"/>
+
+        <!-- Network Spinner -->
+        <Spinner
+            android:id="@+id/spinnerNetwork"
+            android:layout_width="150dp"
+            android:layout_height="35dp"
+            android:layout_gravity="right"
+            android:layout_marginStart="15dp"
+            android:background="@drawable/spinner_background"
+            android:layout_marginEnd="15dp" />
+
+    </LinearLayout>
+
+    <!-- Save Station Button -->
     <Button
         android:id="@+id/btnSaveStation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="45dp"
+        android:textSize="15dp"
+        android:layout_marginTop="26dp"
+        android:layout_gravity="center_horizontal"
         android:text="Save Station"
         android:textColor="@android:color/white"
-        android:padding="10dp"
-        android:layout_marginTop="16dp" />
+        android:backgroundTint="@android:color/holo_green_dark"/>
 
 </LinearLayout>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Row for Back Arrow & Heading -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Back Arrow -->
+        <TextView
+            android:id="@+id/backArrowText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:textColor="@color/black"
+            android:textSize="32sp"
+            android:padding="8dp"
+            android:layout_marginEnd="16dp"/> <!-- Space between arrow and heading -->
+
+        <!-- Drawer Heading -->
+        <TextView
+            android:id="@+id/drawer_heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Menu"
+            android:textColor="#028A0F"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <!-- Separator Line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- Menu Items -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Trip Planner -->
+        <TextView
+            android:id="@+id/menu_trip_planner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trip Planner"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:padding="12dp"
+            android:drawableStart="@drawable/trip"
+            android:drawablePadding="12dp"
+            android:gravity="start|center_vertical"/>
+
+        <!-- Chat -->
+        <TextView
+            android:id="@+id/menu_chat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chat"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:padding="12dp"
+            android:drawableStart="@drawable/chat"
+            android:drawablePadding="12dp"
+            android:gravity="start|center_vertical"/>
+
+        <!-- Filter -->
+        <TextView
+            android:id="@+id/menu_filter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Filter"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:padding="12dp"
+            android:drawableStart="@drawable/filter"
+            android:drawablePadding="12dp"
+            android:gravity="start|center_vertical"/>
+
+        <!-- User Profile -->
+        <TextView
+            android:id="@+id/menu_user_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="User Profile"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:padding="12dp"
+            android:drawableStart="@drawable/profile"
+            android:drawablePadding="12dp"
+            android:gravity="start|center_vertical"/>
+    </LinearLayout>
+
+</LinearLayout>

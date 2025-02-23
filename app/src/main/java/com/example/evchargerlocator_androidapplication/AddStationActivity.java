@@ -24,6 +24,15 @@ public class AddStationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_station);
 
+        TextView backArrowText = findViewById(R.id.backArrowText);
+
+        // Navigate to Profile when clicking back arrow
+        backArrowText.setOnClickListener(v -> {
+            Intent intent = new Intent(AddStationActivity.this, AdminDashboardActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
 
         Intent intent = getIntent();

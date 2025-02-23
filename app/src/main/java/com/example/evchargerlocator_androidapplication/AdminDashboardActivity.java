@@ -10,6 +10,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,6 +29,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -49,14 +51,17 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
     private List<ChargingStation> stationList = new ArrayList<>();
     private static final int FINE_PERMISSION_CODE = 1;
     private double selectedLat = 0.0, selectedLng = 0.0;
+    private Button logoutButton;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dashboard);
 
-        // Initialize Firebase
+        // Initialize
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
+        logoutButton = findViewById(R.id.logoutButton);
 
         // Initialize Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
@@ -249,5 +254,13 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
         if (fusedLocationProviderClient != null && locationCallback != null) {
             fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         }
+    }
+    /**
+     * Logs out the user and redirects to the main screen.
+     */
+    private void logoutUser() {
+        firebaseAuth.signOut();
+        startActivity(new Intent(AdminDashboardActivity.this, MainActivity.class));
+        finish();
     }
 }
