@@ -97,29 +97,31 @@
     <!-- Card Holder Name -->
     <EditText
         android:id="@+id/cardHolderInput"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="339dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="14dp"
+        android:background="@android:drawable/editbox_background"
         android:hint="Cardholder Name"
         android:inputType="text"
         android:padding="12dp"
-        android:background="@android:drawable/editbox_background"
-        app:layout_constraintTop_toBottomOf="@id/expiryCvvContainer"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="14dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/expiryCvvContainer" />
 
     <!-- Save Card Checkbox -->
+
+    <!-- Continue Button -->
     <CheckBox
         android:id="@+id/saveCardCheckbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="16dp"
         android:text="Save card for future payments"
         android:textColor="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/cardHolderInput"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="20dp"/>
+        app:layout_constraintTop_toBottomOf="@id/cardHolderInput" />
 
-    <!-- Continue Button -->
     <Button
         android:id="@+id/continueButton"
         android:layout_width="wrap_content"
