@@ -1,6 +1,5 @@
 package com.example.evchargerlocator_androidapplication;
 
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,9 +7,11 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -51,7 +52,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
     private List<ChargingStation> stationList = new ArrayList<>();
     private static final int FINE_PERMISSION_CODE = 1;
     private double selectedLat = 0.0, selectedLng = 0.0;
-    private Button logoutButton;
     private FirebaseAuth firebaseAuth;
 
     @Override
@@ -59,9 +59,9 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dashboard);
 
-        // Initialize
+        // Initialize Firebase and Authentication
+        firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
-        logoutButton = findViewById(R.id.logoutButton);
 
         // Initialize Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
@@ -85,7 +85,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
             startActivity(intent);
         });
 
-        // Set up single search functionality
+        // Set up search functionality
         EditText searchBar = findViewById(R.id.searchBar);
         Button searchButton = findViewById(R.id.searchButton);
         searchButton.setOnClickListener(v -> {
@@ -97,14 +97,23 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
             }
         });
 
+        // Setup More Options Menu (Three Dots for Logout)
+        ImageView moreOptions = findViewById(R.id.moreOptions);
+        moreOptions.setOnClickListener(view -> showPopupMenu(view));
+
         startLocationUpdates();
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         myMap = googleMap;
+
+        // Check if location permissions are granted
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             myMap.setMyLocationEnabled(true);
+            getCurrentLocation();  // Fetch current location on map load
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_PERMISSION_CODE);
         }
 
         myMap.getUiSettings().setZoomControlsEnabled(true);
@@ -113,21 +122,40 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
         // Load stations from Firebase
         loadStationsFromFirebase();
 
-        // Set the map click listener
+        // Set the map click listener to place a marker
         myMap.setOnMapClickListener(latLng -> {
-            // Clear any existing markers before adding the new one
-            myMap.clear();
+            // Remove only the previous marker, don't clear the whole map
+            if (searchMarker != null) {
+                searchMarker.remove();
+            }
 
-            // Add a new marker for the selected location
-            myMap.addMarker(new MarkerOptions().position(latLng).title("Selected Location"));
+            // Add new marker for the selected location
+            searchMarker = myMap.addMarker(new MarkerOptions().position(latLng).title("Selected Location"));
 
-            // Zoom the camera to the selected location
+            // Zoom to the selected location
             myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
 
-            // Store the selected latitude and longitude for further use
+            // Store the selected latitude and longitude
             selectedLat = latLng.latitude;
             selectedLng = latLng.longitude;
         });
+    }
+
+    private void getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(), locationCallback, null);
+    }
+
+    private LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(5000);  // Update every 5 seconds
+        locationRequest.setFastestInterval(2000); // Fastest update interval
+        // Set priority to high accuracy (not deprecated anymore)
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        return locationRequest;
     }
 
     private void startLocationUpdates() {
@@ -139,7 +167,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
         LocationRequest locationRequest = LocationRequest.create()
                 .setInterval(5000) // Update every 5 seconds
                 .setFastestInterval(2000) // Fastest update interval
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);  // Updated priority method
 
         locationCallback = new LocationCallback() {
             @Override
@@ -173,7 +201,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                myMap.clear();
                 stationList.clear();
                 for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
@@ -187,7 +214,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(AdminDashboardActivity.this, "Failed to load stations", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AdminDashboardActivity.this, "Failed to load charging stations", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -195,69 +222,38 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
     private void searchPlaceOrStation(String query) {
         Geocoder geocoder = new Geocoder(AdminDashboardActivity.this);
         try {
-            // First, try to find a place
             List<Address> addressList = geocoder.getFromLocationName(query, 1);
             if (addressList != null && !addressList.isEmpty()) {
                 Address address = addressList.get(0);
                 LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
                 myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
 
-                // Clear any previous search marker before adding a new one
                 if (searchMarker != null) {
                     searchMarker.remove();
                 }
 
-                // Add a marker for the search result
                 searchMarker = myMap.addMarker(new MarkerOptions().position(location).title(query));
             } else {
-                // If no place was found, search for charging stations
-                searchStations(query);
+                Toast.makeText(this, "Location not found!", Toast.LENGTH_SHORT).show();
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(AdminDashboardActivity.this, "Error in searching place or station", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error while searching location", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void searchStations(String query) {
-        // Clear any previous station markers
-        myMap.clear();
-
-        // Add matching stations
-        boolean stationFound = false;
-        for (ChargingStation station : stationList) {
-            if (station.getName().toLowerCase().contains(query.toLowerCase())) {
-                addStationMarker(station); // Add marker for matching stations
-                if (!stationFound) {
-                    // Zoom in on the first matching station
-                    LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
-                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
-                    stationFound = true;
-                }
+    private void showPopupMenu(View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+        popup.getMenuInflater().inflate(R.menu.menu_admin_dashboard, popup.getMenu());
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.menu_logout) {
+                logoutUser();
+                return true;
             }
-        }
-
-        // If no stations were found, show a message
-        if (!stationFound) {
-            Toast.makeText(AdminDashboardActivity.this, "No matching station found", Toast.LENGTH_SHORT).show();
-        }
+            return false;
+        });
+        popup.show();
     }
 
-    private void addStationMarker(ChargingStation station) {
-        LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
-        myMap.addMarker(new MarkerOptions().position(location).title(station.getName()));
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (fusedLocationProviderClient != null && locationCallback != null) {
-            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-        }
-    }
-    /**
-     * Logs out the user and redirects to the main screen.
-     */
     private void logoutUser() {
         firebaseAuth.signOut();
         startActivity(new Intent(AdminDashboardActivity.this, MainActivity.class));
