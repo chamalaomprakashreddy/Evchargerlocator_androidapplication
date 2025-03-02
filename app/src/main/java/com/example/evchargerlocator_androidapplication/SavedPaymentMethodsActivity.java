@@ -1,6 +1,5 @@
 package com.example.evchargerlocator_androidapplication;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,7 +46,7 @@ public class SavedPaymentMethodsActivity extends AppCompatActivity {
         paymentMethods = new ArrayList<>();
         adapter = new PaymentMethodsAdapter(paymentMethods, selectedCard -> {
             selectedCardNumber = selectedCard;
-            continueButton.setEnabled(true);
+            continueButton.setEnabled(true); // Enable continue button when a card is selected
         }, this::deleteCard);  // Pass deleteCard function to adapter
 
         paymentMethodsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -57,9 +56,13 @@ public class SavedPaymentMethodsActivity extends AppCompatActivity {
 
         continueButton.setEnabled(false);
         continueButton.setOnClickListener(v -> {
-            Intent intent = new Intent(SavedPaymentMethodsActivity.this, PaymentProcessingActivity.class);
-            intent.putExtra("selectedCard", selectedCardNumber);
-            startActivity(intent);
+            if (selectedCardNumber != null) {
+                Intent intent = new Intent(SavedPaymentMethodsActivity.this, PaymentProcessingActivity.class);
+                intent.putExtra("selectedCard", selectedCardNumber);  // Pass the selected card number
+                startActivity(intent);
+            } else {
+                Toast.makeText(SavedPaymentMethodsActivity.this, "Please select a card", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
