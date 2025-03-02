@@ -102,6 +102,17 @@
             android:drawableStart="@drawable/profile"
             android:drawablePadding="12dp"
             android:gravity="start|center_vertical"/>
+
+        <!-- Logout Button -->
+        <Button
+            android:id="@+id/logoutButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:layout_marginTop="100dp"
+            android:padding="12dp"
+            android:gravity="center"/>
     </LinearLayout>
 
 </LinearLayout>

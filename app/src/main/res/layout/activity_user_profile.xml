@@ -155,7 +155,7 @@
         android:layout_marginTop="30dp"
         android:text="Payment"
         android:textSize="16sp"
-        android:backgroundTint="@color/black"
+        android:backgroundTint="@android:color/holo_blue_dark"
         android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -170,23 +170,9 @@
         android:layout_marginTop="15dp"
         android:text="Edit Profile"
         android:textSize="16sp"
-        android:backgroundTint="@android:color/holo_blue_dark"
+        android:backgroundTint="@android:color/holo_green_dark"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/PaymentButton" />
-
-    <!-- Logout Button -->
-    <Button
-        android:id="@+id/logoutButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="70dp"
-        android:layout_marginTop="15dp"
-        android:text="Logout"
-        android:textSize="16sp"
-        android:backgroundTint="@android:color/holo_red_dark"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/editButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

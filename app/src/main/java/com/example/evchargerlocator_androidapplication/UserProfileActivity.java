@@ -22,7 +22,7 @@ import com.google.firebase.database.ValueEventListener;
 public class UserProfileActivity extends AppCompatActivity {
 
     private EditText fullName, phoneNumber, email, vehicle;
-    private Button editButton, logoutButton, paymentButton;
+    private Button editButton, paymentButton;
     private FirebaseAuth firebaseAuth;
     private DatabaseReference userRef;
     private boolean isEditing = false; // Track if in edit mode
@@ -39,7 +39,6 @@ public class UserProfileActivity extends AppCompatActivity {
         email = findViewById(R.id.email);
         vehicle = findViewById(R.id.vehicle);
         editButton = findViewById(R.id.editButton);
-        logoutButton = findViewById(R.id.logoutButton);
         paymentButton = findViewById(R.id.PaymentButton);
 
         // Navigate to Profile when clicking back arrow
@@ -62,7 +61,6 @@ public class UserProfileActivity extends AppCompatActivity {
         }
 
         editButton.setOnClickListener(v -> toggleEditProfile());
-        logoutButton.setOnClickListener(v -> logoutUser());
         paymentButton.setOnClickListener(v -> openPaymentActivity());
     }
 
@@ -150,15 +148,6 @@ public class UserProfileActivity extends AppCompatActivity {
             phoneNumber.setFocusable(false);
             vehicle.setFocusable(false);
         }
-    }
-
-    /**
-     * Logs out the user and redirects to the main screen.
-     */
-    private void logoutUser() {
-        firebaseAuth.signOut();
-        startActivity(new Intent(UserProfileActivity.this, MainActivity.class));
-        finish();
     }
 
     /**

@@ -11,6 +11,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -138,6 +140,15 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         chat.setOnClickListener(v -> startActivity(new Intent(this, ChatActivity.class)));
         filter.setOnClickListener(v -> startActivity(new Intent(this, FilterActivity.class)));
         userProfile.setOnClickListener(v -> startActivity(new Intent(this, UserProfileActivity.class)));
+
+        // Handle Logout
+        Button logoutButton = headerView.findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(v -> {
+            // Log out the user
+            FirebaseAuth.getInstance().signOut();  // Sign out from Firebase Auth
+            startActivity(new Intent(HomePageActivity.this, MainActivity.class)); // Redirect to login screen
+            finish();  // Close this activity
+        });
     }
 
     private void updateMapWithLocation(Location location) {
@@ -255,7 +266,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                 // Add a marker for the search result
                 searchMarker = myMap.addMarker(new MarkerOptions().position(location).title(query));
             } else {
-                Toast.makeText(HomePageActivity.this, "it is ev station", Toast.LENGTH_SHORT).show();
+                Toast.makeText(HomePageActivity.this, "No matching place found", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -283,7 +294,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
         // If no stations were found, show a message
         if (!stationFound) {
-            Toast.makeText(HomePageActivity.this, "it is a place", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HomePageActivity.this, "No stations found", Toast.LENGTH_SHORT).show();
         }
     }
 
