@@ -1,60 +1,38 @@
 package com.example.evchargerlocator_androidapplication;
 
 public class User {
-    private String email;
+    private String id;
     private String fullName;
+    private String email;
     private String phoneNumber;
     private String vehicle;
-    private String role;
 
+    // Default Constructor (Required by Firebase)
     public User() {
-        // Default constructor required for Firebase
     }
 
-    public User(String email, String fullName, String phoneNumber, String vehicle) {
+    // ✅ Constructor without "status"
+    public User(String id, String email, String fullName, String phoneNumber, String vehicle) {
+        this.id = id;
         this.email = email;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.vehicle = vehicle;
     }
-    public User(String email, String fullName, String phoneNumber, String vehicle, String role) {
-        this.email = email;
-        this.fullName = fullName;
-        this.phoneNumber = phoneNumber;
-        this.vehicle = vehicle;
-        this.role = role;
-    }
 
+    // ✅ Getters & Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getFullName() {
-        return fullName;
-    }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getVehicle() {
-        return vehicle;
-    }
-
-    public void setVehicle(String vehicle) {
-        this.vehicle = vehicle;
-    }
+    public String getVehicle() { return vehicle; }
+    public void setVehicle(String vehicle) { this.vehicle = vehicle; }
 }

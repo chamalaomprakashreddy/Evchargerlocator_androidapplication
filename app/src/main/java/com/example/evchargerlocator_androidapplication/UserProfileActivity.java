@@ -13,11 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.*;
 
 public class UserProfileActivity extends AppCompatActivity {
 
@@ -25,7 +21,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private Button editButton, paymentButton;
     private FirebaseAuth firebaseAuth;
     private DatabaseReference userRef;
-    private boolean isEditing = false; // Track if in edit mode
+    private boolean isEditing = false; // Track edit mode
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +37,9 @@ public class UserProfileActivity extends AppCompatActivity {
         editButton = findViewById(R.id.editButton);
         paymentButton = findViewById(R.id.PaymentButton);
 
-        // Navigate to Profile when clicking back arrow
+        // Back navigation
         backArrowText.setOnClickListener(v -> {
-            Intent intent = new Intent(UserProfileActivity.this, HomePageActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(UserProfileActivity.this, HomePageActivity.class));
             finish();
         });
 
@@ -94,11 +89,9 @@ public class UserProfileActivity extends AppCompatActivity {
         isEditing = !isEditing;
 
         if (isEditing) {
-            // Enable fields for editing
             setFieldsEnabled(true);
             editButton.setText("Save");
         } else {
-            // Save the updated data
             saveUserProfile();
             setFieldsEnabled(false);
             editButton.setText("Edit Profile");
@@ -106,20 +99,29 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Completely replaces old user data in Firebase with new values.
+     * Saves the updated user profile to Firebase.
      */
     private void saveUserProfile() {
-        String updatedFullName = fullName.getText().toString();
-        String updatedPhoneNumber = phoneNumber.getText().toString();
-        String updatedVehicle = vehicle.getText().toString();
+        String updatedFullName = fullName.getText().toString().trim();
+        String updatedPhoneNumber = phoneNumber.getText().toString().trim();
+        String updatedVehicle = vehicle.getText().toString().trim();
 
         if (updatedFullName.isEmpty() || updatedPhoneNumber.isEmpty() || updatedVehicle.isEmpty()) {
             Toast.makeText(this, "Fields cannot be empty!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Create a new User object with the updated data
-        User updatedUser = new User(email.getText().toString(), updatedFullName, updatedPhoneNumber, updatedVehicle);
+        // Get userId from Firebase Authentication
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "Authentication error!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = currentUser.getUid();
+
+        // ✅ Updated Constructor Call with Offline Default Status
+        User updatedUser = new User(userId, email.getText().toString(), updatedFullName, updatedPhoneNumber, updatedVehicle);
 
         // Overwrite the user data in Firebase
         userRef.setValue(updatedUser).addOnCompleteListener(task -> {
@@ -139,15 +141,9 @@ public class UserProfileActivity extends AppCompatActivity {
         phoneNumber.setEnabled(enabled);
         vehicle.setEnabled(enabled);
 
-        if (enabled) {
-            fullName.setFocusableInTouchMode(true);
-            phoneNumber.setFocusableInTouchMode(true);
-            vehicle.setFocusableInTouchMode(true);
-        } else {
-            fullName.setFocusable(false);
-            phoneNumber.setFocusable(false);
-            vehicle.setFocusable(false);
-        }
+        fullName.setFocusableInTouchMode(enabled);
+        phoneNumber.setFocusableInTouchMode(enabled);
+        vehicle.setFocusableInTouchMode(enabled);
     }
 
     /**

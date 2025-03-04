@@ -3,9 +3,13 @@ package com.example.evchargerlocator_androidapplication;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
+import android.util.Patterns;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,11 +29,14 @@ public class MainActivity extends AppCompatActivity {
     private EditText emailEditText, passwordEditText;
     private Button loginButton, adminLoginButton;
     private TextView registerTextView, forgotPasswordTextView;
+    private ProgressBar progressBar;
     private FirebaseAuth firebaseAuth;
     private ImageView showHidePasswordButton;
     private boolean isPasswordVisible = false;
 
     private DatabaseReference usersRef;
+
+    private static final String TAG = "MainActivity"; // For debugging
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         usersRef = FirebaseDatabase.getInstance().getReference("users");
 
+        // Initialize UI components
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         loginButton = findViewById(R.id.loginButton);
@@ -47,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         adminLoginButton = findViewById(R.id.adminLoginButton);
         forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
         showHidePasswordButton = findViewById(R.id.showHidePasswordButton);
+        progressBar = findViewById(R.id.progressBar);
 
         // Toggle password visibility
         showHidePasswordButton.setOnClickListener(v -> {
@@ -61,28 +70,8 @@ public class MainActivity extends AppCompatActivity {
             isPasswordVisible = !isPasswordVisible;
         });
 
-        // Login Button Logic
-        loginButton.setOnClickListener(v -> {
-            String email = emailEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
-
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(MainActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            firebaseAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, task -> {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                            if (user != null) {
-                                checkUserInDatabase(user.getUid());
-                            }
-                        } else {
-                            Toast.makeText(MainActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        });
+        // Login Button Click
+        loginButton.setOnClickListener(v -> loginUser());
 
         // RegisterActivity Navigation
         registerTextView.setOnClickListener(v -> {
@@ -103,13 +92,58 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void loginUser() {
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+
+        // Input Validation
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Enter a valid email address", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Show progress while logging in
+        progressBar.setVisibility(View.VISIBLE);
+        loginButton.setEnabled(false);
+
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    progressBar.setVisibility(View.GONE);
+                    loginButton.setEnabled(true);
+
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        if (user != null) {
+                            // ✅ Commented out email verification check
+                            /*
+                            if (!user.isEmailVerified()) {
+                                Toast.makeText(MainActivity.this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show();
+                                firebaseAuth.signOut(); // Log out unverified users
+                                return;
+                            }
+                            */
+
+                            checkUserInDatabase(user.getUid());
+                        }
+                    } else {
+                        Log.e(TAG, "Login failed: ", task.getException());
+                        Toast.makeText(MainActivity.this, "Invalid email or password!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     private void checkUserInDatabase(String userId) {
         usersRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    // The user exists in the "users" collection -> Proceed to Homepage
-                    Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                    // The user exists in the database -> Proceed to Homepage
+                    Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(MainActivity.this, HomePageActivity.class);
                     startActivity(intent);
                     finish();
