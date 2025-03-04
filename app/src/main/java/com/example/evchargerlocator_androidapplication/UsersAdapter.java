@@ -30,7 +30,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item, parent, false);
         return new ViewHolder(view);
     }
 
@@ -38,9 +38,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = userList.get(position);
         holder.userName.setText(user.getFullName());
-        holder.userEmail.setText(user.getEmail());
 
-        // ✅ Open ChatActivity when a user is clicked
+        // ✅ Handle item click
         holder.itemView.setOnClickListener(v -> onUserClickListener.onUserClick(user));
     }
 
@@ -50,12 +49,11 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView userName, userEmail;
+        TextView userName;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            userName = itemView.findViewById(R.id.userName);
-            userEmail = itemView.findViewById(R.id.userEmail);
+            userName = itemView.findViewById(R.id.usernameText);
         }
     }
 }

@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,7 +18,6 @@ import com.example.evchargerlocator_androidapplication.R;
 import com.example.evchargerlocator_androidapplication.User;
 import com.example.evchargerlocator_androidapplication.UsersAdapter;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.*;
 
 import java.util.ArrayList;
@@ -27,40 +25,33 @@ import java.util.List;
 
 public class UsersFragment extends Fragment {
 
-    private RecyclerView recyclerView;
+    private RecyclerView recyclerViewUsers;
     private UsersAdapter usersAdapter;
     private List<User> userList;
     private DatabaseReference usersRef;
-    private FirebaseAuth auth;
     private String currentUserId;
 
-    public UsersFragment() {
-        // Required empty constructor
-    }
+    private static final String TAG = "UsersFragment";
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_users, container, false);
 
-        // ✅ Initialize UI Components
-        recyclerView = view.findViewById(R.id.recyclerViewUsers);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerViewUsers = view.findViewById(R.id.recyclerViewUsers);
+        recyclerViewUsers.setLayoutManager(new LinearLayoutManager(getContext()));
 
         userList = new ArrayList<>();
-        usersAdapter = new UsersAdapter(userList, requireContext(), this::openChatWithUser);
-        recyclerView.setAdapter(usersAdapter);
+        usersAdapter = new UsersAdapter(userList, getContext(), user -> openChat(user));
+        recyclerViewUsers.setAdapter(usersAdapter);
 
-        // ✅ Initialize Firebase
-        auth = FirebaseAuth.getInstance();
-        usersRef = FirebaseDatabase.getInstance().getReference("users");
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        currentUserId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
-        FirebaseUser firebaseUser = auth.getCurrentUser();
-        if (firebaseUser != null) {
-            currentUserId = firebaseUser.getUid();
+        if (currentUserId != null) {
+            usersRef = FirebaseDatabase.getInstance().getReference("users");
             loadUsers();
         } else {
-            Toast.makeText(getContext(), "User not authenticated!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "User not authenticated", Toast.LENGTH_SHORT).show();
         }
 
         return view;
@@ -71,45 +62,37 @@ public class UsersFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 userList.clear();
-                if (currentUserId == null) return; // ✅ Prevent crashes if user ID is null
-
-                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                    try {
-                        // ✅ Extract user data
-                        String userId = userSnapshot.getKey();
-                        String email = userSnapshot.child("email").getValue(String.class);
-                        String fullName = userSnapshot.child("fullName").getValue(String.class);
-                        String phoneNumber = userSnapshot.child("phoneNumber").getValue(String.class);
-                        String vehicle = userSnapshot.child("vehicle").getValue(String.class);
-
-                        if (userId != null && email != null && fullName != null) {
-                            // ✅ Skip the currently logged-in user
-                            if (!userId.equals(currentUserId)) {
-                                userList.add(new User(userId, email, fullName, phoneNumber, vehicle));
-                            }
-                        }
-                    } catch (Exception e) {
-                        Log.e("UsersFragment", "Error parsing user data", e);
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    String userId = dataSnapshot.getKey();
+                    if (userId == null || userId.equals(currentUserId)) {
+                        continue;
                     }
-                }
 
-                if (userList.isEmpty()) {
-                    Toast.makeText(getContext(), "No users found", Toast.LENGTH_SHORT).show();
-                }
+                    String fullName = dataSnapshot.child("fullName").getValue(String.class);
+                    String email = dataSnapshot.child("email").getValue(String.class);
+                    String phoneNumber = dataSnapshot.child("phoneNumber").getValue(String.class);
+                    String vehicle = dataSnapshot.child("vehicle").getValue(String.class);
 
+                    User user = new User(userId, email, fullName, phoneNumber, vehicle);
+                    userList.add(user);
+                }
                 usersAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Failed to load users: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error fetching users: " + error.getMessage());
             }
         });
     }
 
-    // ✅ Open Chat with Specific User
-    private void openChatWithUser(User user) {
-        Intent intent = new Intent(requireContext(), MessageActivity.class);
+    private void openChat(User user) {
+        if (user == null || user.getId() == null) {
+            Toast.makeText(getContext(), "User not found!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(getContext(), MessageActivity.class);
         intent.putExtra("receiverUserId", user.getId());
         intent.putExtra("receiverUserName", user.getFullName());
         startActivity(intent);
