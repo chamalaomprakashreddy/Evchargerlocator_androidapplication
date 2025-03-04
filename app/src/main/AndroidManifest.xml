@@ -1,19 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Internet and Network Permissions -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-
-    <!-- Storage Permissions for Firebase Storage -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-
-    <!-- For Android 10+ (Scoped Storage) -->
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- Storage Permissions for Firebase Storage -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- For Android 10+ (Scoped Storage) -->
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
 
     <application
@@ -25,36 +22,75 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Evchargerlocator_androidapplication"
         tools:targetApi="31">
-
-        <!-- Activities -->
-        <activity android:name=".MessageActivity" android:exported="false" />
-        <activity android:name=".AddStationActivity" android:exported="false" />
-        <activity android:name=".PaymentProcessingActivity" android:exported="false" />
-        <activity android:name=".SavedPaymentMethodsActivity" android:exported="false" />
-        <activity android:name=".CardDetails" android:exported="false" />
-        <activity android:name=".CreateTripActivity" android:exported="false" />
-        <activity android:name=".MyTripsActivity" android:exported="false" />
-        <activity android:name=".TripPlannerActivity" android:exported="false" />
-        <activity android:name=".UserProfileActivity" android:exported="false" />
-        <activity android:name=".FilterActivity" android:exported="false" />
-        <activity android:name=".ChatActivity" android:exported="true" />
-        <activity android:name=".HomePageActivity" android:exported="false" />
-        <activity android:name=".PaymentActivity" android:exported="false" />
-        <activity android:name=".ForgetPasswordActivity" android:exported="false" />
-        <activity android:name=".AdminDashboardActivity" android:exported="false" />
-        <activity android:name=".AdminLoginActivity" android:exported="false" />
-        <activity android:name=".RegisterActivity" android:exported="false" />
-
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity
+            android:name=".BookingStationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StationDetailsActivity"
+            android:exported="false" /> <!-- Activities -->
+        <activity
+            android:name=".MessageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddStationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PaymentProcessingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SavedPaymentMethodsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CardDetails"
+            android:exported="false" />
+        <activity
+            android:name=".CreateTripActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MyTripsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TripPlannerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FilterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChatActivity"
+            android:exported="true" />
+        <activity
+            android:name=".HomePageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PaymentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgetPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Secure API Key (Move this to `gradle.properties` if possible) -->
+        </activity> <!-- Secure API Key (Move this to `gradle.properties` if possible) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs" />
     </application>
+
 </manifest>

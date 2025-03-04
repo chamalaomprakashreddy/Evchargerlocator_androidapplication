@@ -1,8 +1,8 @@
 package com.example.evchargerlocator_androidapplication;
 
 import static android.util.Log.e;
-
 import android.Manifest;
+import android.content.Context;  // Import Context
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -10,9 +10,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.LayoutInflater;  // Import LayoutInflater
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,7 +41,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -173,6 +174,16 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
         // Load charging stations from Firebase
         loadStationsFromFirebase();
+
+        // Set a marker click listener to show the details popup
+        myMap.setOnMarkerClickListener(marker -> {
+            if (marker.getTag() instanceof ChargingStation) {
+                ChargingStation station = (ChargingStation) marker.getTag();
+                showDetailsPopup(station);
+                return true;
+            }
+            return false;
+        });
     }
 
     private void loadStationsFromFirebase() {
@@ -211,10 +222,8 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void addStationMarker(ChargingStation station) {
         LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
-        myMap.addMarker(new MarkerOptions()
-                .position(location)
-                .title(station.getName())
-                .snippet("Power: " + station.getPowerOutput() + "\nStatus: " + station.getAvailability()));
+        Marker marker = myMap.addMarker(new MarkerOptions().position(location));
+        marker.setTag(station);
     }
 
     private void addUserLocationMarker(LatLng userLocation) {
@@ -228,6 +237,43 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                 .position(userLocation)
                 .title("Your Location");
         myMap.addMarker(userLocationMarker);
+    }
+
+    private void showDetailsPopup(ChargingStation station) {
+        // Inflate the popup layout
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_details, null);
+
+        // Initialize UI elements
+        TextView stationName = popupView.findViewById(R.id.popup_station_name);
+        Button detailsButton = popupView.findViewById(R.id.popup_details_button);
+
+        // Set station details
+        stationName.setText(station.getName());
+
+        // Handle button click to open station details activity
+        detailsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(HomePageActivity.this, StationDetailsActivity.class);
+            intent.putExtra("stationId", station.getStationId());
+            intent.putExtra("name", station.getName());
+            intent.putExtra("latitude", station.getLatitude());
+            intent.putExtra("longitude", station.getLongitude());
+            intent.putExtra("powerOutput", station.getPowerOutput());
+            intent.putExtra("availability", station.getAvailability());
+            intent.putExtra("chargingLevel", station.getChargingLevel());
+            intent.putExtra("connectorType", station.getConnectorType());
+            intent.putExtra("network", station.getNetwork());
+            startActivity(intent);
+        });
+
+        // Create and display the popup
+        PopupWindow popupWindow = new PopupWindow(
+                popupView,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                true
+        );
+        popupWindow.showAtLocation(findViewById(R.id.map), Gravity.CENTER, 0, 0);
     }
 
     private void setupSearch() {
@@ -276,7 +322,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void searchStations(String query) {
         // Clear any previous station markers
-        myMap.clear();
+        //myMap.clear();
 
         // Add matching stations
         boolean stationFound = false;
