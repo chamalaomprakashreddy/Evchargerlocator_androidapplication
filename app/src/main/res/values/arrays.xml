@@ -3,18 +3,22 @@
         <item>None</item>
         <item>Level 1</item>
         <item>Level 2</item>
-        <item>Level 3</item>
+        <item>DC Fast</item>
     </string-array>
+
     <string-array name="connectors_array">
         <item>None</item>
-        <item>J1772</item>
+        <item>Type 1</item>
+        <item>Type 2</item>
         <item>CCS</item>
         <item>CHAdeMO</item>
     </string-array>
+
     <string-array name="networks_array">
         <item>None</item>
-        <item>7 CHARGE</item>
-        <item>Electrify America</item>
+        <item>Tesla</item>
         <item>ChargePoint</item>
+        <item>EVgo</item>
+        <item>Electrify America</item>
     </string-array>
 </resources>

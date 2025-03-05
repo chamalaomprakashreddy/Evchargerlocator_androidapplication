@@ -3,23 +3,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Map Fragment -->
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/searchLayout"/>
+        android:layout_below="@id/searchLayout" />
 
-    <!-- Search Bar with Three Dots Menu -->
     <LinearLayout
         android:id="@+id/searchLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:orientation="horizontal"
         android:background="#FFFFFF"
         android:elevation="5dp"
+        android:orientation="horizontal"
         android:padding="10dp"
         android:layout_alignParentTop="true">
 
@@ -40,25 +38,35 @@
             android:src="@drawable/ic_menu_more" />
     </LinearLayout>
 
-    <!-- Search Button -->
     <Button
         android:id="@+id/searchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Search"
         android:layout_below="@id/searchLayout"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
-        android:backgroundTint="@android:color/holo_green_dark"/>
+        android:backgroundTint="@android:color/holo_green_dark"
+        android:text="Search" />
 
-    <!-- Add Station Button -->
     <Button
         android:id="@+id/btnAddStation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Station"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="80dp"
-        android:backgroundTint="#000"/>
+        android:layout_marginBottom="60dp"
+        android:backgroundTint="@android:color/holo_green_dark"
+        android:text="Add Station" />
+
+    <ImageView
+        android:id="@+id/chatIcon"
+        android:layout_width="67dp"
+        android:layout_height="55dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="110dp"
+        android:src="@android:drawable/sym_action_chat"
+        app:tint="@android:color/background_dark" />
+
 </RelativeLayout>

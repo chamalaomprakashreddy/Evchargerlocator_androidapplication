@@ -1,12 +1,14 @@
 <resources>
     <string name="app_name">Evchargerlocator_androidapplication</string>
     <string-array name="charging_levels">
+        <item>None</item>
         <item>Level 1</item>
         <item>Level 2</item>
         <item>DC Fast</item>
     </string-array>
 
     <string-array name="connector_types">
+        <item>None</item>
         <item>Type 1</item>
         <item>Type 2</item>
         <item>CCS</item>
@@ -14,6 +16,7 @@
     </string-array>
 
     <string-array name="networks">
+        <item>None</item>
         <item>Tesla</item>
         <item>ChargePoint</item>
         <item>EVgo</item>
