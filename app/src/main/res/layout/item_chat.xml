@@ -5,6 +5,7 @@
     android:orientation="vertical"
     android:padding="8dp">
 
+    <!-- Message Text -->
     <TextView
         android:id="@+id/messageTextView"
         android:layout_width="wrap_content"
@@ -12,5 +13,31 @@
         android:background="@drawable/chat_bubble"
         android:padding="10dp"
         android:textColor="@android:color/black"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:maxWidth="280dp"/> <!-- ✅ Fixed: Used dp instead of percentage -->
+
+    <!-- Timestamp & Seen Status -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:paddingTop="4dp">
+
+        <TextView
+            android:id="@+id/timestampTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"
+            android:paddingEnd="6dp"/>
+
+        <TextView
+            android:id="@+id/seenStatusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"/>
+    </LinearLayout>
+
 </LinearLayout>

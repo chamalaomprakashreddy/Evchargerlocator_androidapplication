@@ -5,10 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
@@ -33,13 +31,29 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Message message = messageList.get(position);
-        holder.messageTextView.setText(message.getMessage());
 
-        // Align messages (Left for received, Right for sent)
-        if (message.getSenderId().equals(currentUserId)) {
-            holder.messageTextView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+        if (message != null) {
+            // ✅ Ensure message text is displayed properly
+            holder.messageTextView.setText(message.getMessage() != null ? message.getMessage() : "Message not available");
+
+            // ✅ Align messages (Left for received, Right for sent)
+            if (message.getSenderId().equals(currentUserId)) {
+                holder.messageTextView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+            } else {
+                holder.messageTextView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+            }
+
+            // ✅ Display timestamp
+            holder.timestampTextView.setText(message.getFormattedTimestamp());
+
+            // ✅ Display seen/unseen status
+            if (message.isSeen()) {
+                holder.seenStatusTextView.setText("✔✔"); // Double tick for seen
+            } else {
+                holder.seenStatusTextView.setText("✔");  // Single tick for unseen
+            }
         } else {
-            holder.messageTextView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+            holder.messageTextView.setText("Message data is missing");
         }
     }
 
@@ -62,11 +76,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView messageTextView;
+        TextView messageTextView, timestampTextView, seenStatusTextView;
 
         ViewHolder(View itemView) {
             super(itemView);
             messageTextView = itemView.findViewById(R.id.messageTextView);
+            timestampTextView = itemView.findViewById(R.id.timestampTextView);
+            seenStatusTextView = itemView.findViewById(R.id.seenStatusTextView);
         }
     }
 }

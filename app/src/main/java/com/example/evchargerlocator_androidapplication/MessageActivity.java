@@ -46,15 +46,11 @@ public class MessageActivity extends AppCompatActivity {
         receiverUserId = getIntent().getStringExtra("receiverUserId");
         receiverUserName = getIntent().getStringExtra("receiverUserName");
 
-        if (receiverUserId == null) {
-            Log.e(TAG, "Receiver User ID is null!");
+        if (receiverUserId == null || receiverUserName == null) {
+            Log.e(TAG, "Receiver User ID or Name is null!");
             Toast.makeText(this, "User not found!", Toast.LENGTH_SHORT).show();
             finish();
             return;
-        }
-
-        if (receiverUserName == null) {
-            receiverUserName = "Unknown User";
         }
 
         // ✅ Initialize Firebase Auth
@@ -108,6 +104,11 @@ public class MessageActivity extends AppCompatActivity {
                     messageList.add(message);
                     messageAdapter.notifyDataSetChanged();
                     recyclerViewMessages.scrollToPosition(messageList.size() - 1);
+
+                    // ✅ Mark as Seen if it's a received message
+                    if (!message.getSenderId().equals(currentUserId) && !message.isSeen()) {
+                        messagesRef.child(message.getMessageId()).child("seen").setValue(true);
+                    }
                 }
             }
 
@@ -129,8 +130,8 @@ public class MessageActivity extends AppCompatActivity {
             String messageId = messagesRef.push().getKey();
             long timestamp = System.currentTimeMillis();
 
-            // ✅ Fixed Message Constructor Issue (Removed "false" argument)
-            Message message = new Message(currentUserId, receiverUserId, messageText, timestamp, messageId);
+            // ✅ Fixed: Added 'false' for 'seen' status
+            Message message = new Message(currentUserId, receiverUserId, messageText, timestamp, messageId, false);
 
             messagesRef.child(messageId).setValue(message)
                     .addOnSuccessListener(aVoid -> {
