@@ -2,7 +2,6 @@ package com.example.evchargerlocator_androidapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -15,13 +14,18 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class UserProfileActivity extends AppCompatActivity {
 
     private EditText fullName, phoneNumber, email, vehicle;
     private Button editButton, paymentButton;
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference userRef;
+    private DatabaseReference userRef, onlineStatusRef;
     private boolean isEditing = false; // Track edit mode
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,42 +41,42 @@ public class UserProfileActivity extends AppCompatActivity {
         editButton = findViewById(R.id.editButton);
         paymentButton = findViewById(R.id.PaymentButton);
 
-        // Back navigation
-        backArrowText.setOnClickListener(v -> {
-            startActivity(new Intent(UserProfileActivity.this, HomePageActivity.class));
-            finish();
-        });
-
         // Initialize Firebase
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
 
         if (currentUser != null) {
-            userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUser.getUid());
+            userId = currentUser.getUid();
+            userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+            onlineStatusRef = userRef.child("lastSeen");
+
             showUserData();
+            setUserOnline();  // ✅ Set user as online when activity is opened
         } else {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
             finish();
         }
 
+        backArrowText.setOnClickListener(v -> {
+            startActivity(new Intent(UserProfileActivity.this, HomePageActivity.class));
+            finish();
+        });
+
         editButton.setOnClickListener(v -> toggleEditProfile());
         paymentButton.setOnClickListener(v -> openPaymentActivity());
     }
 
-    /**
-     * Fetches user data from Firebase and displays it in the UI.
-     */
     public void showUserData() {
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     fullName.setText(snapshot.child("fullName").getValue(String.class));
-                    email.setText(snapshot.child("email").getValue(String.class)); // Email remains unchanged
+                    email.setText(snapshot.child("email").getValue(String.class));
                     phoneNumber.setText(snapshot.child("phoneNumber").getValue(String.class));
                     vehicle.setText(snapshot.child("vehicle").getValue(String.class));
                 }
-                setFieldsEnabled(false); // Disable fields after fetching data
+                setFieldsEnabled(false);
             }
 
             @Override
@@ -82,9 +86,6 @@ public class UserProfileActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Toggles between Edit and Save mode.
-     */
     private void toggleEditProfile() {
         isEditing = !isEditing;
 
@@ -98,9 +99,6 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Saves the updated user profile to Firebase.
-     */
     private void saveUserProfile() {
         String updatedFullName = fullName.getText().toString().trim();
         String updatedPhoneNumber = phoneNumber.getText().toString().trim();
@@ -111,45 +109,45 @@ public class UserProfileActivity extends AppCompatActivity {
             return;
         }
 
-        // Get userId from Firebase Authentication
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "Authentication error!", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        userRef.child("fullName").setValue(updatedFullName);
+        userRef.child("phoneNumber").setValue(updatedPhoneNumber);
+        userRef.child("vehicle").setValue(updatedVehicle);
 
-        String userId = currentUser.getUid();
-
-        // ✅ Updated Constructor Call with Offline Default Status
-        User updatedUser = new User(userId, email.getText().toString(), updatedFullName, updatedPhoneNumber, updatedVehicle);
-
-        // Overwrite the user data in Firebase
-        userRef.setValue(updatedUser).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(UserProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(UserProfileActivity.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
-            }
-        });
+        Toast.makeText(UserProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * Enables or disables the input fields.
-     */
     private void setFieldsEnabled(boolean enabled) {
         fullName.setEnabled(enabled);
         phoneNumber.setEnabled(enabled);
         vehicle.setEnabled(enabled);
-
-        fullName.setFocusableInTouchMode(enabled);
-        phoneNumber.setFocusableInTouchMode(enabled);
-        vehicle.setFocusableInTouchMode(enabled);
     }
 
-    /**
-     * Opens the Payment activity.
-     */
     private void openPaymentActivity() {
         startActivity(new Intent(UserProfileActivity.this, PaymentActivity.class));
+    }
+
+    private void setUserOnline() {
+        if (onlineStatusRef != null) {
+            onlineStatusRef.setValue("Online");
+        }
+    }
+
+    private void setUserOffline() {
+        if (onlineStatusRef != null) {
+            String lastSeenTime = String.valueOf(System.currentTimeMillis());
+            onlineStatusRef.setValue(lastSeenTime);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        setUserOffline();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setUserOnline();
     }
 }

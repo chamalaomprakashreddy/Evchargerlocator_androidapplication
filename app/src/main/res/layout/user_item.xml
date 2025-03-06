@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp"
+    android:padding="12dp"
     android:background="@android:color/white">
 
     <!-- Username -->
@@ -19,4 +19,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginStart="12dp"/>
+
+    <!-- User Online/Last Seen Status -->
+    <TextView
+        android:id="@+id/userStatusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Online"
+    android:textSize="14sp"
+    android:textColor="@android:color/darker_gray"
+    app:layout_constraintStart_toStartOf="@id/usernameText"
+    app:layout_constraintTop_toBottomOf="@id/usernameText"
+    android:layout_marginTop="4dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

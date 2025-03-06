@@ -2,13 +2,10 @@ package com.example.evchargerlocator_androidapplication.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,7 +30,6 @@ public class UsersFragment extends Fragment {
     private List<User> userList;
     private DatabaseReference usersRef;
     private String currentUserId;
-    private EditText searchUser;
 
     private static final String TAG = "UsersFragment";
 
@@ -43,8 +39,6 @@ public class UsersFragment extends Fragment {
 
         recyclerViewUsers = view.findViewById(R.id.recyclerViewUsers);
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        searchUser = view.findViewById(R.id.search_user);
 
         userList = new ArrayList<>();
         usersAdapter = new UsersAdapter(userList, getContext(), user -> openChat(user));
@@ -59,20 +53,6 @@ public class UsersFragment extends Fragment {
         } else {
             Toast.makeText(getContext(), "User not authenticated", Toast.LENGTH_SHORT).show();
         }
-
-        // ✅ Add Search Listener
-        searchUser.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                searchUsers(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
 
         return view;
     }
@@ -92,8 +72,14 @@ public class UsersFragment extends Fragment {
                     String email = dataSnapshot.child("email").getValue(String.class);
                     String phoneNumber = dataSnapshot.child("phoneNumber").getValue(String.class);
                     String vehicle = dataSnapshot.child("vehicle").getValue(String.class);
+                    String lastSeen = dataSnapshot.child("lastSeen").getValue(String.class);
 
-                    User user = new User(userId, email, fullName, phoneNumber, vehicle);
+                    // ✅ If lastSeen is missing, set default to "Offline"
+                    if (lastSeen == null) {
+                        lastSeen = "Offline";
+                    }
+
+                    User user = new User(userId, email, fullName, phoneNumber, vehicle, lastSeen);
                     userList.add(user);
                 }
                 usersAdapter.notifyDataSetChanged();
@@ -102,40 +88,6 @@ public class UsersFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Error fetching users: " + error.getMessage());
-            }
-        });
-    }
-
-    // ✅ Search Users in Firebase Database
-    private void searchUsers(String query) {
-        Query searchQuery = usersRef.orderByChild("fullName")
-                .startAt(query)
-                .endAt(query + "\uf8ff");
-
-        searchQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                userList.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    String userId = dataSnapshot.getKey();
-                    if (userId == null || userId.equals(currentUserId)) {
-                        continue;
-                    }
-
-                    String fullName = dataSnapshot.child("fullName").getValue(String.class);
-                    String email = dataSnapshot.child("email").getValue(String.class);
-                    String phoneNumber = dataSnapshot.child("phoneNumber").getValue(String.class);
-                    String vehicle = dataSnapshot.child("vehicle").getValue(String.class);
-
-                    User user = new User(userId, email, fullName, phoneNumber, vehicle);
-                    userList.add(user);
-                }
-                usersAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Search failed: " + error.getMessage());
             }
         });
     }

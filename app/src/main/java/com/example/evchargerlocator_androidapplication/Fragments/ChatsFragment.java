@@ -20,8 +20,11 @@ import com.example.evchargerlocator_androidapplication.UsersAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ChatsFragment extends Fragment {
 
@@ -75,8 +78,23 @@ public class ChatsFragment extends Fragment {
                                 String email = userSnapshot.child("email").getValue(String.class);
                                 String phoneNumber = userSnapshot.child("phoneNumber").getValue(String.class);
                                 String vehicle = userSnapshot.child("vehicle").getValue(String.class);
+                                String lastSeen = userSnapshot.child("lastSeen").getValue(String.class);
 
-                                User user = new User(userId, email, fullName, phoneNumber, vehicle);
+                                // ✅ Handle "Online" or "Last Seen" time formatting
+                                if (lastSeen == null) {
+                                    lastSeen = "Unknown";
+                                } else if (lastSeen.equals("Online")) {
+                                    lastSeen = "Online";
+                                } else {
+                                    try {
+                                        long lastSeenTimestamp = Long.parseLong(lastSeen);
+                                        lastSeen = "Last seen: " + formatTimestamp(lastSeenTimestamp);
+                                    } catch (NumberFormatException e) {
+                                        lastSeen = "Unknown";
+                                    }
+                                }
+
+                                User user = new User(userId, email, fullName, phoneNumber, vehicle, lastSeen);
                                 userList.add(user);
                                 usersAdapter.notifyDataSetChanged();
                             }
@@ -107,5 +125,11 @@ public class ChatsFragment extends Fragment {
         intent.putExtra("receiverUserId", user.getId());
         intent.putExtra("receiverUserName", user.getFullName());
         startActivity(intent);
+    }
+
+    // ✅ Helper method to format timestamps
+    private String formatTimestamp(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a, MMM dd", Locale.getDefault());
+        return sdf.format(new Date(timestamp));
     }
 }
