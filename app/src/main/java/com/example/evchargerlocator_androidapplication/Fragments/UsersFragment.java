@@ -2,10 +2,13 @@ package com.example.evchargerlocator_androidapplication.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,10 +28,12 @@ import java.util.List;
 
 public class UsersFragment extends Fragment {
 
+    private EditText searchUser;
     private RecyclerView recyclerViewUsers;
     private UsersAdapter usersAdapter;
-    private List<User> userList;
+    private List<User> userList, filteredUserList;
     private DatabaseReference usersRef;
+    private FirebaseAuth auth;
     private String currentUserId;
 
     private static final String TAG = "UsersFragment";
@@ -37,24 +42,47 @@ public class UsersFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_users, container, false);
 
+        searchUser = view.findViewById(R.id.search_user);
         recyclerViewUsers = view.findViewById(R.id.recyclerViewUsers);
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(getContext()));
 
         userList = new ArrayList<>();
-        usersAdapter = new UsersAdapter(userList, getContext(), user -> openChat(user));
+        filteredUserList = new ArrayList<>();
+        usersAdapter = new UsersAdapter(filteredUserList, getContext(), this::openChat);
         recyclerViewUsers.setAdapter(usersAdapter);
 
-        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth = FirebaseAuth.getInstance();
         currentUserId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
         if (currentUserId != null) {
             usersRef = FirebaseDatabase.getInstance().getReference("users");
+            setUserOnline();
             loadUsers();
         } else {
             Toast.makeText(getContext(), "User not authenticated", Toast.LENGTH_SHORT).show();
         }
 
+        searchUser.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterUsers(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
         return view;
+    }
+
+    private void setUserOnline() {
+        if (currentUserId == null) return;
+        DatabaseReference currentUserRef = usersRef.child(currentUserId);
+        currentUserRef.child("status").setValue("Online");
+        currentUserRef.child("status").onDisconnect().setValue("Offline");
     }
 
     private void loadUsers() {
@@ -69,20 +97,18 @@ public class UsersFragment extends Fragment {
                     }
 
                     String fullName = dataSnapshot.child("fullName").getValue(String.class);
-                    String email = dataSnapshot.child("email").getValue(String.class);
-                    String phoneNumber = dataSnapshot.child("phoneNumber").getValue(String.class);
-                    String vehicle = dataSnapshot.child("vehicle").getValue(String.class);
-                    String lastSeen = dataSnapshot.child("lastSeen").getValue(String.class);
+                    String status = dataSnapshot.child("status").getValue(String.class);
 
-                    // ✅ If lastSeen is missing, set default to "Offline"
-                    if (lastSeen == null) {
-                        lastSeen = "Offline";
+                    if (fullName == null) {
+                        fullName = "Unknown"; // Prevent null name crashes
                     }
 
-                    User user = new User(userId, email, fullName, phoneNumber, vehicle, lastSeen);
+                    String displayStatus = (status != null && status.equals("Online")) ? "Online" : "Offline";
+
+                    User user = new User(userId, fullName, displayStatus);
                     userList.add(user);
                 }
-                usersAdapter.notifyDataSetChanged();
+                filterUsers(searchUser.getText().toString());
             }
 
             @Override
@@ -90,6 +116,20 @@ public class UsersFragment extends Fragment {
                 Log.e(TAG, "Error fetching users: " + error.getMessage());
             }
         });
+    }
+
+    private void filterUsers(String query) {
+        filteredUserList.clear();
+        if (query.isEmpty()) {
+            filteredUserList.addAll(userList);
+        } else {
+            for (User user : userList) {
+                if (user.getFullName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredUserList.add(user);
+                }
+            }
+        }
+        usersAdapter.notifyDataSetChanged();
     }
 
     private void openChat(User user) {

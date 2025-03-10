@@ -18,15 +18,15 @@ import java.util.HashMap;
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText registerFullName, registerEmail, registerPhoneNumber, registerPassword, confirmPassword, registerVehicle, adminKey;
-    private TextView alreadyHaveAccount;
+    private TextView passwordErrorText, alreadyHaveAccount;
     private Button registerButton;
+    private TextView backArrowText;
     private CheckBox adminCheckBox;
     private FirebaseAuth firebaseAuth;
     private ImageView togglePasswordVisibility, toggleConfirmPasswordVisibility;
-    private ProgressBar progressBar;
     private boolean isPasswordVisible = false, isConfirmPasswordVisible = false;
 
-    private static final String ADMIN_SECRET_KEY = "EV_ADMIN_2025"; // Change this to a secure key
+    private static final String ADMIN_SECRET_KEY = "EV_ADMIN_2025"; // Secure key for admin access
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +42,14 @@ public class RegisterActivity extends AppCompatActivity {
         registerPassword = findViewById(R.id.registerPassword);
         confirmPassword = findViewById(R.id.confirmPassword);
         registerVehicle = findViewById(R.id.registerVehicle);
+        passwordErrorText = findViewById(R.id.passwordErrorText);
         registerButton = findViewById(R.id.registerButton);
         alreadyHaveAccount = findViewById(R.id.alreadyHaveAccount);
+        backArrowText = findViewById(R.id.backArrowText);
         adminCheckBox = findViewById(R.id.adminCheckBox);
         adminKey = findViewById(R.id.adminKey);
         togglePasswordVisibility = findViewById(R.id.togglePasswordVisibility);
         toggleConfirmPasswordVisibility = findViewById(R.id.toggleConfirmPasswordVisibility);
-        progressBar = findViewById(R.id.progressBar);
-        TextView backArrowText = findViewById(R.id.backArrowText);
 
         // Back Arrow Functionality
         backArrowText.setOnClickListener(v -> {
@@ -103,7 +103,6 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // Admins do not need vehicle details, but users must provide one
         if (!isAdmin && vehicle.isEmpty()) {
             Toast.makeText(this, "Please enter vehicle details", Toast.LENGTH_SHORT).show();
             return;
@@ -114,38 +113,47 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        // Password validation: Minimum 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
+        if (!password.matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$")) {
+            passwordErrorText.setVisibility(View.VISIBLE);
+            return;
+        } else {
+            passwordErrorText.setVisibility(View.GONE);
+        }
+
         if (isAdmin && !adminCode.equals(ADMIN_SECRET_KEY)) {
             Toast.makeText(this, "Invalid Admin Key!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        progressBar.setVisibility(View.VISIBLE);
-        registerButton.setEnabled(false);
+        String role = isAdmin ? "admin" : "user";
 
-        registerUserWithFirebase(fullName, email, phoneNumber, vehicle, password, isAdmin);
+        // If admin, set vehicle to "N/A"
+        if (isAdmin) {
+            vehicle = "N/A";
+        }
+
+        registerUserWithFirebase(fullName, email, phoneNumber, vehicle, password, role);
     }
 
-    private void registerUserWithFirebase(String fullName, String email, String phoneNumber, String vehicle, String password, boolean isAdmin) {
+    private void registerUserWithFirebase(String fullName, String email, String phoneNumber, String vehicle, String password, String role) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
-                    progressBar.setVisibility(View.GONE);
-                    registerButton.setEnabled(true);
-
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
                             String userId = user.getUid();
-                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference(role.equals("admin") ? "admins" : "users").child(userId);
 
-                            // Save user details in Firebase
+                            // ✅ Fixed: Store user details properly
                             HashMap<String, Object> userData = new HashMap<>();
-                            userData.put("userId", userId);
-                            userData.put("email", email);
+                            userData.put("id", userId);
                             userData.put("fullName", fullName);
+                            userData.put("email", email);
                             userData.put("phoneNumber", phoneNumber);
-                            userData.put("vehicle", isAdmin ? "Admin" : vehicle); // Admins don't have a vehicle
-                            userData.put("role", isAdmin ? "admin" : "user"); // Role management
-                            userData.put("status", "offline"); // Default status
+                            userData.put("vehicle", vehicle);
+                            userData.put("status", "Offline"); // Default status
+                            userData.put("role", role);
 
                             userRef.setValue(userData).addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {

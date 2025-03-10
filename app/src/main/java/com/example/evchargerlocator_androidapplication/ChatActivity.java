@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.evchargerlocator_androidapplication.Fragments.ChatsFragment;
-import com.example.evchargerlocator_androidapplication.Fragments.ProfileFragment;
 import com.example.evchargerlocator_androidapplication.Fragments.UsersFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -29,22 +28,18 @@ public class ChatActivity extends AppCompatActivity {
 
         Log.d(TAG, "ChatActivity started");
 
-        // ✅ Initialize UI Components
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
         backArrowText = findViewById(R.id.backArrowText);
 
-        // ✅ Use `this` for `FragmentActivity`
         try {
             viewPagerAdapter = new ViewPagerAdapter(this);
             viewPagerAdapter.addFragment(new ChatsFragment(), "Chats");
             viewPagerAdapter.addFragment(new UsersFragment(), "Users");
-            viewPagerAdapter.addFragment(new ProfileFragment(), "Profile"); // ✅ Add Profile Tab
-
+            //viewPagerAdapter.addFragment(new ProfileFragment(), "Profile"); // ✅ Add Profile Tab
 
             viewPager.setAdapter(viewPagerAdapter);
 
-            // ✅ Link TabLayout with ViewPager2
             new TabLayoutMediator(tabLayout, viewPager, (tab, position) ->
                     tab.setText(viewPagerAdapter.getPageTitle(position))
             ).attach();
@@ -53,7 +48,6 @@ public class ChatActivity extends AppCompatActivity {
             Log.e(TAG, "Error initializing ViewPagerAdapter: " + e.getMessage());
         }
 
-        // ✅ Back Button Functionality
         backArrowText.setOnClickListener(v -> {
             Log.d(TAG, "Back button clicked - Closing ChatActivity");
             finish();
