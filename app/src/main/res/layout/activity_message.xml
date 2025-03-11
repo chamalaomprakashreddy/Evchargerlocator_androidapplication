@@ -33,13 +33,26 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <!-- Typing Indicator -->
+    <TextView
+        android:id="@+id/typingIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User is typing..."
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        android:visibility="gone"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="@id/chatUserName"
+        app:layout_constraintTop_toBottomOf="@id/chatUserName"/>
+
     <!-- RecyclerView for Messages -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewMessages"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintTop_toBottomOf="@id/chatUserName"
+        app:layout_constraintTop_toBottomOf="@id/typingIndicator"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/messageInputLayout"/>

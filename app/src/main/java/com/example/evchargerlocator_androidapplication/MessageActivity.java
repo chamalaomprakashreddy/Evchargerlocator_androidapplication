@@ -1,6 +1,8 @@
 package com.example.evchargerlocator_androidapplication;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -23,14 +25,14 @@ import java.util.List;
 public class MessageActivity extends AppCompatActivity {
 
     private static final String TAG = "MessageActivity";
-    private TextView chatUserName;
+    private TextView chatUserName, typingIndicator;
     private RecyclerView recyclerViewMessages;
     private EditText etMessage;
     private ImageButton btnSend;
     private ImageView backButton;
     private MessageAdapter messageAdapter;
     private List<Message> messageList;
-    private DatabaseReference messagesRef, userChatsRef;
+    private DatabaseReference messagesRef, userChatsRef, userRef;
     private FirebaseAuth auth;
     private String currentUserId, receiverUserId, receiverUserName;
     private ChildEventListener messageListener;
@@ -67,9 +69,11 @@ public class MessageActivity extends AppCompatActivity {
         // ✅ Firebase References
         messagesRef = FirebaseDatabase.getInstance().getReference("chats").child(getChatId(currentUserId, receiverUserId));
         userChatsRef = FirebaseDatabase.getInstance().getReference("user_chats");
+        userRef = FirebaseDatabase.getInstance().getReference("users");
 
         // ✅ Initialize UI Components
         chatUserName = findViewById(R.id.chatUserName);
+        typingIndicator = findViewById(R.id.typingIndicator); // ✅ Typing Indicator
         recyclerViewMessages = findViewById(R.id.recyclerViewMessages);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
@@ -87,6 +91,23 @@ public class MessageActivity extends AppCompatActivity {
 
         // ✅ Load Messages in Real-Time
         loadMessages();
+
+        // ✅ Listen for Typing Status
+        listenForTypingStatus();
+
+        // ✅ Detect Typing
+        etMessage.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                setTypingStatus(!s.toString().trim().isEmpty());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         // ✅ Send Message
         btnSend.setOnClickListener(v -> sendMessage());
@@ -136,6 +157,7 @@ public class MessageActivity extends AppCompatActivity {
             messagesRef.child(messageId).setValue(message)
                     .addOnSuccessListener(aVoid -> {
                         etMessage.setText("");
+                        setTypingStatus(false); // ✅ Stop typing status after sending
                         Log.d(TAG, "Message sent successfully");
                         updateUserChats();
                     })
@@ -155,6 +177,28 @@ public class MessageActivity extends AppCompatActivity {
         return user1.compareTo(user2) < 0 ? user1 + "_" + user2 : user2 + "_" + user1;
     }
 
+    // ✅ Update typing status in Firebase
+    private void setTypingStatus(boolean isTyping) {
+        if (currentUserId != null) {
+            userRef.child(currentUserId).child("typing").setValue(isTyping);
+        }
+    }
+
+    // ✅ Listen for Receiver's Typing Status
+    private void listenForTypingStatus() {
+        userRef.child(receiverUserId).child("typing").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean isTyping = snapshot.getValue(Boolean.class) != null && snapshot.getValue(Boolean.class);
+                typingIndicator.setVisibility(isTyping ? View.VISIBLE : View.GONE);
+                typingIndicator.setText(isTyping ? "User is typing..." : "");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -162,5 +206,6 @@ public class MessageActivity extends AppCompatActivity {
             messagesRef.removeEventListener(messageListener);
             Log.d(TAG, "Firebase listener removed");
         }
+        setTypingStatus(false); // ✅ Stop typing when user leaves
     }
 }
