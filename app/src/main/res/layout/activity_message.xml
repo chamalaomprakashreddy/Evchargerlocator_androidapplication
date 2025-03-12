@@ -5,35 +5,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MessageActivity"
-    android:background="@color/white">
+    android:background="@color/white"
+    tools:context=".MessageActivity">
 
-    <!-- Back Button -->
-    <ImageView
-        android:id="@+id/backButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:src="@drawable/ic_back"
-        app:layout_constraintStart_toStartOf="parent"
+    <!-- Top Bar with Back, Username, and Clear Chat -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/chatToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="?attr/colorPrimary"
+        app:titleTextColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="16dp"
-        android:contentDescription="Back Button"/>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-    <!-- Chat User Name -->
-    <TextView
-        android:id="@+id/chatUserName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Chat"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toEndOf="@id/backButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        <!-- Back Button -->
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Back"
+            android:clickable="true"
+            android:focusable="true"/>
 
-    <!-- Typing Indicator -->
+        <!-- Centered User Name -->
+        <TextView
+            android:id="@+id/chatUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chat"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center"/>
+
+        <!-- Clear Chat Button (In App Bar) -->
+        <ImageButton
+            android:id="@+id/btnClearChat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_delete"
+            android:contentDescription="Clear Chat"
+            android:background="@null"
+            android:layout_gravity="end"
+            android:padding="12dp"/>
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- Typing Indicator (Below Toolbar) -->
     <TextView
         android:id="@+id/typingIndicator"
         android:layout_width="wrap_content"
@@ -43,8 +62,10 @@
         android:textColor="@color/gray"
         android:visibility="gone"
         android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="@id/chatUserName"
-        app:layout_constraintTop_toBottomOf="@id/chatUserName"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chatToolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center_horizontal"/>
 
     <!-- RecyclerView for Messages -->
     <androidx.recyclerview.widget.RecyclerView

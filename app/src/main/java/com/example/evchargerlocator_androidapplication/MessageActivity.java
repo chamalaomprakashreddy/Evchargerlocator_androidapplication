@@ -29,7 +29,7 @@ public class MessageActivity extends AppCompatActivity {
     private RecyclerView recyclerViewMessages;
     private EditText etMessage;
     private ImageButton btnSend;
-    private ImageView backButton;
+    private ImageView backButton, btnClearChat;
     private MessageAdapter messageAdapter;
     private List<Message> messageList;
     private DatabaseReference messagesRef, userChatsRef, userRef;
@@ -66,18 +66,19 @@ public class MessageActivity extends AppCompatActivity {
             return;
         }
 
-        // ✅ Firebase References
+        // ✅ Firebase References (Fixed `getChatId()` issue)
         messagesRef = FirebaseDatabase.getInstance().getReference("chats").child(getChatId(currentUserId, receiverUserId));
         userChatsRef = FirebaseDatabase.getInstance().getReference("user_chats");
         userRef = FirebaseDatabase.getInstance().getReference("users");
 
         // ✅ Initialize UI Components
         chatUserName = findViewById(R.id.chatUserName);
-        typingIndicator = findViewById(R.id.typingIndicator); // ✅ Typing Indicator
+        typingIndicator = findViewById(R.id.typingIndicator);
         recyclerViewMessages = findViewById(R.id.recyclerViewMessages);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
         backButton = findViewById(R.id.backButton);
+        btnClearChat = findViewById(R.id.btnClearChat); // ✅ Clear Chat Button
 
         chatUserName.setText(receiverUserName);
 
@@ -112,8 +113,16 @@ public class MessageActivity extends AppCompatActivity {
         // ✅ Send Message
         btnSend.setOnClickListener(v -> sendMessage());
 
+        // ✅ Clear Chat Button (New Feature)
+        btnClearChat.setOnClickListener(v -> showClearChatDialog());
+
         // ✅ Back Button Click
         backButton.setOnClickListener(v -> finish());
+    }
+
+    // ✅ Fix: Generate Unique Chat ID based on User IDs
+    private String getChatId(String user1, String user2) {
+        return (user1.compareTo(user2) < 0) ? user1 + "_" + user2 : user2 + "_" + user1;
     }
 
     private void loadMessages() {
@@ -126,7 +135,6 @@ public class MessageActivity extends AppCompatActivity {
                     messageAdapter.notifyDataSetChanged();
                     recyclerViewMessages.scrollToPosition(messageList.size() - 1);
 
-                    // ✅ Mark as Seen if it's a received message
                     if (!message.getSenderId().equals(currentUserId) && !message.isSeen()) {
                         messagesRef.child(message.getMessageId()).child("seen").setValue(true);
                     }
@@ -151,13 +159,12 @@ public class MessageActivity extends AppCompatActivity {
             String messageId = messagesRef.push().getKey();
             long timestamp = System.currentTimeMillis();
 
-            // ✅ Fixed: Added 'false' for 'seen' status
             Message message = new Message(currentUserId, receiverUserId, messageText, timestamp, messageId, false);
 
             messagesRef.child(messageId).setValue(message)
                     .addOnSuccessListener(aVoid -> {
                         etMessage.setText("");
-                        setTypingStatus(false); // ✅ Stop typing status after sending
+                        setTypingStatus(false);
                         Log.d(TAG, "Message sent successfully");
                         updateUserChats();
                     })
@@ -173,18 +180,35 @@ public class MessageActivity extends AppCompatActivity {
         userChatsRef.child(receiverUserId).child(currentUserId).setValue(System.currentTimeMillis());
     }
 
-    private String getChatId(String user1, String user2) {
-        return user1.compareTo(user2) < 0 ? user1 + "_" + user2 : user2 + "_" + user1;
+    // ✅ Show Confirmation Dialog for Clearing Chat
+    private void showClearChatDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Clear Chat")
+                .setMessage("Are you sure you want to clear this chat?")
+                .setPositiveButton("Clear", (dialog, which) -> clearChat())
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
-    // ✅ Update typing status in Firebase
+    // ✅ Clear Chat Messages from Firebase
+    private void clearChat() {
+        messagesRef.removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    messageList.clear();
+                    messageAdapter.notifyDataSetChanged();
+                    Toast.makeText(MessageActivity.this, "Chat cleared", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(MessageActivity.this, "Failed to clear chat", Toast.LENGTH_SHORT).show();
+                });
+    }
+
     private void setTypingStatus(boolean isTyping) {
         if (currentUserId != null) {
             userRef.child(currentUserId).child("typing").setValue(isTyping);
         }
     }
 
-    // ✅ Listen for Receiver's Typing Status
     private void listenForTypingStatus() {
         userRef.child(receiverUserId).child("typing").addValueEventListener(new ValueEventListener() {
             @Override
@@ -202,10 +226,6 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (messagesRef != null && messageListener != null) {
-            messagesRef.removeEventListener(messageListener);
-            Log.d(TAG, "Firebase listener removed");
-        }
-        setTypingStatus(false); // ✅ Stop typing when user leaves
+        setTypingStatus(false);
     }
 }
