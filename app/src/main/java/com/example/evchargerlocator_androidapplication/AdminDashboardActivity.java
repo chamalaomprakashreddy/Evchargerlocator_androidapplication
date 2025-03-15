@@ -85,6 +85,12 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
             startActivity(intent);
         });
 
+        Button btnViewStations = findViewById(R.id.btnViewStations);
+        btnViewStations.setOnClickListener(v -> {
+            Intent intent = new Intent(AdminDashboardActivity.this, StationListActivity.class);
+            startActivity(intent);
+        });
+
         // Set up search functionality
         EditText searchBar = findViewById(R.id.searchBar);
         Button searchButton = findViewById(R.id.searchButton);
@@ -259,4 +265,5 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
         startActivity(new Intent(AdminDashboardActivity.this, MainActivity.class));
         finish();
     }
+
 }

@@ -57,16 +57,16 @@
         android:layout_marginBottom="60dp"
         android:backgroundTint="@android:color/holo_green_dark"
         android:text="Add Station" />
+    <Button
+        android:id="@+id/btnViewStations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View Stations"
+        android:backgroundTint="#448C2B"
+        android:textColor="#FFFFFF"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:layout_above="@id/btnAddStation"/>
 
-    <ImageView
-        android:id="@+id/chatIcon"
-        android:layout_width="67dp"
-        android:layout_height="55dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="110dp"
-        android:src="@android:drawable/sym_action_chat"
-        app:tint="@android:color/background_dark" />
 
 </RelativeLayout>

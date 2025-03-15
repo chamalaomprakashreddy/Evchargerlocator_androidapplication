@@ -215,7 +215,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean isTyping = snapshot.getValue(Boolean.class) != null && snapshot.getValue(Boolean.class);
                 typingIndicator.setVisibility(isTyping ? View.VISIBLE : View.GONE);
-                typingIndicator.setText(isTyping ? "User is typing..." : "");
+                typingIndicator.setText(isTyping ? "typing..." : "");
             }
 
             @Override

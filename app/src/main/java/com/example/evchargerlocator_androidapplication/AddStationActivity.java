@@ -1,9 +1,7 @@
 package com.example.evchargerlocator_androidapplication;
 
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,6 +9,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -18,20 +17,17 @@ public class AddStationActivity extends AppCompatActivity {
 
     private double latitude, longitude;
     private DatabaseReference databaseReference;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_station);
 
-        TextView backArrowText = findViewById(R.id.backArrowText);
+        firebaseAuth = FirebaseAuth.getInstance();
 
         // Navigate to Profile when clicking back arrow
-        backArrowText.setOnClickListener(v -> {
-            Intent intent = new Intent(AddStationActivity.this, AdminDashboardActivity.class);
-            startActivity(intent);
-            finish();
-        });
+
 
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
 
@@ -81,8 +77,10 @@ public class AddStationActivity extends AppCompatActivity {
                 return;
             }
 
+            String adminId = firebaseAuth.getCurrentUser().getUid();
             String stationId = databaseReference.push().getKey();
-            ChargingStation station = new ChargingStation(stationId, name, latitude, longitude, powerOutput, availability, chargingLevel, connectorType, network);
+
+            ChargingStation station = new ChargingStation(stationId, name, latitude, longitude, powerOutput, availability, chargingLevel, connectorType, network, adminId);
 
             if (stationId != null) {
                 databaseReference.child(stationId).setValue(station).addOnCompleteListener(task -> {

@@ -23,6 +23,12 @@
         android:theme="@style/Theme.Evchargerlocator_androidapplication"
         tools:targetApi="31">
         <activity
+            android:name=".EditDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StationListActivity"
+            android:exported="false" />
+        <activity
             android:name=".BookingStationActivity"
             android:exported="false" />
         <activity
