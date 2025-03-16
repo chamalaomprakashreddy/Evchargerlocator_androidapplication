@@ -11,12 +11,14 @@
     <!-- Top Bar with Back, Username, and Clear Chat -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/chatToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@android:color/white"
-        app:titleTextColor="@android:color/white"
+        android:layout_width="388dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/darker_gray"
         app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:titleTextColor="@android:color/white"
+        tools:layout_editor_absoluteX="12dp">
 
         <!-- Back Button -->
         <ImageView
@@ -24,32 +26,32 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginStart="16dp"
-            android:src="@drawable/ic_back"
-            android:contentDescription="Back"
             android:clickable="true"
-            android:focusable="true"/>
+            android:contentDescription="Back"
+            android:focusable="true"
+            android:src="@drawable/ic_back" />
 
         <!-- Centered User Name -->
         <TextView
             android:id="@+id/chatUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="Chat"
-            android:textSize="18sp"
-            android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:layout_gravity="center"/>
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <!-- Clear Chat Button (In App Bar) -->
         <ImageButton
             android:id="@+id/btnClearChat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_delete"
-            android:contentDescription="Clear Chat"
-            android:background="@null"
             android:layout_gravity="end"
-            android:padding="12dp"/>
+            android:background="@null"
+            android:contentDescription="Clear Chat"
+            android:padding="12dp"
+            android:src="@drawable/ic_delete" />
     </androidx.appcompat.widget.Toolbar>
 
     <!-- Typing Indicator (Below Toolbar) -->
@@ -98,6 +100,7 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:orientation="horizontal"
+            android:backgroundTint="@color/light_gray"
             android:gravity="center_vertical">
 
             <!-- EditText for typing messages -->
