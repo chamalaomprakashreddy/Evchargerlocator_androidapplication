@@ -12,13 +12,13 @@
         android:id="@+id/backArrowText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="40dp"
         android:text="←"
         android:textColor="@color/black"
         android:textSize="32sp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="22dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Title -->
     <TextView
@@ -52,131 +52,187 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Full Name Field -->
-    <EditText
-        android:id="@+id/registerUsername"
-        android:layout_width="0dp"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/usernameInputContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Full Name"
-        android:inputType="textPersonName"
-        android:padding="12dp"
-        android:layout_margin="10dp"
-        app:layout_constraintTop_toBottomOf="@id/subtitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="50dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/subtitle">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/usernameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Your Email"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Email Field -->
-    <EditText
-        android:id="@+id/registerEmail"
-        android:layout_width="0dp"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/registerEmailInputContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:padding="12dp"
-        android:layout_margin="10dp"
-        app:layout_constraintTop_toBottomOf="@id/registerUsername"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="10dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/usernameInputContainer">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/registerEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Phone Number Field -->
-    <EditText
-        android:id="@+id/registerPhoneNumber"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/registerPhoneNumberInputContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="10dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/registerEmailInputContainer">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/registerPhoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phone Number"
+            android:inputType="phone"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Password Input Layout (With Show/Hide Button) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/registerPasswordContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Phone Number"
-        android:inputType="phone"
-        android:padding="12dp"
-        android:layout_margin="10dp"
-        app:layout_constraintTop_toBottomOf="@id/registerEmail"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/registerPhoneNumberInputContainer"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="45dp">
 
-    <!-- Vehicle Field -->
-    <EditText
-        android:id="@+id/registerVehicle"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordInputContainer"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxCornerRadiusTopStart="15dp"
+            app:boxCornerRadiusTopEnd="15dp"
+            app:boxCornerRadiusBottomStart="15dp"
+            app:boxCornerRadiusBottomEnd="15dp"
+            app:boxStrokeColor="#888888"
+            app:hintEnabled="true"
+            tools:ignore="MissingConstraints">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/registerPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter your Password"
+                android:inputType="textPassword"
+                android:padding="12dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/togglePasswordVisibility"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="20dp"
+            android:src="@drawable/ic_eye_closed"
+            android:contentDescription="Show Password"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/passwordEditText"
+            app:layout_constraintTop_toBottomOf="@id/passwordEditText"
+            tools:ignore="NotSibling" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <!-- Confirm Password Input Layout (With Show/Hide Button) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/confirmPasswordContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Vehicle Name"
-        android:inputType="text"
-        android:padding="12dp"
-        android:layout_margin="10dp"
-        app:layout_constraintTop_toBottomOf="@id/registerPhoneNumber"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
-
-    <!-- Password Field -->
-    <EditText
-        android:id="@+id/registerPassword"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:padding="12dp"
-        android:layout_margin="10dp"
-        app:layout_constraintTop_toBottomOf="@id/registerVehicle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        app:layout_constraintTop_toBottomOf="@id/registerPasswordContainer"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="45dp">
 
-    <!-- Toggle Password Visibility -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/confirmPasswordInputContainer"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxCornerRadiusTopStart="15dp"
+            app:boxCornerRadiusTopEnd="15dp"
+            app:boxCornerRadiusBottomStart="15dp"
+            app:boxCornerRadiusBottomEnd="15dp"
+            app:boxStrokeColor="#888888"
+            app:hintEnabled="true"
+            tools:ignore="MissingConstraints">
 
-    <!-- Confirm Password Field -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/confirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter your Password"
+                android:inputType="textPassword"
+                android:padding="12dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <ImageView
-        android:id="@+id/togglePasswordVisibility"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_margin="10dp"
-        android:layout_marginEnd="28dp"
-        android:layout_marginBottom="20dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_eye_closed"
-        app:layout_constraintBottom_toBottomOf="@id/registerPassword"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <EditText
-        android:id="@+id/confirmPassword"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Confirm Password"
-        android:inputType="textPassword"
-        android:padding="12dp"
-        android:layout_margin="10dp"
-        app:layout_constraintTop_toBottomOf="@id/registerPassword"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
-
-    <!-- Toggle Confirm Password Visibility -->
-    <ImageView
-        android:id="@+id/toggleConfirmPasswordVisibility"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="12dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_eye_closed"
-        app:layout_constraintBottom_toBottomOf="@id/confirmPassword"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <ImageView
+            android:id="@+id/toggleConfirmPasswordVisibility"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="20dp"
+            android:src="@drawable/ic_eye_closed"
+            android:contentDescription="Show Password"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/passwordEditText"
+            app:layout_constraintTop_toBottomOf="@id/passwordEditText"
+            tools:ignore="NotSibling" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Password Error Message -->
     <TextView
         android:id="@+id/passwordErrorText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="4dp"
+        android:paddingTop="8dp"
         android:text="Password must be at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character."
         android:textColor="@android:color/holo_red_dark"
         android:textSize="14sp"
         android:visibility="gone"
-        android:paddingTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/confirmPassword"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/confirmPasswordContainer" />
 
     <!-- Register as Admin Checkbox -->
     <CheckBox
@@ -184,39 +240,51 @@
         android:layout_width="178dp"
         android:layout_height="34dp"
         android:layout_marginStart="96dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:text="Register as Admin"
         android:textColor="@android:color/holo_blue_dark"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/passwordErrorText" />
 
     <!-- Admin Key Field (Hidden by Default) -->
-    <EditText
-        android:id="@+id/adminKey"
-        android:layout_width="0dp"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/adminKeyContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Admin Key (Only for Admins)"
-        android:inputType="textPassword"
-        android:padding="12dp"
+        android:layout_marginHorizontal="45dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/adminCheckBox"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/adminCheckBox">
 
-    <!-- Sign Up Button -->
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/adminKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Admin Key"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Register Button -->
     <Button
         android:id="@+id/registerButton"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:backgroundTint="@android:color/holo_blue_dark"
-        android:text="Sign Up"
+        android:layout_marginHorizontal="45dp"
+        android:text="SignUp"
         android:textColor="@android:color/white"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:backgroundTint="@android:color/holo_blue_dark"
+        app:layout_constraintTop_toBottomOf="@id/adminKeyContainer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/adminKey" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Already Have an Account -->
     <TextView

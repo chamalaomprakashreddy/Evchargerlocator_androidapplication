@@ -28,8 +28,8 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="FILTERS"
+        android:layout_marginTop="40dp"
+        android:text="Filters"
         android:textColor="@color/black"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -146,8 +146,9 @@
     <!-- Reset Button -->
     <Button
         android:id="@+id/resetButton"
-        android:layout_width="150dp"
-        android:layout_height="45dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
         android:layout_marginTop="48dp"
         android:backgroundTint="@android:color/holo_green_dark"
         android:text="Reset"
@@ -160,8 +161,9 @@
     <!-- Apply Button -->
     <Button
         android:id="@+id/button_apply"
-        android:layout_width="150dp"
-        android:layout_height="45dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
         android:layout_marginTop="24dp"
         android:backgroundTint="@android:color/holo_blue_dark"
         android:text="Apply"

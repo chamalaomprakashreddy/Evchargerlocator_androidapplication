@@ -7,18 +7,38 @@
     android:background="#FFFFFF"
     android:padding="16dp">
 
+    <!-- Back Arrow -->
+    <TextView
+        android:id="@+id/back_arrow"
+        android:layout_width="68dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="5dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back Arrow"
+        android:gravity="start"
+        android:text="\u2190"
+        android:textColor="#333"
+        android:textSize="32sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Charging Stations Title -->
+    <!-- RecyclerView for Charging Stations -->
     <TextView
         android:id="@+id/txtChargingStations"
         android:layout_width="304dp"
         android:layout_height="36dp"
         android:paddingBottom="10dp"
+        android:layout_marginTop="40dp"
         android:text="Your Charging Stations"
         android:textColor="#000000"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.542"
+        app:layout_constraintStart_toEndOf="@+id/back_arrow"
+        tools:layout_editor_absoluteY="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewStations"

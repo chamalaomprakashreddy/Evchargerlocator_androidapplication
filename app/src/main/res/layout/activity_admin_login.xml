@@ -17,7 +17,6 @@
         android:textSize="25dp"
         android:textStyle="bold"
         android:layout_marginTop="40dp"
-        app:layout_constraintStart_toEndOf="@id/backArrowText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -45,27 +44,35 @@
         android:textColor="@color/black"
         android:textSize="25dp"
         android:textStyle="bold"
-        android:layout_marginTop="150dp"
-        app:layout_constraintStart_toEndOf="@id/backArrowText"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.2" />
-
-    <!-- Username/Email -->
-    <EditText
-        android:id="@+id/usernameInput"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Enter Your Email"
-        android:padding="12dp"
         android:layout_marginTop="80dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subtitle"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintVertical_bias="0.1"
-        android:layout_marginHorizontal="16dp" />
+        app:layout_constraintTop_toBottomOf="@id/backArrowText"
+        app:layout_constraintVertical_bias="0.2" />
+
+    <!-- Username/Email -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/usernameInputContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="50dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/subtitle">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/usernameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Your Email"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Password Input Layout (With Show/Hide Button) -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -74,34 +81,44 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/usernameInput"
-        android:layout_marginTop="28dp">
+        app:layout_constraintTop_toBottomOf="@id/usernameInputContainer"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="45dp">
 
-        <EditText
-            android:id="@+id/passwordEditText"
-            android:layout_width="0dp"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordInputContainer"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter your Password"
-            android:inputType="textPassword"
-            android:padding="10dp"
-            android:paddingEnd="50dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginHorizontal="16dp"
-            tools:ignore="MissingConstraints" />
+            app:boxCornerRadiusTopStart="15dp"
+            app:boxCornerRadiusTopEnd="15dp"
+            app:boxCornerRadiusBottomStart="15dp"
+            app:boxCornerRadiusBottomEnd="15dp"
+            app:boxStrokeColor="#888888"
+            app:hintEnabled="true"
+            tools:ignore="MissingConstraints">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passwordEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter your Password"
+                android:inputType="textPassword"
+                android:padding="12dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <ImageView
             android:id="@+id/showHidePasswordButton"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="5dp"
+            android:layout_margin="20dp"
             android:src="@drawable/ic_eye_closed"
             android:contentDescription="Show Password"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/passwordEditText"
-            app:layout_constraintTop_toBottomOf="@id/passwordEditText" />
+            app:layout_constraintTop_toBottomOf="@id/passwordEditText"
+            tools:ignore="NotSibling" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Forgot password -->
@@ -123,7 +140,7 @@
         android:id="@+id/loginButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
+        android:layout_marginHorizontal="45dp"
         android:layout_marginTop="20dp"
         android:textSize="16dp"
         android:text="Login"

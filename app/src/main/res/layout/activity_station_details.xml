@@ -2,53 +2,72 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
     android:background="#F5F5F5">
+
+    <!-- Back Arrow -->
+    <TextView
+        android:id="@+id/back_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\u2190"
+        android:textSize="32sp"
+        android:textColor="#333"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:gravity="start"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back Arrow"/>
 
     <!-- Station Name -->
     <TextView
         android:id="@+id/station_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="Station Name"
+        android:textColor="#333"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="#333"
-        android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="16dp" />
+        app:layout_constraintHorizontal_bias="0.47"
+        app:layout_constraintStart_toEndOf="@+id/back_arrow"
+        tools:layout_editor_absoluteY="25dp" />
 
     <!-- Station Details Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_station_details"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:cardElevation="6dp"
-        app:cardCornerRadius="12dp"
-        android:padding="16dp"
+        android:layout_width="308dp"
+        android:layout_height="232dp"
+        android:layout_marginTop="40dp"
         android:background="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@id/station_name"
+        android:padding="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/station_name">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/power_output_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Power Output:"
+                android:layout_marginTop="20dp"
                 android:textColor="#000"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/power_output_text"
@@ -56,8 +75,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="#555"
                 android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/power_output_label"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/power_output_label" />
 
             <TextView
                 android:id="@+id/availability_label"
@@ -67,8 +86,8 @@
                 android:textColor="#000"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/power_output_text"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/power_output_text" />
 
             <TextView
                 android:id="@+id/availability_text"
@@ -76,8 +95,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="#555"
                 android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/availability_label"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/availability_label" />
 
             <TextView
                 android:id="@+id/charging_level_label"
@@ -87,8 +106,8 @@
                 android:textColor="#000"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/availability_text"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/availability_text" />
 
             <TextView
                 android:id="@+id/charging_level_text"
@@ -96,8 +115,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="#555"
                 android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/charging_level_label"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/charging_level_label" />
 
             <TextView
                 android:id="@+id/connector_type_label"
@@ -107,8 +126,8 @@
                 android:textColor="#000"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/charging_level_text"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/charging_level_text" />
 
             <TextView
                 android:id="@+id/connector_type_text"
@@ -116,8 +135,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="#555"
                 android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/connector_type_label"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/connector_type_label" />
 
             <TextView
                 android:id="@+id/network_label"
@@ -127,8 +146,8 @@
                 android:textColor="#000"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/connector_type_text"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/connector_type_text" />
 
             <TextView
                 android:id="@+id/network_text"
@@ -136,8 +155,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="#555"
                 android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@id/network_label"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/network_label" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
@@ -145,16 +164,16 @@
     <!-- Booking Button -->
     <Button
         android:id="@+id/btn_book_station"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
         android:text="Book Now"
-        android:backgroundTint="#007BFF"
+        android:backgroundTint="@android:color/holo_blue_dark"
         android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:padding="12dp"
+        android:textSize="15sp"
         app:layout_constraintTop_toBottomOf="@id/card_station_details"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="40dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

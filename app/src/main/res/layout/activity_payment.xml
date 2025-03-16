@@ -29,7 +29,7 @@
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="PAYMENT"
+        android:text="Payment Methods"
         android:textColor="@android:color/black"
         android:textSize="24sp"
         android:textStyle="bold"

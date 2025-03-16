@@ -29,14 +29,17 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TRIP PLANNER"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
         android:layout_marginTop="40dp"
-        app:layout_constraintTop_toBottomOf="@id/backArrowText"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:text="Trip Planner"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/backArrowText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.39"
+        app:layout_constraintStart_toEndOf="@+id/backArrowText"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <!-- Buttons Container -->
     <LinearLayout
@@ -47,7 +50,7 @@
         app:layout_constraintTop_toBottomOf="@id/title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="30dp">
+        android:layout_marginTop="80dp">
 
         <Button
             android:id="@+id/createTripButton"
@@ -69,57 +72,81 @@
             android:text="My Trips"/>
     </LinearLayout>
 
-    <!-- Start Point -->
-    <EditText
-        android:id="@+id/startPoint"
-        android:layout_width="0dp"
+    <!-- start point -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/startPointContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Start Point"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="24dp"
-        android:padding="12dp"
-        android:background="@android:drawable/editbox_background"
-        android:textColor="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/buttonContainer"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="40dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/buttonContainer">
 
-    <!-- Destination (Fixed Missing ID) -->
-    <EditText
-        android:id="@+id/endPoint"
-        android:layout_width="0dp"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/startPoint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:hint="Enter Start Point"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!--destination-->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/endPointContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Destination"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="12dp"
-        android:padding="12dp"
-        android:background="@android:drawable/editbox_background"
-        android:textColor="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/startPoint"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="20dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/startPointContainer">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/endPoint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:hint="Enter Destination Point"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Select Filters Button -->
     <Button
         android:id="@+id/selectFiltersButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="40dp"
         android:text="Select Filters"
         android:textSize="16sp"
         android:backgroundTint="@android:color/holo_green_dark"
         android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/endPoint"/>
+        app:layout_constraintTop_toBottomOf="@id/endPointContainer"/>
 
     <!-- Submit Button -->
     <Button
         android:id="@+id/submitButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="SUBMIT"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="30dp"
+        android:text="Submit"
         android:textSize="16sp"
         android:backgroundTint="@android:color/holo_blue_dark"
         android:textColor="@android:color/white"

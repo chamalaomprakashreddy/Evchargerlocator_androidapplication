@@ -1,59 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/stationNameTextView"
+    <!-- Back Arrow and Title Container -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Charging Station Name"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="40dp"
+        android:paddingBottom="8dp">
 
+        <!-- Back Arrow -->
+        <TextView
+            android:id="@+id/backArrowText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="\u2190"
+            android:textColor="@color/black"
+            android:textSize="32sp"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingEnd="16dp"/>
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/stationNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Charging Station Name"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+    </LinearLayout>
     <TextView
         android:id="@+id/stationLocationTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
         android:text="Location"
         android:textSize="16sp"
         android:textColor="@android:color/darker_gray"
         android:paddingBottom="8dp"/>
 
-    <EditText
-        android:id="@+id/dateEditText"
+    <!-- Date Picker Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/dateContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Select Date"
-        android:focusable="false"
-        android:clickable="true"/>
+        android:layout_marginTop="15dp"
+        android:layout_marginHorizontal="45dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true">
 
-    <EditText
-        android:id="@+id/timeEditText"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/dateEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Date"
+            android:focusable="false"
+            android:clickable="true"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Time Picker Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/timeContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Select Time"
-        android:focusable="false"
-        android:clickable="true"/>
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="15dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true">
 
-    <EditText
-        android:id="@+id/vehicleModelEditText"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/timeEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Time"
+            android:focusable="false"
+            android:clickable="true"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Vehicle Model Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/vehicleModelContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Vehicle Model"/>
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="15dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true">
 
-    <EditText
-        android:id="@+id/licensePlateEditText"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/vehicleModelEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Vehicle Model"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- License Plate Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/licensePlateContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter License Plate"/>
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="15dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/licensePlateEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter License Plate"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Payment Button -->
     <Button
         android:id="@+id/paymentNowButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Payment Now"/>
+        android:layout_marginHorizontal="45dp"
+        android:text="Pay Now"
+        android:backgroundTint="@color/black"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="50dp"
+        android:paddingVertical="12dp"/>
 
 </LinearLayout>

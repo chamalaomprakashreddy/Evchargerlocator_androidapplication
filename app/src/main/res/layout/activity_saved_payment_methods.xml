@@ -51,15 +51,17 @@
     <!-- continueButton -->
     <Button
         android:id="@+id/continueButton"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="30dp"
         android:text="Continue Payment"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="10dp"
+        android:backgroundTint="@android:color/black"
         android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:layout_margin="30dp"
-        android:backgroundTint="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/paymentMethodsRecyclerView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

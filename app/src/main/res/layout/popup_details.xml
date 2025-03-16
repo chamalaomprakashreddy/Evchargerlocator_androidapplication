@@ -1,25 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:padding="16dp"
-    android:background="@drawable/popup_background"
-    android:orientation="vertical">
+    android:background="@drawable/popup_background">
 
     <TextView
         android:id="@+id/popup_station_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Charging Station"
         android:textSize="18sp"
         android:textStyle="bold"
         android:paddingBottom="10dp"
-        android:text="Charging Station"/>
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <Button
         android:id="@+id/popup_details_button"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="View Details"
-        android:background="@drawable/button_background"
-        android:padding="10dp"/>
-</LinearLayout>
+        android:backgroundTint="@android:color/black"
+        android:padding="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/popup_station_name"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

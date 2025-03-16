@@ -5,6 +5,7 @@
     android:orientation="horizontal"
     android:padding="8dp"
     android:layout_gravity="start"
+    android:backgroundTint="@android:color/holo_blue_light"
     android:background="@drawable/chat_bubble_received">
 
     <TextView

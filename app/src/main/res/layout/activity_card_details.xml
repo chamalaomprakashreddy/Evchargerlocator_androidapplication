@@ -38,101 +38,155 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Card Number -->
-    <EditText
-        android:id="@+id/cardNumberInput"
-        android:layout_width="0dp"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/cardNumberInputContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Card Number"
-        android:inputType="number"
-        android:padding="12dp"
-        android:layout_marginHorizontal="20dp"
-        android:background="@android:drawable/editbox_background"
-        app:layout_constraintTop_toBottomOf="@id/titleText"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp" />
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="20dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/titleText">
 
-    <!-- Expiry Date and CVV -->
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/cardNumberInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:hint="**** **** **** ****"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/expiryCvvContainer"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        app:layout_constraintTop_toBottomOf="@id/cardNumberInput"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="14dp">
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="20dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/cardNumberInputContainer">
 
         <!-- Expiry Date -->
-        <EditText
-            android:id="@+id/expiryDateInput"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/expiryDateInputContainer"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="MM/YY"
-            android:inputType="datetime"
-            android:padding="12dp"
-            android:background="@android:drawable/editbox_background"
+            android:layout_marginEnd="6dp"
+            app:boxCornerRadiusTopStart="15dp"
+            app:boxCornerRadiusTopEnd="15dp"
+            app:boxCornerRadiusBottomStart="15dp"
+            app:boxCornerRadiusBottomEnd="15dp"
+            app:boxStrokeColor="#888888"
+            app:hintEnabled="true"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/cvvInput"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="8dp" />
+            app:layout_constraintEnd_toStartOf="@id/cvvInputContainer"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/expiryDateInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:hint="MM/YY"
+                android:inputType="datetime"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- CVV -->
-        <EditText
-            android:id="@+id/cvvInput"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cvvInputContainer"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="CVV"
-            android:inputType="numberPassword"
-            android:padding="12dp"
-            android:background="@android:drawable/editbox_background"
-            app:layout_constraintStart_toEndOf="@id/expiryDateInput"
+            android:layout_marginStart="8dp"
+            app:boxCornerRadiusTopStart="15dp"
+            app:boxCornerRadiusTopEnd="15dp"
+            app:boxCornerRadiusBottomStart="15dp"
+            app:boxCornerRadiusBottomEnd="15dp"
+            app:boxStrokeColor="#888888"
+            app:hintEnabled="true"
+            app:layout_constraintStart_toEndOf="@id/expiryDateInputContainer"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginStart="10dp" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/cvvInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:hint="CVV"
+                android:inputType="numberPassword"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
     <!-- Card Holder Name -->
-    <EditText
-        android:id="@+id/cardHolderInput"
-        android:layout_width="339dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="14dp"
-        android:background="@android:drawable/editbox_background"
-        android:hint="Cardholder Name"
-        android:inputType="text"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/expiryCvvContainer" />
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/cardHolderInputContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="20dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/expiryCvvContainer">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/cardHolderInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:hint="Cardholder Name"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Save Card Checkbox -->
-
-    <!-- Continue Button -->
     <CheckBox
         android:id="@+id/saveCardCheckbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="72dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:text="Save card for future payments"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardHolderInput" />
+        app:layout_constraintTop_toBottomOf="@id/cardHolderInputContainer" />
 
+    <!-- Continue Button -->
     <Button
         android:id="@+id/continueButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="20dp"
         android:text="Continue Payment"
         android:textSize="16sp"
         android:textColor="@android:color/white"
         android:backgroundTint="@color/black"
         app:layout_constraintTop_toBottomOf="@id/saveCardCheckbox"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="15dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
