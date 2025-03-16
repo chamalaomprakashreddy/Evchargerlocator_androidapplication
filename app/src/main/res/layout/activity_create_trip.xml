@@ -13,6 +13,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginTop="40dp"
+        android:layout_marginStart="10dp"
         android:paddingBottom="8dp">
 
         <!-- Back Arrow -->
@@ -39,19 +40,30 @@
             android:textColor="@color/black"/>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/stationLocationTextView"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tripNameContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="45dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="40dp"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusBottomEnd="15dp"
-        android:text="Location"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="16sp" />
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/titleCreateTrip">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/tripName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:hint="Enter Trip Name"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/dateContainer"
@@ -68,7 +80,7 @@
         app:hintEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/dateEditText"
+            android:id="@+id/tripDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Select Date"
@@ -77,87 +89,84 @@
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Time Picker Input -->
+    <!-- start point -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/timeContainer"
+        android:id="@+id/startPointContainer"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="45dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxStrokeColor="#888888"
-        app:hintEnabled="true">
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/buttonContainer">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/timeEditText"
+            android:id="@+id/startPoint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select Time"
-            android:focusable="false"
-            android:clickable="true"
-            android:padding="12dp"/>
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:hint="Enter Start Point"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Vehicle Model Input -->
+    <!--destination-->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/vehicleModelContainer"
+        android:id="@+id/endPointContainer"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="45dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxStrokeColor="#888888"
-        app:hintEnabled="true">
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/startPointContainer">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/vehicleModelEditText"
+            android:id="@+id/endPoint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter Vehicle Model"
-            android:padding="12dp"/>
+            android:padding="12dp"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:hint="Enter Destination Point"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- License Plate Input -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/licensePlateContainer"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="45dp"
-        android:layout_marginTop="15dp"
-        app:boxCornerRadiusTopStart="15dp"
-        app:boxCornerRadiusTopEnd="15dp"
-        app:boxCornerRadiusBottomStart="15dp"
-        app:boxCornerRadiusBottomEnd="15dp"
-        app:boxStrokeColor="#888888"
-        app:hintEnabled="true">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/licensePlateEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter License Plate"
-            android:padding="12dp"/>
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Payment Button -->
+    <!-- Select Filters Button -->
     <Button
-        android:id="@+id/paymentNowButton"
+        android:id="@+id/selectFiltersButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="45dp"
-        android:text="Pay Now"
+        android:layout_marginTop="40dp"
+        android:text="Select Filters"
+        android:textSize="16sp"
+        android:backgroundTint="@android:color/holo_green_dark"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/endPointContainer"/>
+
+
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/saveTripButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
+        android:text="Save Trip"
         android:backgroundTint="@color/black"
         android:textColor="@android:color/white"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="20dp"
         android:paddingVertical="12dp"/>
 
 </LinearLayout>

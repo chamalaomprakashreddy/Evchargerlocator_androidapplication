@@ -68,10 +68,10 @@
         app:layout_constraintTop_toBottomOf="@id/subtitle">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/usernameInput"
+            android:id="@+id/registerUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter Your Email"
+            android:hint="Enter Your Username"
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -95,7 +95,7 @@
             android:id="@+id/registerEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
+            android:hint="Enter Your Email"
             android:inputType="textEmailAddress"
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
@@ -125,6 +125,32 @@
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!--vehicle-->
+    <!-- Full Name Field -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/registerVehicleContainer"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="10dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/registerPhoneNumberInputContainer">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/registerVehicle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Your vehicle model"
+            android:padding="12dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+
     <!-- Password Input Layout (With Show/Hide Button) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/registerPasswordContainer"
@@ -132,7 +158,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/registerPhoneNumberInputContainer"
+        app:layout_constraintTop_toBottomOf="@id/registerVehicleContainer"
         android:layout_marginTop="10dp"
         android:layout_marginHorizontal="45dp">
 
