@@ -7,14 +7,32 @@
     android:padding="8dp"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/messageText"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/chat_bubble_received"
-        android:textColor="@android:color/black"
-        android:padding="10dp"
-        android:textSize="14sp"/>
+        android:orientation="vertical">
+
+        <!-- Message Bubble -->
+        <TextView
+            android:id="@+id/messageText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/chat_bubble_received"
+            android:textColor="@android:color/black"
+            android:padding="10dp"
+            android:textSize="14sp"/>
+
+        <!-- Reaction Text (Emoji Reaction) -->
+        <TextView
+            android:id="@+id/reactionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:visibility="gone"/> <!-- Initially Hidden -->
+    </LinearLayout>
 
     <!-- Timestamp for received messages -->
     <TextView

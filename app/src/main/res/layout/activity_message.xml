@@ -59,7 +59,7 @@
         android:layout_height="wrap_content"
         android:text="User is typing..."
         android:textSize="14sp"
-        android:textColor="@color/gray"
+        android:textColor="@color/dark_gray"
         android:visibility="gone"
         android:layout_marginTop="4dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -123,5 +123,38 @@
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <!-- Reply Preview Layout -->
+    <LinearLayout
+        android:id="@+id/replyPreviewLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="@color/light_gray"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/messageInputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/replyMessageText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:maxLines="2"
+            android:ellipsize="end"/>
+
+        <ImageButton
+            android:id="@+id/btnCancelReply"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:contentDescription="Cancel Reply"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

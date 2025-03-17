@@ -10,15 +10,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +33,7 @@ public class MessageActivity extends AppCompatActivity {
     private DatabaseReference messagesRef, userChatsRef, userRef;
     private FirebaseAuth auth;
     private String currentUserId, receiverUserId, receiverUserName;
-    private ChildEventListener messageListener;
+    private String editingMessageId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,59 +42,40 @@ public class MessageActivity extends AppCompatActivity {
 
         Log.d(TAG, "MessageActivity started");
 
-        // ✅ Retrieve Receiver Details
         receiverUserId = getIntent().getStringExtra("receiverUserId");
         receiverUserName = getIntent().getStringExtra("receiverUserName");
 
         if (receiverUserId == null || receiverUserName == null) {
-            Log.e(TAG, "Receiver User ID or Name is null!");
             Toast.makeText(this, "User not found!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // ✅ Initialize Firebase Auth
         auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) {
-            currentUserId = auth.getCurrentUser().getUid();
-        } else {
-            Log.e(TAG, "Firebase Authentication failed!");
-            Toast.makeText(this, "Authentication failed!", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
+        currentUserId = auth.getCurrentUser().getUid();
 
-        // ✅ Firebase References (Fixed `getChatId()` issue)
         messagesRef = FirebaseDatabase.getInstance().getReference("chats").child(getChatId(currentUserId, receiverUserId));
         userChatsRef = FirebaseDatabase.getInstance().getReference("user_chats");
         userRef = FirebaseDatabase.getInstance().getReference("users");
 
-        // ✅ Initialize UI Components
         chatUserName = findViewById(R.id.chatUserName);
         typingIndicator = findViewById(R.id.typingIndicator);
         recyclerViewMessages = findViewById(R.id.recyclerViewMessages);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
         backButton = findViewById(R.id.backButton);
-        btnClearChat = findViewById(R.id.btnClearChat); // ✅ Clear Chat Button
+        btnClearChat = findViewById(R.id.btnClearChat);
 
         chatUserName.setText(receiverUserName);
 
-        // ✅ Setup RecyclerView
         messageList = new ArrayList<>();
         messageAdapter = new MessageAdapter(messageList, currentUserId, this);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setStackFromEnd(true);
-        recyclerViewMessages.setLayoutManager(layoutManager);
+        recyclerViewMessages.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewMessages.setAdapter(messageAdapter);
 
-        // ✅ Load Messages in Real-Time
         loadMessages();
-
-        // ✅ Listen for Typing Status
         listenForTypingStatus();
 
-        // ✅ Detect Typing
         etMessage.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -110,23 +89,24 @@ public class MessageActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        // ✅ Send Message
-        btnSend.setOnClickListener(v -> sendMessage());
+        btnSend.setOnClickListener(v -> {
+            if (editingMessageId != null) {
+                updateMessage();  // ✅ Fixed missing method
+            } else {
+                sendMessage();
+            }
+        });
 
-        // ✅ Clear Chat Button (New Feature)
         btnClearChat.setOnClickListener(v -> showClearChatDialog());
-
-        // ✅ Back Button Click
         backButton.setOnClickListener(v -> finish());
     }
 
-    // ✅ Fix: Generate Unique Chat ID based on User IDs
     private String getChatId(String user1, String user2) {
         return (user1.compareTo(user2) < 0) ? user1 + "_" + user2 : user2 + "_" + user1;
     }
 
     private void loadMessages() {
-        messageListener = new ChildEventListener() {
+        messagesRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
                 Message message = snapshot.getValue(Message.class);
@@ -136,7 +116,7 @@ public class MessageActivity extends AppCompatActivity {
                     recyclerViewMessages.scrollToPosition(messageList.size() - 1);
 
                     if (!message.getSenderId().equals(currentUserId) && !message.isSeen()) {
-                        messagesRef.child(message.getMessageId()).child("seen").setValue(true);
+                        markMessageAsSeen(message.getMessageId());
                     }
                 }
             }
@@ -144,53 +124,58 @@ public class MessageActivity extends AppCompatActivity {
             @Override public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {}
             @Override public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
             @Override public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
-            @Override public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Database Error: " + error.getMessage());
-                Toast.makeText(MessageActivity.this, "Failed to load messages", Toast.LENGTH_SHORT).show();
-            }
-        };
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
 
-        messagesRef.addChildEventListener(messageListener);
+    private void markMessageAsSeen(String messageId) {
+        messagesRef.child(messageId).child("seen").setValue(true)
+                .addOnSuccessListener(aVoid -> messageAdapter.notifyDataSetChanged());
     }
 
     private void sendMessage() {
         String messageText = etMessage.getText().toString().trim();
+
         if (!messageText.isEmpty()) {
             String messageId = messagesRef.push().getKey();
             long timestamp = System.currentTimeMillis();
-
-            Message message = new Message(currentUserId, receiverUserId, messageText, timestamp, messageId, false);
+            Message message = new Message(currentUserId, receiverUserId, messageText, timestamp, messageId, false, null, null, false);
 
             messagesRef.child(messageId).setValue(message)
-                    .addOnSuccessListener(aVoid -> {
-                        etMessage.setText("");
-                        setTypingStatus(false);
-                        Log.d(TAG, "Message sent successfully");
-                        updateUserChats();
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to send message: " + e.getMessage());
-                        Toast.makeText(MessageActivity.this, "Failed to send message", Toast.LENGTH_SHORT).show();
-                    });
+                    .addOnSuccessListener(aVoid -> etMessage.setText(""))
+                    .addOnFailureListener(e -> Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show());
         }
     }
 
-    private void updateUserChats() {
-        userChatsRef.child(currentUserId).child(receiverUserId).setValue(System.currentTimeMillis());
-        userChatsRef.child(receiverUserId).child(currentUserId).setValue(System.currentTimeMillis());
+    private void updateMessage() {
+        String updatedText = etMessage.getText().toString().trim();
+        if (!updatedText.isEmpty()) {
+            messagesRef.child(editingMessageId).child("message").setValue(updatedText)
+                    .addOnSuccessListener(aVoid -> {
+                        editingMessageId = null;
+                        etMessage.setText("");
+                        btnSend.setImageResource(R.drawable.ic_send);
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this, "Failed to update message", Toast.LENGTH_SHORT).show());
+        }
     }
 
-    // ✅ Show Confirmation Dialog for Clearing Chat
+    public void startEditingMessage(String messageId, String messageText) {
+        editingMessageId = messageId;
+        etMessage.setText(messageText);
+        etMessage.setSelection(etMessage.getText().length());
+        btnSend.setImageResource(R.drawable.ic_edit);
+    }
+
     private void showClearChatDialog() {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setTitle("Clear Chat")
-                .setMessage("Are you sure you want to clear this chat?")
-                .setPositiveButton("Clear", (dialog, which) -> clearChat())
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setMessage("Are you sure?")
+                .setPositiveButton("Yes", (dialog, which) -> clearChat())
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
-    // ✅ Clear Chat Messages from Firebase
     private void clearChat() {
         messagesRef.removeValue()
                 .addOnSuccessListener(aVoid -> {
@@ -198,9 +183,7 @@ public class MessageActivity extends AppCompatActivity {
                     messageAdapter.notifyDataSetChanged();
                     Toast.makeText(MessageActivity.this, "Chat cleared", Toast.LENGTH_SHORT).show();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(MessageActivity.this, "Failed to clear chat", Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(MessageActivity.this, "Failed to clear chat", Toast.LENGTH_SHORT).show());
     }
 
     private void setTypingStatus(boolean isTyping) {
