@@ -56,6 +56,11 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
+    // ✅ Google Places API
+    implementation(libs.places)
+    implementation("com.google.maps.android:android-maps-utils:2.2.3")
+
+
     // ✅ Glide (Image Loading)
     implementation("com.github.bumptech.glide:glide:4.15.1")
     implementation(libs.activity)
@@ -69,6 +74,12 @@ dependencies {
 
     // ✅ CircleImageView (For Profile Images & Status Indicator)
     implementation("de.hdodenhof:circleimageview:3.1.0") // **🔥 NEWLY ADDED 🔥**
+
+    // ✅ Google Maps Utilities (For Markers & Clustering)
+    implementation("com.google.maps.android:android-maps-utils:2.2.3")
+
+    // ✅ Volley (For Network Requests - Google Directions API)
+    implementation("com.android.volley:volley:1.2.1")
 
     // ✅ Testing Dependencies
     testImplementation("junit:junit:4.13.2")

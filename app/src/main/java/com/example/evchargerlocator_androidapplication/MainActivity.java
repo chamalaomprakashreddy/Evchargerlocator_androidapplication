@@ -57,46 +57,39 @@ public class MainActivity extends AppCompatActivity {
         showHidePasswordButton = findViewById(R.id.showHidePasswordButton);
         progressBar = findViewById(R.id.progressBar);
 
-        // Toggle password visibility
-        showHidePasswordButton.setOnClickListener(v -> {
-            if (isPasswordVisible) {
-                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                showHidePasswordButton.setImageResource(R.drawable.ic_eye_closed);
-            } else {
-                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                showHidePasswordButton.setImageResource(R.drawable.ic_eye_open);
-            }
-            passwordEditText.setSelection(passwordEditText.length()); // Keep cursor at the end
-            isPasswordVisible = !isPasswordVisible;
-        });
+        // ✅ Password visibility toggle
+        showHidePasswordButton.setOnClickListener(v -> togglePasswordVisibility());
 
-        // Login Button Click
+        // ✅ Login Button Click
         loginButton.setOnClickListener(v -> loginUser());
 
-        // RegisterActivity Navigation
-        registerTextView.setOnClickListener(v -> {
-            Intent registerIntent = new Intent(MainActivity.this, RegisterActivity.class);
-            startActivity(registerIntent);
-        });
+        // ✅ Navigation: Register Page
+        registerTextView.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, RegisterActivity.class)));
 
-        // AdminLoginActivity Navigation
-        adminLoginButton.setOnClickListener(v -> {
-            Intent adminIntent = new Intent(MainActivity.this, AdminLoginActivity.class);
-            startActivity(adminIntent);
-        });
+        // ✅ Navigation: Admin Login
+        adminLoginButton.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, AdminLoginActivity.class)));
 
-        // ForgotPasswordActivity Navigation
-        forgotPasswordTextView.setOnClickListener(v -> {
-            Intent forgotPasswordIntent = new Intent(MainActivity.this, ForgetPasswordActivity.class);
-            startActivity(forgotPasswordIntent);
-        });
+        // ✅ Navigation: Forgot Password
+        forgotPasswordTextView.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, ForgetPasswordActivity.class)));
+    }
+
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            showHidePasswordButton.setImageResource(R.drawable.ic_eye_closed);
+        } else {
+            passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            showHidePasswordButton.setImageResource(R.drawable.ic_eye_open);
+        }
+        passwordEditText.setSelection(passwordEditText.getText().length()); // Keep cursor at the end
+        isPasswordVisible = !isPasswordVisible;
     }
 
     private void loginUser() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
-        // Input Validation
+        // ✅ Input Validation
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
             return;
@@ -107,32 +100,24 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Show progress while logging in
+        // ✅ Show progress and disable login button
         progressBar.setVisibility(View.VISIBLE);
         loginButton.setEnabled(false);
 
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
-                    progressBar.setVisibility(View.GONE);
-                    loginButton.setEnabled(true);
-
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
-                            // ✅ Commented out email verification check
-                            /*
-                            if (!user.isEmailVerified()) {
-                                Toast.makeText(MainActivity.this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show();
-                                firebaseAuth.signOut(); // Log out unverified users
-                                return;
-                            }
-                            */
-
+                            Log.d(TAG, "User logged in successfully: " + user.getEmail());
                             checkUserInDatabase(user.getUid());
                         }
                     } else {
+                        // ✅ Handle login failure
                         Log.e(TAG, "Login failed: ", task.getException());
                         Toast.makeText(MainActivity.this, "Invalid email or password!", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
+                        loginButton.setEnabled(true);
                     }
                 });
     }
@@ -141,14 +126,15 @@ public class MainActivity extends AppCompatActivity {
         usersRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                progressBar.setVisibility(View.GONE);
+                loginButton.setEnabled(true);
+
                 if (snapshot.exists()) {
-                    // The user exists in the database -> Proceed to Homepage
+                    // ✅ User exists -> Proceed to Homepage
                     Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(MainActivity.this, HomePageActivity.class);
-                    startActivity(intent);
-                    finish();
+                    navigateToHomePage();
                 } else {
-                    // User is not found in "users" collection -> Log out
+                    // ❌ Unauthorized user
                     firebaseAuth.signOut();
                     Toast.makeText(MainActivity.this, "Unauthorized! Only registered users can log in.", Toast.LENGTH_SHORT).show();
                 }
@@ -156,8 +142,17 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                // ✅ Handle database error
+                progressBar.setVisibility(View.GONE);
+                loginButton.setEnabled(true);
                 Toast.makeText(MainActivity.this, "Database Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void navigateToHomePage() {
+        Intent intent = new Intent(MainActivity.this, HomePageActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }

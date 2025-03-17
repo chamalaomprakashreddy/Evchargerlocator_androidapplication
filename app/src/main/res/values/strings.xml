@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Evchargerlocator_androidapplication</string>
+    <!-- ✅ Added Google Maps API Key -->
+    <string name="google_maps_key">AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs</string>
     <string-array name="charging_levels">
         <item>None</item>
         <item>Level 1</item>

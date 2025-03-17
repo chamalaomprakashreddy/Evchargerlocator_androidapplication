@@ -1,279 +1,132 @@
 package com.example.evchargerlocator_androidapplication;
 
-import static android.util.Log.e;
 import android.Manifest;
-import android.content.Context;  // Import Context
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;  // Import LayoutInflater
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import java.util.ArrayList;
+import com.google.maps.android.PolyUtil;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.IOException;
 import java.util.List;
 
 public class HomePageActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private static final int FINE_PERMISSION_CODE = 1;
+    private static final String TAG = "HomePageActivity";
+    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs";
+
     private GoogleMap myMap;
-    private SearchView mapSearchView;
+    private FusedLocationProviderClient fusedLocationClient;
+    private RequestQueue requestQueue;
     private DatabaseReference databaseReference;
     private DrawerLayout drawerLayout;
     private ImageView navIcon;
-    private NavigationView navigationView;  // Declare NavigationView
-    private List<ChargingStation> stationList = new ArrayList<>();
-    private FusedLocationProviderClient fusedLocationClient;
-    private LocationRequest locationRequest;
-    private LocationCallback locationCallback;
-    private LatLng userLocation;
-    private MarkerOptions userLocationMarker; // Marker for user's location
-    private Marker searchMarker;  // Marker for search result
+    private NavigationView navigationView;
+    private SearchView mapSearchView;
+    private FloatingActionButton fabCenter;
+    private LatLng startLocation, endLocation;
+    private double distanceFilter = 5.0;
+    private Polyline routePolyline;
+    private Marker searchMarker;
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        // Initialize Drawer and Navigation Views
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        requestQueue = Volley.newRequestQueue(this);
+        databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
+
         drawerLayout = findViewById(R.id.drawer_layout);
         navIcon = findViewById(R.id.nav_icon);
-        navigationView = findViewById(R.id.nav_view);  // Initialize NavigationView
-
-        // Set up nav icon to open the navigation drawer
-        navIcon.setOnClickListener(v -> drawerLayout.openDrawer(Gravity.LEFT));
-
-        // Initialize the SearchView
+        navigationView = findViewById(R.id.nav_view);
         mapSearchView = findViewById(R.id.mapSearch);
-        if (mapSearchView != null) {
-            setupSearch();
-        } else {
-            e("HomePageActivity", "SearchView not found.");
+        fabCenter = findViewById(R.id.fab_center);
+
+        navIcon.setOnClickListener(v -> {
+            if (!drawerLayout.isDrawerOpen(Gravity.LEFT)) {
+                drawerLayout.openDrawer(Gravity.LEFT);
+            }
+        });
+
+        setupDrawer();
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            startLocation = getLatLngFromIntent(intent.getStringExtra("startLocation"));
+            endLocation = getLatLngFromIntent(intent.getStringExtra("endLocation"));
+            distanceFilter = intent.getDoubleExtra("distanceFilter", 5.0);
         }
 
-        // Initialize Firebase and map
-        databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
+        setupSearch();
+        fabCenter.setOnClickListener(v -> fetchCurrentLocation());
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
-
-        // Initialize FusedLocationProviderClient for live location tracking
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        // Setup LocationRequest for continuous updates
-        locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000); // 10 seconds
-        locationRequest.setFastestInterval(5000); // 5 seconds
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        // Setup LocationCallback to handle location updates
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                if (locationResult != null && locationResult.getLocations() != null) {
-                    for (Location location : locationResult.getLocations()) {
-                        if (location != null) {
-                            userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                            updateMapWithLocation(location); // Update live location marker
-                        }
-                    }
-                }
-            }
-        };
-
-        // Floating action button (FAB) for recentering the map to the live location
-        FloatingActionButton fabCenter = findViewById(R.id.fab_center);
-        fabCenter.setOnClickListener(v -> {
-            if (userLocation != null) {
-                // Recenter the map to the most recent live location and keep the charging stations visible
-                myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-            }
-        });
-
-        // Set up Drawer Navigation
-        setupDrawer();
-    }
-
-    private void setupDrawer() {
-        View headerView = navigationView.getHeaderView(0);
-
-        // Initialize menu items
-        TextView tripPlanner = headerView.findViewById(R.id.menu_trip_planner);
-        TextView chat = headerView.findViewById(R.id.menu_chat);
-        TextView filter = headerView.findViewById(R.id.menu_filter);
-        TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
-
-        // Set click listeners
-        tripPlanner.setOnClickListener(v -> startActivity(new Intent(this, TripPlannerActivity.class)));
-        chat.setOnClickListener(v -> startActivity(new Intent(this, ChatActivity.class)));
-        filter.setOnClickListener(v -> startActivity(new Intent(this, FilterActivity.class)));
-        userProfile.setOnClickListener(v -> startActivity(new Intent(this, UserProfileActivity.class)));
-
-        // Handle Logout
-        Button logoutButton = headerView.findViewById(R.id.logoutButton);
-        logoutButton.setOnClickListener(v -> {
-            // Log out the user
-            FirebaseAuth.getInstance().signOut();  // Sign out from Firebase Auth
-            startActivity(new Intent(HomePageActivity.this, MainActivity.class)); // Redirect to login screen
-            finish();  // Close this activity
-        });
-    }
-
-    private void updateMapWithLocation(Location location) {
-        // Update the map with the user's current location (optional)
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         myMap = googleMap;
+        myMap.getUiSettings().setZoomControlsEnabled(true);
 
-        // Check for permissions
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             myMap.setMyLocationEnabled(true);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
 
-        // Start location updates
-        getCurrentLocation();
-
-        // Enable zoom controls
-        myMap.getUiSettings().setZoomControlsEnabled(true);
-        myMap.getUiSettings().setZoomGesturesEnabled(true);
-
-        // Load charging stations from Firebase
-        loadStationsFromFirebase();
-
-        // Set a marker click listener to show the details popup
-        myMap.setOnMarkerClickListener(marker -> {
-            if (marker.getTag() instanceof ChargingStation) {
-                ChargingStation station = (ChargingStation) marker.getTag();
-                showDetailsPopup(station);
-                return true;
-            }
-            return false;
-        });
-    }
-
-    private void loadStationsFromFirebase() {
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                myMap.clear(); // Clear existing markers
-                stationList.clear(); // Clear old station data
-
-                // Add charging stations markers first (they should be on top of the live location marker)
-                for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
-                    ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
-                    if (station != null) {
-                        stationList.add(station); // Store stations for searching
-                        addStationMarker(station); // Add marker to map
-                    }
-                }
-
-                // Add live location marker after the charging station markers (so it appears below them)
-                if (userLocation != null) {
-                    addUserLocationMarker(userLocation);
-                }
-
-                // Ensure that the map zoom level is appropriate
-                if (userLocation != null) {
-                    myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15)); // Adjust zoom level if needed
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                Toast.makeText(HomePageActivity.this, "Failed to load stations", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void addStationMarker(ChargingStation station) {
-        LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
-        Marker marker = myMap.addMarker(new MarkerOptions().position(location));
-        marker.setTag(station);
-    }
-
-    private void addUserLocationMarker(LatLng userLocation) {
-        // Remove the old marker if it exists
-        if (userLocationMarker != null) {
-            myMap.clear(); // Remove previous user location marker
+        if (startLocation != null && endLocation != null) {
+            drawRouteAndEVStations();
+        } else {
+            fetchCurrentLocation();
         }
-
-        // Add a new marker for the user's current location
-        userLocationMarker = new MarkerOptions()
-                .position(userLocation)
-                .title("Your Location");
-        myMap.addMarker(userLocationMarker);
-    }
-
-    private void showDetailsPopup(ChargingStation station) {
-        // Inflate the popup layout
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.popup_details, null);
-
-        // Initialize UI elements
-        TextView stationName = popupView.findViewById(R.id.popup_station_name);
-        Button detailsButton = popupView.findViewById(R.id.popup_details_button);
-
-        // Set station details
-        stationName.setText(station.getName());
-
-        // Handle button click to open station details activity
-        detailsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(HomePageActivity.this, StationDetailsActivity.class);
-            intent.putExtra("stationId", station.getStationId());
-            intent.putExtra("name", station.getName());
-            intent.putExtra("latitude", station.getLatitude());
-            intent.putExtra("longitude", station.getLongitude());
-            intent.putExtra("powerOutput", station.getPowerOutput());
-            intent.putExtra("availability", station.getAvailability());
-            intent.putExtra("chargingLevel", station.getChargingLevel());
-            intent.putExtra("connectorType", station.getConnectorType());
-            intent.putExtra("network", station.getNetwork());
-            startActivity(intent);
-        });
-
-        // Create and display the popup
-        PopupWindow popupWindow = new PopupWindow(
-                popupView,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                true
-        );
-        popupWindow.showAtLocation(findViewById(R.id.map), Gravity.CENTER, 0, 0);
     }
 
     private void setupSearch() {
@@ -281,93 +134,242 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public boolean onQueryTextSubmit(String query) {
                 searchPlace(query);
-                searchStations(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (searchMarker != null) {
-                    searchMarker.remove();  // Clear the previous search marker
-                }
                 return false;
             }
         });
     }
 
     private void searchPlace(String query) {
-        Geocoder geocoder = new Geocoder(HomePageActivity.this);
+        Geocoder geocoder = new Geocoder(this);
         try {
             List<Address> addressList = geocoder.getFromLocationName(query, 1);
             if (addressList != null && !addressList.isEmpty()) {
                 Address address = addressList.get(0);
-                LatLng location = new LatLng(address.getLatitude(), address.getLongitude());
-                myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
+                LatLng searchedLocation = new LatLng(address.getLatitude(), address.getLongitude());
 
-                // Clear any previous search marker before adding a new one
                 if (searchMarker != null) {
                     searchMarker.remove();
                 }
 
-                // Add a marker for the search result
-                searchMarker = myMap.addMarker(new MarkerOptions().position(location).title(query));
+                searchMarker = myMap.addMarker(new MarkerOptions()
+                        .position(searchedLocation)
+                        .title(query)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+                myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(searchedLocation, 14));
+                fetchEVStationsNearby(searchedLocation);
+
+                Log.d(TAG, "Search successful: " + query);
             } else {
-                Toast.makeText(HomePageActivity.this, "No matching place found", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No matching place found", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(HomePageActivity.this, "Error in searching place", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Log.e(TAG, "Error searching place: " + e.getMessage());
         }
     }
 
-    private void searchStations(String query) {
-        // Clear any previous station markers
-        //myMap.clear();
+    private void fetchEVStationsNearby(LatLng searchedLocation) {
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
+                    ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
+                    if (station != null) {
+                        LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
 
-        // Add matching stations
-        boolean stationFound = false;
-        for (ChargingStation station : stationList) {
-            if (station.getName().toLowerCase().contains(query.toLowerCase())) {
-                addStationMarker(station); // Add marker for matching stations
-                if (!stationFound) {
-                    // Zoom in on the first matching station
-                    LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
-                    myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
-                    stationFound = true;
+                        double distance = distanceBetween(searchedLocation, stationLocation);
+                        if (distance <= distanceFilter * 1.60934) {
+                            myMap.addMarker(new MarkerOptions()
+                                    .position(stationLocation)
+                                    .title(station.getName())
+                                    .snippet("EV Charging Station")
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                        }
+                    }
                 }
             }
-        }
 
-        // If no stations were found, show a message
-        if (!stationFound) {
-            Toast.makeText(HomePageActivity.this, "No stations found", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_PERMISSION_CODE);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        fusedLocationClient.removeLocationUpdates(locationCallback);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == FINE_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getCurrentLocation(); // Retry getting location if permission is granted
-            } else {
-                Toast.makeText(this, "Permission denied. Unable to get location.", Toast.LENGTH_SHORT).show();
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HomePageActivity.this, "Error fetching EV stations", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    private double distanceBetween(LatLng latLng1, LatLng latLng2) {
+        double latDiff = latLng1.latitude - latLng2.latitude;
+        double lonDiff = latLng1.longitude - latLng2.longitude;
+        return Math.sqrt(latDiff * latDiff + lonDiff * lonDiff) * 111.32;
+    }
+
+    private void setupDrawer() {
+        View headerView = navigationView.getHeaderView(0);
+
+        // ✅ Trip Planner Navigation
+        TextView tripPlanner = headerView.findViewById(R.id.menu_trip_planner);
+        tripPlanner.setOnClickListener(v -> startActivity(new Intent(HomePageActivity.this, TripPlannerActivity.class)));
+
+        // ✅ Chat Navigation
+        TextView chatOption = headerView.findViewById(R.id.menu_chat);
+        chatOption.setOnClickListener(v -> startActivity(new Intent(HomePageActivity.this, ChatActivity.class)));
+
+        // ✅ Filter Navigation
+        TextView filterOption = headerView.findViewById(R.id.menu_filter);
+        filterOption.setOnClickListener(v -> startActivity(new Intent(HomePageActivity.this, FilterActivity.class)));
+
+        // ✅ User Profile Navigation
+        TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
+        userProfile.setOnClickListener(v -> startActivity(new Intent(HomePageActivity.this, UserProfileActivity.class)));
+    }
+
+    private void drawRouteAndEVStations() {
+        String url = "https://maps.googleapis.com/maps/api/directions/json?"
+                + "origin=" + startLocation.latitude + "," + startLocation.longitude
+                + "&destination=" + endLocation.latitude + "," + endLocation.longitude
+                + "&key=" + GOOGLE_MAPS_API_KEY;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONArray routes = response.getJSONArray("routes");
+                        if (routes.length() > 0) {
+                            JSONObject route = routes.getJSONObject(0);
+                            String polyline = route.getJSONObject("overview_polyline").getString("points");
+
+                            List<LatLng> routePoints = PolyUtil.decode(polyline);
+                            if (routePolyline != null) routePolyline.remove();
+
+                            routePolyline = myMap.addPolyline(new PolylineOptions()
+                                    .addAll(routePoints)
+                                    .width(10)
+                                    .color(ContextCompat.getColor(this, R.color.black)));
+
+                            fetchEVStationsAlongRoute(routePoints);
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing route response: " + e.getMessage());
+                    }
+                },
+                error -> Log.e(TAG, "Route request failed: " + error.getMessage()));
+
+        requestQueue.add(request);
+    }
+    private void fetchEVStationsAlongRoute(List<LatLng> routePoints) {
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
+                    ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
+                    if (station != null) {
+                        LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
+
+                        // ✅ Check if the EV station is within the specified distance from the route
+                        if (PolyUtil.isLocationOnPath(stationLocation, routePoints, true, distanceFilter * 1609.34)) {
+                            myMap.addMarker(new MarkerOptions()
+                                    .position(stationLocation)
+                                    .title(station.getName())
+                                    .snippet("EV Charging Station")
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HomePageActivity.this, "Error fetching EV stations", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private LatLng getLatLngFromIntent(String locationString) {
+        if (locationString == null || locationString.isEmpty()) return null;
+        try {
+            String[] latLng = locationString.split(",");
+            return new LatLng(Double.parseDouble(latLng[0]), Double.parseDouble(latLng[1]));
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing LatLng from Intent: " + e.getMessage());
+            return null;
         }
     }
+    private void requestNewLocation() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(2000);
+
+        LocationCallback locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null || locationResult.getLastLocation() == null) return;
+
+                LatLng userLatLng = new LatLng(locationResult.getLastLocation().getLatitude(),
+                        locationResult.getLastLocation().getLongitude());
+                myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 14));
+
+                myMap.addMarker(new MarkerOptions()
+                        .position(userLatLng)
+                        .title("Updated Location")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+                fusedLocationClient.removeLocationUpdates(this);
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+
+
+
+    private void fetchCurrentLocation() {
+        // ✅ Check for location permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 14));
+
+                        // ✅ Reverse Geocoding to get the address
+                        Geocoder geocoder = new Geocoder(this);
+                        List<Address> addressList;
+                        try {
+                            addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            if (addressList != null && !addressList.isEmpty()) {
+                                Address address = addressList.get(0);
+                                String addressText = address.getAddressLine(0); // Get full address
+
+                                myMap.addMarker(new MarkerOptions()
+                                        .position(userLatLng)
+                                        .title("Current Location")
+                                        .snippet(addressText)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                            }
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error fetching address: " + e.getMessage());
+                        }
+
+                    } else {
+                        Log.e(TAG, "Location is null. Requesting new location update.");
+                        requestNewLocation(); // If location is null, request a new location update
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to get current location: " + e.getMessage());
+                    Toast.makeText(this, "Error fetching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
 }
