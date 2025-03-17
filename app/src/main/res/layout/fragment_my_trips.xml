@@ -7,35 +7,21 @@
     android:layout_height="match_parent"
     tools:context=".MyTripsActivity">
 
-    <!-- Back Arrow -->
-    <TextView
-        android:id="@+id/backArrowText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:text="\u2190"
-        android:textColor="@color/black"
-        android:textSize="32sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/titleMyTrips" />
-
+    
     <!-- Title for My Trips -->
     <TextView
         android:id="@+id/titleMyTrips"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="My Trips"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="10dp"
+        android:text="My Saved trips"
         android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- List of Trips -->
     <ListView
         android:id="@+id/tripsListView"
         android:layout_width="0dp"

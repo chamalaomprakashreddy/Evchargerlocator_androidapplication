@@ -1,6 +1,8 @@
 package com.example.evchargerlocator_androidapplication;
 
 import android.os.Bundle;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +14,8 @@ public class TripPlannerActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
+    private TextView backArrowText;
+
     private TripPlannerPagerAdapter pagerAdapter;
 
     @Override
@@ -21,6 +25,12 @@ public class TripPlannerActivity extends AppCompatActivity {
 
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
+        backArrowText = findViewById(R.id.backArrowText);
+
+        // Go back to the previous screen
+        backArrowText.setOnClickListener(v -> finish());
+
+
 
         // ✅ Ensure ViewPager2 is NOT null before setting an adapter
         if (viewPager != null) {
