@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -39,6 +40,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -127,6 +129,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         } else {
             fetchCurrentLocation();
         }
+
     }
 
     private void setupSearch() {
@@ -225,6 +228,15 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         // ✅ User Profile Navigation
         TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
         userProfile.setOnClickListener(v -> startActivity(new Intent(HomePageActivity.this, UserProfileActivity.class)));
+
+        Button logoutButton = headerView.findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(v -> {
+            // Log out the user
+            FirebaseAuth.getInstance().signOut();  // Sign out from Firebase Auth
+            startActivity(new Intent(HomePageActivity.this, MainActivity.class)); // Redirect to login screen
+            finish();  // Close this activity
+        });
+
     }
 
     private void drawRouteAndEVStations() {
