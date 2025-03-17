@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MyTripsActivity">
 
-    
+
     <!-- Title for My Trips -->
     <TextView
         android:id="@+id/titleMyTrips"
