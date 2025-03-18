@@ -18,7 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MessageActivity extends AppCompatActivity {
 
@@ -91,7 +93,7 @@ public class MessageActivity extends AppCompatActivity {
 
         btnSend.setOnClickListener(v -> {
             if (editingMessageId != null) {
-                updateMessage();  // ✅ Fixed missing method
+                updateMessage();
             } else {
                 sendMessage();
             }
@@ -114,7 +116,6 @@ public class MessageActivity extends AppCompatActivity {
                     messageList.add(message);
                     messageAdapter.notifyDataSetChanged();
                     recyclerViewMessages.scrollToPosition(messageList.size() - 1);
-
                     if (!message.getSenderId().equals(currentUserId) && !message.isSeen()) {
                         markMessageAsSeen(message.getMessageId());
                     }
@@ -142,9 +143,21 @@ public class MessageActivity extends AppCompatActivity {
             Message message = new Message(currentUserId, receiverUserId, messageText, timestamp, messageId, false, null, null, false);
 
             messagesRef.child(messageId).setValue(message)
-                    .addOnSuccessListener(aVoid -> etMessage.setText(""))
+                    .addOnSuccessListener(aVoid -> {
+                        etMessage.setText("");
+                        updateChatHistory(messageText, timestamp);
+                    })
                     .addOnFailureListener(e -> Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show());
         }
+    }
+
+    private void updateChatHistory(String lastMessage, long lastTimestamp) {
+        Map<String, Object> chatUpdate = new HashMap<>();
+        chatUpdate.put("lastMessage", lastMessage);
+        chatUpdate.put("lastTimestamp", lastTimestamp);
+
+        userChatsRef.child(currentUserId).child(receiverUserId).updateChildren(chatUpdate);
+        userChatsRef.child(receiverUserId).child(currentUserId).updateChildren(chatUpdate);
     }
 
     private void updateMessage() {
