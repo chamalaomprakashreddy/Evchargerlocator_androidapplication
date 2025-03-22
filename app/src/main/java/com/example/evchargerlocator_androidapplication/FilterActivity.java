@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class FilterActivity extends AppCompatActivity {
 
     private Spinner levelsSpinner, connectorsSpinner, networksSpinner;
-    private TextView pricingTextView;
+    private TextView pricingTextView, backArrowText;
     private Button resetButton, applyButton;
 
     @Override
@@ -27,6 +27,15 @@ public class FilterActivity extends AppCompatActivity {
         pricingTextView = findViewById(R.id.text_pricing);
         resetButton = findViewById(R.id.resetButton);
         applyButton = findViewById(R.id.button_apply);
+        backArrowText = findViewById(R.id.backArrowText);
+
+        // Set the click listener for the back arrow
+        backArrowText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed(); // Go back to the previous activity
+            }
+        });
 
         ArrayAdapter<CharSequence> levelsAdapter = ArrayAdapter.createFromResource(this,
                 R.array.levels_array, android.R.layout.simple_spinner_item);
