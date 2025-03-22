@@ -9,14 +9,17 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.evchargerlocator_androidapplication.Message;
 import com.example.evchargerlocator_androidapplication.MessageActivity;
 import com.example.evchargerlocator_androidapplication.R;
 import com.example.evchargerlocator_androidapplication.User;
 import com.example.evchargerlocator_androidapplication.UsersAdapter;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
@@ -52,6 +55,7 @@ public class ChatsFragment extends Fragment {
             userChatsRef = FirebaseDatabase.getInstance().getReference("user_chats").child(currentUserId);
             usersRef = FirebaseDatabase.getInstance().getReference("users");
             loadChatUsers();
+            listenForIncomingMessages(); // ✅ In-app notifications
         } else {
             Toast.makeText(getContext(), "User not authenticated", Toast.LENGTH_SHORT).show();
         }
@@ -134,6 +138,74 @@ public class ChatsFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Error loading chat users: " + error.getMessage());
             }
+        });
+    }
+
+    private void listenForIncomingMessages() {
+        if (currentUserId == null) return;
+
+        DatabaseReference userChatsRef = FirebaseDatabase.getInstance().getReference("user_chats").child(currentUserId);
+
+        userChatsRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot chatSnapshot, @Nullable String previousChildName) {
+                String otherUserId = chatSnapshot.getKey();
+                if (otherUserId == null) return;
+
+                String chatId = getChatId(currentUserId, otherUserId);
+
+                DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("chats").child(chatId);
+                chatRef.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot messageSnapshot, @Nullable String previousChildName) {
+                        Message msg = messageSnapshot.getValue(Message.class);
+                        if (msg == null) return;
+
+                        if (msg.getReceiverId().equals(currentUserId) && !msg.isSeen()) {
+                            showInAppNotification(msg.getSenderId(), msg.getMessage());
+                        }
+                    }
+
+                    @Override public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
+                    @Override public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+                    @Override public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
+                    @Override public void onCancelled(@NonNull DatabaseError error) {}
+                });
+            }
+
+            @Override public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
+            @Override public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+            @Override public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private String getChatId(String user1, String user2) {
+        return (user1.compareTo(user2) < 0) ? user1 + "_" + user2 : user2 + "_" + user1;
+    }
+
+
+
+    private void showInAppNotification(String senderId, String messageText) {
+        usersRef.child(senderId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                final String[] senderName = {snapshot.child("fullName").getValue(String.class)};
+                if (senderName[0] == null) senderName[0] = "Someone";
+
+                Snackbar.make(recyclerViewChats,
+                        "📩 New message from " + senderName[0] + ": " + messageText,
+                        Snackbar.LENGTH_LONG
+                ).setAction("Open Chat", v -> openChat(new User(
+                        senderId,
+                        senderName[0],
+                        "", // status
+                        0, 0, "" // timestamp, unread, preview
+                ))).show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
