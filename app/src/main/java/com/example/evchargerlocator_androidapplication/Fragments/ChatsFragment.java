@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ChatsFragment extends Fragment {
@@ -64,8 +65,22 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 userList.clear();
+                List<User> tempUserList = new ArrayList<>();
+                int totalUsers = (int) snapshot.getChildrenCount();
+                if (totalUsers == 0) {
+                    usersAdapter.notifyDataSetChanged();
+                    return;
+                }
+
+                final int[] loadedCount = {0};
+
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     String userId = dataSnapshot.getKey();
+                    Long tsValue = dataSnapshot.child("lastTimestamp").getValue(Long.class);
+                    long lastMessageTimestamp = tsValue != null ? tsValue : 0L;
+
+                    Integer unreadVal = dataSnapshot.child("unreadCount").getValue(Integer.class);
+                    int unreadCount = unreadVal != null ? unreadVal : 0;
 
                     usersRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -74,22 +89,27 @@ public class ChatsFragment extends Fragment {
                                 String fullName = userSnapshot.child("fullName").getValue(String.class);
                                 String status = userSnapshot.child("status").getValue(String.class);
 
-                                if (fullName == null) {
-                                    fullName = "Unknown"; // Ensure names are never null
-                                }
-
+                                fullName = (fullName != null) ? fullName : "Unknown";
                                 String displayStatus = (status != null && status.equals("Online")) ? "Online" : "Offline";
 
-                                // ✅ Now matches the correct `User.java` constructor
-                                User user = new User(userId, fullName, displayStatus);
-                                userList.add(user);
+                                User user = new User(userId, fullName, displayStatus, lastMessageTimestamp, unreadCount);
+                                tempUserList.add(user);
+                            }
+
+                            loadedCount[0]++;
+                            if (loadedCount[0] == totalUsers) {
+                                Collections.sort(tempUserList, (u1, u2) ->
+                                        Long.compare(u2.getLastMessageTimestamp(), u1.getLastMessageTimestamp()));
+
+                                userList.clear();
+                                userList.addAll(tempUserList);
                                 usersAdapter.notifyDataSetChanged();
                             }
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
-                            Log.e(TAG, "Error fetching chat user: " + error.getMessage());
+                            loadedCount[0]++;
                         }
                     });
                 }
@@ -101,6 +121,7 @@ public class ChatsFragment extends Fragment {
             }
         });
     }
+
 
     private void openChat(User user) {
         if (user == null || user.getId() == null) {

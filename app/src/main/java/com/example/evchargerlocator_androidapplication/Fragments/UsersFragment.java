@@ -105,7 +105,7 @@ public class UsersFragment extends Fragment {
 
                     String displayStatus = (status != null && status.equals("Online")) ? "Online" : "Offline";
 
-                    User user = new User(userId, fullName, displayStatus);
+                    User user = new User(userId, fullName, displayStatus, 0L, 0); // Defaults
                     userList.add(user);
                 }
                 filterUsers(searchUser.getText().toString());
@@ -131,6 +131,24 @@ public class UsersFragment extends Fragment {
         }
         usersAdapter.notifyDataSetChanged();
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+        setUserStatus("Online");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        setUserStatus("Offline");
+    }
+
+    private void setUserStatus(String status) {
+        if (currentUserId == null) return;
+        DatabaseReference currentUserRef = FirebaseDatabase.getInstance().getReference("users").child(currentUserId);
+        currentUserRef.child("status").setValue(status);
+    }
+
 
     private void openChat(User user) {
         if (user == null || user.getId() == null) {

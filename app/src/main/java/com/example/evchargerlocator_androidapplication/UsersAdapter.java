@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Collections;
 import java.util.List;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> {
@@ -40,9 +41,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         User user = userList.get(position);
         holder.userName.setText(user.getFullName());
 
-        holder.itemView.setOnClickListener(v -> onUserClickListener.onUserClick(user));
-
-        // ✅ Show "Online" or "Offline" with correct color
+        // ✅ Display "Online" or "Offline" with color
         if (user.isOnline()) {
             holder.userStatus.setText("Online");
             holder.userStatus.setTextColor(Color.GREEN);
@@ -50,6 +49,17 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             holder.userStatus.setText("Offline");
             holder.userStatus.setTextColor(Color.GRAY);
         }
+
+        // ✅ Display unread message count if available
+        if (user.getUnreadCount() > 0) {
+            holder.unreadBadge.setVisibility(View.VISIBLE);
+            holder.unreadBadge.setText(String.valueOf(user.getUnreadCount()));
+        } else {
+            holder.unreadBadge.setVisibility(View.GONE);
+        }
+
+        // ✅ Handle chat click event
+        holder.itemView.setOnClickListener(v -> onUserClickListener.onUserClick(user));
     }
 
     @Override
@@ -57,13 +67,20 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         return userList.size();
     }
 
+    // ✅ Sort users by last message timestamp (latest first)
+    public void sortUsersByRecentChats() {
+        Collections.sort(userList);
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView userName, userStatus;
+        TextView userName, userStatus, unreadBadge;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             userName = itemView.findViewById(R.id.usernameText);
             userStatus = itemView.findViewById(R.id.userStatusText);
+            unreadBadge = itemView.findViewById(R.id.unreadBadge); // Add this TextView in your layout
         }
     }
 }

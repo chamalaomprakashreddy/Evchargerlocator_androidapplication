@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -47,14 +48,20 @@ public class MessageActivity extends AppCompatActivity {
         receiverUserId = getIntent().getStringExtra("receiverUserId");
         receiverUserName = getIntent().getStringExtra("receiverUserName");
 
+        auth = FirebaseAuth.getInstance();
+        currentUserId = auth.getCurrentUser().getUid();
+
         if (receiverUserId == null || receiverUserName == null) {
             Toast.makeText(this, "User not found!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        auth = FirebaseAuth.getInstance();
-        currentUserId = auth.getCurrentUser().getUid();
+        DatabaseReference resetUnreadRef = FirebaseDatabase.getInstance()
+                .getReference("user_chats")
+                .child(currentUserId)
+                .child(receiverUserId);
+        resetUnreadRef.child("unreadCount").setValue(0);
 
         messagesRef = FirebaseDatabase.getInstance().getReference("chats").child(getChatId(currentUserId, receiverUserId));
         userChatsRef = FirebaseDatabase.getInstance().getReference("user_chats");
@@ -122,7 +129,20 @@ public class MessageActivity extends AppCompatActivity {
                 }
             }
 
-            @Override public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {}
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {
+                Message updatedMessage = snapshot.getValue(Message.class);
+                if (updatedMessage != null) {
+                    for (int i = 0; i < messageList.size(); i++) {
+                        if (messageList.get(i).getMessageId().equals(updatedMessage.getMessageId())) {
+                            messageList.set(i, updatedMessage);
+                            messageAdapter.notifyItemChanged(i);
+                            break;
+                        }
+                    }
+                }
+            }
+
             @Override public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
             @Override public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
             @Override public void onCancelled(@NonNull DatabaseError error) {}
@@ -140,14 +160,50 @@ public class MessageActivity extends AppCompatActivity {
         if (!messageText.isEmpty()) {
             String messageId = messagesRef.push().getKey();
             long timestamp = System.currentTimeMillis();
-            Message message = new Message(currentUserId, receiverUserId, messageText, timestamp, messageId, false, null, null, false);
+
+            Message message = new Message(
+                    currentUserId,
+                    receiverUserId,
+                    messageText,
+                    timestamp,
+                    messageId,
+                    false,
+                    null,
+                    null,
+                    false
+            );
 
             messagesRef.child(messageId).setValue(message)
                     .addOnSuccessListener(aVoid -> {
                         etMessage.setText("");
                         updateChatHistory(messageText, timestamp);
+
+                        DatabaseReference senderChatRef = userChatsRef.child(currentUserId).child(receiverUserId);
+                        DatabaseReference receiverChatRef = userChatsRef.child(receiverUserId).child(currentUserId);
+
+                        senderChatRef.child("lastTimestamp").setValue(timestamp);
+                        receiverChatRef.child("lastTimestamp").setValue(timestamp);
+
+                        receiverChatRef.child("unreadCount").runTransaction(new Transaction.Handler() {
+                            @NonNull
+                            @Override
+                            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                                Integer currentValue = currentData.getValue(Integer.class);
+                                if (currentValue == null) {
+                                    currentData.setValue(1);
+                                } else {
+                                    currentData.setValue(currentValue + 1);
+                                }
+                                return Transaction.success(currentData);
+                            }
+
+                            @Override
+                            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {}
+                        });
                     })
-                    .addOnFailureListener(e -> Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show());
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show()
+                    );
         }
     }
 
@@ -162,8 +218,9 @@ public class MessageActivity extends AppCompatActivity {
 
     private void updateMessage() {
         String updatedText = etMessage.getText().toString().trim();
-        if (!updatedText.isEmpty()) {
-            messagesRef.child(editingMessageId).child("message").setValue(updatedText)
+        if (!updatedText.isEmpty() && editingMessageId != null) {
+            messagesRef.child(editingMessageId).child("message").setValue(updatedText);
+            messagesRef.child(editingMessageId).child("edited").setValue(true)
                     .addOnSuccessListener(aVoid -> {
                         editingMessageId = null;
                         etMessage.setText("");

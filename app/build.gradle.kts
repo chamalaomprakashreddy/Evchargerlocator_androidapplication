@@ -35,6 +35,19 @@ android {
     buildFeatures {
         viewBinding = true // ✅ Enable View Binding
     }
+    // ✅ Fix META-INF conflicts
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt"
+            )
+        }
+    }
+
 }
 
 dependencies {
@@ -51,12 +64,15 @@ dependencies {
     implementation("com.google.firebase:firebase-storage:20.3.0")
     implementation("com.google.firebase:firebase-messaging:23.3.0")
     implementation("com.google.firebase:firebase-analytics:21.4.0")
+    implementation("com.google.android.datatransport:transport-runtime:3.1.9")
 
     // ✅ Google Play Services
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("com.google.android.libraries.places:places:2.7.0")
+
+        implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0") // 🔥 Google OAuth Library
 
     // ✅ Google Places API
     implementation(libs.places)

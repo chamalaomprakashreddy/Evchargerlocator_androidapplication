@@ -5,32 +5,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     tools:context=".Fragments.UsersFragment">
 
     <!-- Search Bar -->
     <EditText
         android:id="@+id/search_user"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Search user..."
-        android:padding="10dp"
+        android:hint="Search users..."
+        android:padding="12dp"
         android:textSize="16sp"
-        android:background="@android:color/white"
+        android:background="@drawable/search_bar_background"
         android:drawableStart="@android:drawable/ic_menu_search"
         android:drawablePadding="8dp"
+        android:inputType="text"
+        android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="10dp"/>
+        android:layout_margin="12dp"/>
 
-    <!-- RecyclerView for Users -->
+    <!-- User List RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewUsers"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="10dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/search_user"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        tools:listitem="@layout/user_item" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
