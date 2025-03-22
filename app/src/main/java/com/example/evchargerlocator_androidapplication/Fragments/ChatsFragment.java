@@ -51,7 +51,6 @@ public class ChatsFragment extends Fragment {
         if (currentUserId != null) {
             userChatsRef = FirebaseDatabase.getInstance().getReference("user_chats").child(currentUserId);
             usersRef = FirebaseDatabase.getInstance().getReference("users");
-
             loadChatUsers();
         } else {
             Toast.makeText(getContext(), "User not authenticated", Toast.LENGTH_SHORT).show();
@@ -76,11 +75,19 @@ public class ChatsFragment extends Fragment {
 
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     String userId = dataSnapshot.getKey();
+
+                    final long[] lastMessageTimestamp = {0};
+                    final int[] unreadCount = {0};
+                    final String[] lastMessage = {""};
+
                     Long tsValue = dataSnapshot.child("lastTimestamp").getValue(Long.class);
-                    long lastMessageTimestamp = tsValue != null ? tsValue : 0L;
+                    if (tsValue != null) lastMessageTimestamp[0] = tsValue;
 
                     Integer unreadVal = dataSnapshot.child("unreadCount").getValue(Integer.class);
-                    int unreadCount = unreadVal != null ? unreadVal : 0;
+                    if (unreadVal != null) unreadCount[0] = unreadVal;
+
+                    String messageVal = dataSnapshot.child("lastMessage").getValue(String.class);
+                    if (messageVal != null) lastMessage[0] = messageVal;
 
                     usersRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -92,7 +99,15 @@ public class ChatsFragment extends Fragment {
                                 fullName = (fullName != null) ? fullName : "Unknown";
                                 String displayStatus = (status != null && status.equals("Online")) ? "Online" : "Offline";
 
-                                User user = new User(userId, fullName, displayStatus, lastMessageTimestamp, unreadCount);
+                                User user = new User(
+                                        userId,
+                                        fullName,
+                                        displayStatus,
+                                        lastMessageTimestamp[0],
+                                        unreadCount[0],
+                                        lastMessage[0]
+                                );
+
                                 tempUserList.add(user);
                             }
 
@@ -100,7 +115,6 @@ public class ChatsFragment extends Fragment {
                             if (loadedCount[0] == totalUsers) {
                                 Collections.sort(tempUserList, (u1, u2) ->
                                         Long.compare(u2.getLastMessageTimestamp(), u1.getLastMessageTimestamp()));
-
                                 userList.clear();
                                 userList.addAll(tempUserList);
                                 usersAdapter.notifyDataSetChanged();
@@ -113,6 +127,7 @@ public class ChatsFragment extends Fragment {
                         }
                     });
                 }
+
             }
 
             @Override
@@ -121,7 +136,6 @@ public class ChatsFragment extends Fragment {
             }
         });
     }
-
 
     private void openChat(User user) {
         if (user == null || user.getId() == null) {

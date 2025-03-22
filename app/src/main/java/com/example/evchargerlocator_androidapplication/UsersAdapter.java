@@ -41,7 +41,10 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         User user = userList.get(position);
         holder.userName.setText(user.getFullName());
 
-        // ✅ Display "Online" or "Offline" with color
+        // ✅ Set last message preview
+        holder.lastMessagePreview.setText(user.getLastMessage());
+
+        // ✅ Display online/offline status
         if (user.isOnline()) {
             holder.userStatus.setText("Online");
             holder.userStatus.setTextColor(Color.GREEN);
@@ -50,7 +53,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             holder.userStatus.setTextColor(Color.GRAY);
         }
 
-        // ✅ Display unread message count if available
+        // ✅ Show unread badge if applicable
         if (user.getUnreadCount() > 0) {
             holder.unreadBadge.setVisibility(View.VISIBLE);
             holder.unreadBadge.setText(String.valueOf(user.getUnreadCount()));
@@ -58,7 +61,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             holder.unreadBadge.setVisibility(View.GONE);
         }
 
-        // ✅ Handle chat click event
+        // ✅ Handle chat click
         holder.itemView.setOnClickListener(v -> onUserClickListener.onUserClick(user));
     }
 
@@ -67,20 +70,20 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         return userList.size();
     }
 
-    // ✅ Sort users by last message timestamp (latest first)
     public void sortUsersByRecentChats() {
         Collections.sort(userList);
         notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView userName, userStatus, unreadBadge;
+        TextView userName, userStatus, unreadBadge, lastMessagePreview;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             userName = itemView.findViewById(R.id.usernameText);
             userStatus = itemView.findViewById(R.id.userStatusText);
-            unreadBadge = itemView.findViewById(R.id.unreadBadge); // Add this TextView in your layout
+            unreadBadge = itemView.findViewById(R.id.unreadBadge);
+            lastMessagePreview = itemView.findViewById(R.id.lastMessagePreview); // ✅ Make sure it's in XML
         }
     }
 }
