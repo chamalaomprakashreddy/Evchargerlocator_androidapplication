@@ -2,124 +2,130 @@ package com.example.evchargerlocator_androidapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 public class FilterActivity extends AppCompatActivity {
 
-    private Spinner spinnerLevels, spinnerConnectors, spinnerNetworks;
-    private TextView textPricing;
+    private Spinner levelsSpinner, connectorsSpinner, networksSpinner;
+    private TextView pricingTextView;
     private Button resetButton, applyButton;
-    private boolean fromCreateTrip;  // Check if called from CreateTripActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
 
-        // Initialize UI Elements
-        TextView backArrowText = findViewById(R.id.backArrowText);
-        spinnerLevels = findViewById(R.id.spinner_levels);
-        spinnerConnectors = findViewById(R.id.spinner_connectors);
-        spinnerNetworks = findViewById(R.id.spinner_networks);
-        textPricing = findViewById(R.id.text_pricing);
+        levelsSpinner = findViewById(R.id.spinner_levels);
+        connectorsSpinner = findViewById(R.id.spinner_connectors);
+        networksSpinner = findViewById(R.id.spinner_networks);
+        pricingTextView = findViewById(R.id.text_pricing);
         resetButton = findViewById(R.id.resetButton);
         applyButton = findViewById(R.id.button_apply);
 
-        // Check if opened from CreateTripActivity
-        fromCreateTrip = getIntent().getBooleanExtra("fromCreateTrip", false);
+        ArrayAdapter<CharSequence> levelsAdapter = ArrayAdapter.createFromResource(this,
+                R.array.levels_array, android.R.layout.simple_spinner_item);
+        levelsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        levelsSpinner.setAdapter(levelsAdapter);
 
-        // Back Arrow Functionality
-        backArrowText.setOnClickListener(v -> finish());
+        ArrayAdapter<CharSequence> connectorsAdapter = ArrayAdapter.createFromResource(this,
+                R.array.connectors_array, android.R.layout.simple_spinner_item);
+        connectorsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        connectorsSpinner.setAdapter(connectorsAdapter);
 
-        // Reset Filters
-        resetButton.setOnClickListener(v -> resetFilters());
+        ArrayAdapter<CharSequence> networksAdapter = ArrayAdapter.createFromResource(this,
+                R.array.networks_array, android.R.layout.simple_spinner_item);
+        networksAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        networksSpinner.setAdapter(networksAdapter);
 
-        // Apply Filters
+        // Pre-select spinner values based on incoming intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            String selectedLevel = intent.getStringExtra("selectedLevel");
+            String selectedConnector = intent.getStringExtra("selectedConnector");
+            String selectedNetwork = intent.getStringExtra("selectedNetwork");
+
+            if (selectedLevel != null) levelsSpinner.setSelection(((ArrayAdapter<String>) levelsSpinner.getAdapter()).getPosition(selectedLevel));
+            if (selectedConnector != null) connectorsSpinner.setSelection(((ArrayAdapter<String>) connectorsSpinner.getAdapter()).getPosition(selectedConnector));
+            if (selectedNetwork != null) networksSpinner.setSelection(((ArrayAdapter<String>) networksSpinner.getAdapter()).getPosition(selectedNetwork));
+        }
+
         applyButton.setOnClickListener(v -> {
-            applyFilters();
+            String selectedLevel = levelsSpinner.getSelectedItem().toString();
+            String selectedConnector = connectorsSpinner.getSelectedItem().toString();
+            String selectedNetwork = networksSpinner.getSelectedItem().toString();
+
+            double price = calculatePrice(selectedLevel, selectedConnector, selectedNetwork);
+            pricingTextView.setText("" + price);
+
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("selectedLevel", selectedLevel);
+            resultIntent.putExtra("selectedConnector", selectedConnector);
+            resultIntent.putExtra("selectedNetwork", selectedNetwork);
+            setResult(RESULT_OK, resultIntent);
+            finish(); // Return to HomePageActivity
         });
 
-        // Listen for spinner selections to update pricing
-        AdapterView.OnItemSelectedListener spinnerListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
-                calculatePricing();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        };
-
-        spinnerLevels.setOnItemSelectedListener(spinnerListener);
-        spinnerConnectors.setOnItemSelectedListener(spinnerListener);
-        spinnerNetworks.setOnItemSelectedListener(spinnerListener);
+        resetButton.setOnClickListener(v -> {
+            levelsSpinner.setSelection(0);
+            connectorsSpinner.setSelection(0);
+            networksSpinner.setSelection(0);
+            pricingTextView.setText("Select filters to calculate price");
+        });
     }
 
-    // Reset Filters
-    private void resetFilters() {
-        spinnerLevels.setSelection(0);
-        spinnerConnectors.setSelection(0);
-        spinnerNetworks.setSelection(0);
-        textPricing.setText("Select filters to calculate price");
-    }
+    private double calculatePrice(String level, String connector, String network) {
+        double basePrice = 0;
 
-    // Apply Filters Based on Context
-    private void applyFilters() {
-        String level = spinnerLevels.getSelectedItem().toString();
-        String connector = spinnerConnectors.getSelectedItem().toString();
-        String network = spinnerNetworks.getSelectedItem().toString();
-
-        if (fromCreateTrip) {
-            // Return filters to CreateTripActivity
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("level", level);
-            resultIntent.putExtra("connector", connector);
-            resultIntent.putExtra("network", network);
-            setResult(RESULT_OK, resultIntent);
-            finish();
-        } else {
-            // Navigate directly to HomePageActivity with applied filters
-            Intent intent = new Intent(FilterActivity.this, HomePageActivity.class);
-            intent.putExtra("level", level);
-            intent.putExtra("connector", connector);
-            intent.putExtra("network", network);
-            startActivity(intent);
-            finish();
-        }
-    }
-
-    // Calculate Pricing Based on Selected Filters
-    private void calculatePricing() {
-        String level = spinnerLevels.getSelectedItem().toString();
-        String connector = spinnerConnectors.getSelectedItem().toString();
-        String network = spinnerNetworks.getSelectedItem().toString();
-
-        double basePricePerKWh = 0.255;
-        double finalPrice = basePricePerKWh;
-
-        if (level.equals("Level 2")) {
-            finalPrice *= 1.2;
-        } else if (level.equals("DC Fast")) {
-            finalPrice *= 1.5;
+        switch (level) {
+            case "Level 1":
+                basePrice += 5.00;
+                break;
+            case "Level 2":
+                basePrice += 10.00;
+                break;
+            case "DC Fast":
+                basePrice += 20.00;
+                break;
+            default:
+                basePrice = 0;
         }
 
-        if (connector.equals("CHAdeMO")) {
-            finalPrice *= 1.1;
-        } else if (connector.equals("CCS")) {
-            finalPrice *= 1.3;
+        switch (connector) {
+            case "Type 1":
+                basePrice += 2.00;
+                break;
+            case "Type 2":
+                basePrice += 3.00;
+                break;
+            case "CCS":
+                basePrice += 5.00;
+                break;
+            case "CHAdeMO":
+                basePrice += 7.00;
+                break;
         }
 
-        if (network.equals("Tesla Supercharger")) {
-            finalPrice *= 1.4;
-        } else if (network.equals("Electrify America")) {
-            finalPrice *= 1.2;
+        switch (network) {
+            case "Tesla":
+                basePrice += 1.00;
+                break;
+            case "ChargePoint":
+                basePrice += 1.50;
+                break;
+            case "EVgo":
+                basePrice += 2.00;
+                break;
+            case "Electrify America":
+                basePrice += 3.00;
+                break;
         }
 
-        textPricing.setText(String.format("Estimated Cost: $%.2f per kWh", finalPrice));
+        return basePrice;
     }
 }

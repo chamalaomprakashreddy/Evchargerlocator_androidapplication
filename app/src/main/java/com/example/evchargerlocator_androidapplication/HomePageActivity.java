@@ -383,5 +383,5 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                     Toast.makeText(this, "Error fetching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
-
+    
 }
