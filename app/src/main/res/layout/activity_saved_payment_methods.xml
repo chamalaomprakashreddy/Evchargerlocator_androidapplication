@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="45dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
         android:text="Continue Payment"
         android:textSize="16sp"
         android:textStyle="bold"

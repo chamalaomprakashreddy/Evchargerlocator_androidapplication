@@ -50,6 +50,7 @@
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxStrokeColor="#888888"
+        app:hintTextColor="@android:color/holo_blue_dark"
         app:hintEnabled="true"
         app:layout_constraintTop_toBottomOf="@id/titleText">
 
@@ -89,6 +90,7 @@
             app:boxCornerRadiusBottomStart="15dp"
             app:boxCornerRadiusBottomEnd="15dp"
             app:boxStrokeColor="#888888"
+            app:hintTextColor="@android:color/holo_blue_dark"
             app:hintEnabled="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/cvvInputContainer"
@@ -101,7 +103,7 @@
                 android:padding="12dp"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
-                android:hint="MM/YY"
+                android:hint="mm/yy"
                 android:inputType="datetime"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -117,6 +119,7 @@
             app:boxCornerRadiusBottomStart="15dp"
             app:boxCornerRadiusBottomEnd="15dp"
             app:boxStrokeColor="#888888"
+            app:hintTextColor="@android:color/holo_blue_dark"
             app:hintEnabled="true"
             app:layout_constraintStart_toEndOf="@id/expiryDateInputContainer"
             app:layout_constraintEnd_toEndOf="parent"
@@ -129,7 +132,7 @@
                 android:padding="12dp"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
-                android:hint="CVV"
+                android:hint="cvv"
                 android:inputType="numberPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -149,6 +152,7 @@
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxStrokeColor="#888888"
+        app:hintTextColor="@android:color/holo_blue_dark"
         app:hintEnabled="true"
         app:layout_constraintTop_toBottomOf="@id/expiryCvvContainer">
 

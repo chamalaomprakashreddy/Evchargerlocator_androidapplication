@@ -1,94 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp">
 
-    <!-- Starting Point Label -->
-    <TextView
-        android:id="@+id/startPointLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Starting Point"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <!-- Start Point Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/startPointContainer"
-        android:layout_width="0dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Starting Location"
-        app:layout_constraintTop_toBottomOf="@id/startPointLabel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp">
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginTop="10dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintTextColor="@android:color/holo_blue_dark"
+        app:hintEnabled="true"
+        tools:ignore="MissingConstraints">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/startPoint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="@android:color/black"
-            android:focusable="true"
-            android:clickable="true"/>
+            android:hint="Enter Starting Location"
+            android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Destination Label -->
-    <TextView
-        android:id="@+id/endPointLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Destination"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/startPointContainer"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"/>
-
-    <!-- Destination Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/endPointContainer"
-        android:layout_width="0dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Destination"
-        app:layout_constraintTop_toBottomOf="@id/endPointLabel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp">
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginTop="10dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxStrokeColor="#888888"
+        app:hintTextColor="@android:color/holo_blue_dark"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@id/startPointContainer"
+        tools:ignore="MissingConstraints">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/endPoint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="@android:color/black"
-            android:focusable="true"
-            android:clickable="true"/>
+            android:hint="Enter End Location"
+            android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Distance SeekBar -->
     <TextView
         android:id="@+id/distanceText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_marginHorizontal="45dp"
+        android:layout_marginTop="20dp"
         android:text="Show charging stations within 5 mi"
+        android:textColor="@android:color/black"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/endPointContainer"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/endPointContainer" />
 
     <SeekBar
         android:id="@+id/distanceSeekBar"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
         android:max="50"
         android:progress="5"
         app:layout_constraintTop_toBottomOf="@id/distanceText"
@@ -99,8 +86,9 @@
     <!-- Find Route Button -->
     <Button
         android:id="@+id/submitButton"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
         android:text="Find Route"
         android:backgroundTint="@android:color/holo_green_dark"
         android:textColor="@android:color/white"
@@ -114,8 +102,9 @@
     <!-- Save Trip Button -->
     <Button
         android:id="@+id/saveButton"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
         android:text="Save Trip"
         android:backgroundTint="@android:color/holo_blue_dark"
         android:textColor="@android:color/white"
@@ -125,6 +114,4 @@
         app:layout_constraintTop_toBottomOf="@id/submitButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
