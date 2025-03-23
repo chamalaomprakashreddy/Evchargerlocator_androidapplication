@@ -262,6 +262,7 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
 
     private void logoutUser() {
         firebaseAuth.signOut();
+        Toast.makeText(AdminDashboardActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
         startActivity(new Intent(AdminDashboardActivity.this, MainActivity.class));
         finish();
     }
