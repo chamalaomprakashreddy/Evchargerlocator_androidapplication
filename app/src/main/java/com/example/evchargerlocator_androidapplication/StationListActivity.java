@@ -1,6 +1,7 @@
 package com.example.evchargerlocator_androidapplication;
 
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,10 @@ public class StationListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_station_list);
+
+        // Set up back arrow
+        TextView backArrowText = findViewById(R.id.back_arrow);
+        backArrowText.setOnClickListener(v -> finish());
 
         recyclerView = findViewById(R.id.recyclerViewStations);
         recyclerView.setHasFixedSize(true);

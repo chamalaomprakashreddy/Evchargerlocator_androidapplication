@@ -30,6 +30,10 @@ public class EditDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_details);
 
+        // Set up back arrow
+        TextView backArrowText = findViewById(R.id.backArrowText);
+        backArrowText.setOnClickListener(v -> finish());
+
         edtStationName = findViewById(R.id.edtStationName);
         edtPowerOutput = findViewById(R.id.edtPowerOutput);
         edtAvailability = findViewById(R.id.edtAvailability);

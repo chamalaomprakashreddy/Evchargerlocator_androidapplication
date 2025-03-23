@@ -24,6 +24,10 @@ public class StationDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_station_details);
 
+        // Set up back arrow
+        TextView backArrowText = findViewById(R.id.back_arrow);
+        backArrowText.setOnClickListener(v -> finish());
+
         stationNameText = findViewById(R.id.station_name);
         powerOutputText = findViewById(R.id.power_output_text);
         availabilityText = findViewById(R.id.availability_text);

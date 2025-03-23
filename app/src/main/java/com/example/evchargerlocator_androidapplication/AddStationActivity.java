@@ -24,6 +24,10 @@ public class AddStationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_station);
 
+        // Set up back arrow
+        TextView backArrowText = findViewById(R.id.backArrowText);
+        backArrowText.setOnClickListener(v -> finish());
+
         firebaseAuth = FirebaseAuth.getInstance();
 
         // Navigate to Profile when clicking back arrow

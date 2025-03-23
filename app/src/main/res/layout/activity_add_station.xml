@@ -160,16 +160,6 @@
             android:backgroundTint="@android:color/holo_green_dark"
             android:layout_marginTop="50dp"/>
 
-        <!-- Update Details Button -->
-        <Button
-            android:id="@+id/btnUpdate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="45dp"
-            android:text="Update Details"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="@android:color/holo_blue_dark"
-            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 
