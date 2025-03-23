@@ -34,7 +34,7 @@
         android:padding="10dp"
         android:text="Login"
         android:textColor="@color/black"
-        android:textSize="18sp"
+        android:textSize="25dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -50,11 +50,11 @@
         android:padding="10dp"
         android:text="Welcome Back!"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="20dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintTop_toBottomOf="@id/subtitleTextView" />
 
 
@@ -65,14 +65,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="30dp"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxStrokeColor="#888888"
+        app:hintTextColor="@android:color/holo_blue_dark"
         app:hintEnabled="true"
-        app:layout_constraintTop_toBottomOf="@id/subtitleTextView">
+        app:layout_constraintTop_toBottomOf="@id/welcomeBackTextView">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/emailEditText"
@@ -103,6 +104,7 @@
             app:boxCornerRadiusBottomStart="15dp"
             app:boxCornerRadiusBottomEnd="15dp"
             app:boxStrokeColor="#888888"
+            app:hintTextColor="@android:color/holo_blue_dark"
             app:hintEnabled="true"
             tools:ignore="MissingConstraints">
 
@@ -124,8 +126,8 @@
             android:contentDescription="Show Password"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/passwordEditText"
-            app:layout_constraintTop_toBottomOf="@id/passwordEditText"
+            app:layout_constraintTop_toTopOf="@id/passwordInputContainer"
+            app:layout_constraintTop_toBottomOf="@id/passwordInputContainer"
             tools:ignore="NotSibling" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

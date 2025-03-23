@@ -28,11 +28,10 @@ public class AddStationActivity extends AppCompatActivity {
         TextView backArrowText = findViewById(R.id.backArrowText);
         backArrowText.setOnClickListener(v -> finish());
 
+        // Initialize Firebase and Authentication
         firebaseAuth = FirebaseAuth.getInstance();
 
         // Navigate to Profile when clicking back arrow
-
-
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
 
         Intent intent = getIntent();

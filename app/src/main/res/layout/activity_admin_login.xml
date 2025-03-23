@@ -63,6 +63,7 @@
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxStrokeColor="#888888"
+        app:hintTextColor="@android:color/holo_blue_dark"
         app:hintEnabled="true"
         app:layout_constraintTop_toBottomOf="@id/subtitle">
 
@@ -95,6 +96,7 @@
             app:boxCornerRadiusBottomStart="15dp"
             app:boxCornerRadiusBottomEnd="15dp"
             app:boxStrokeColor="#888888"
+            app:hintTextColor="@android:color/holo_blue_dark"
             app:hintEnabled="true"
             tools:ignore="MissingConstraints">
 
@@ -116,8 +118,8 @@
             android:contentDescription="Show Password"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/passwordEditText"
-            app:layout_constraintTop_toBottomOf="@id/passwordEditText"
+            app:layout_constraintTop_toTopOf="@id/passwordInputContainer"
+            app:layout_constraintTop_toBottomOf="@id/passwordInputContainer"
             tools:ignore="NotSibling" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
