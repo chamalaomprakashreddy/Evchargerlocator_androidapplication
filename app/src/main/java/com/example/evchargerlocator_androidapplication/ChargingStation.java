@@ -1,7 +1,7 @@
 package com.example.evchargerlocator_androidapplication;
 public class ChargingStation {
 
-    public String stationId, name, powerOutput, availability, chargingLevel, connectorType, network, adminId;
+    public String stationId, name, powerOutput, availability, chargingLevel, connectorType, network, adminId, address;
     public double latitude, longitude;
 
     public ChargingStation() {
@@ -35,6 +35,9 @@ public class ChargingStation {
         this.network = network;
     }
 
+    public String getAddress() {
+        return address;
+    }
     public String getStationId() {
         return stationId;
     }

@@ -19,11 +19,11 @@
         android:textColor="#000000"/>
 
     <TextView
-        android:id="@+id/stationLocation"
+        android:id="@+id/stationAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:text="Location"
+        android:text="Address"
         android:textSize="14sp"
         android:textColor="#444444"
         android:paddingBottom="8dp"/>
