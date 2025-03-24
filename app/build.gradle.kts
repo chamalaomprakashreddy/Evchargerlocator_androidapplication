@@ -72,7 +72,7 @@ dependencies {
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("com.google.android.libraries.places:places:2.7.0")
 
-        implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0") // 🔥 Google OAuth Library
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0") // 🔥 Google OAuth Library
 
     // ✅ Google Places API
     implementation(libs.places)
@@ -95,6 +95,17 @@ dependencies {
 
     // ✅ Google Maps Utilities (For Markers & Clustering)
     implementation("com.google.maps.android:android-maps-utils:2.2.3")
+    implementation ("com.google.android.libraries.places:places:3.0.0")
+    implementation ("com.google.maps.android:android-maps-utils:2.3.0")
+    implementation ("com.google.android.libraries.places:places:3.0.0")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+    implementation ("com.android.volley:volley:1.2.1")
+    implementation ("com.google.firebase:firebase-auth:22.0.0")
+    implementation ("com.google.firebase:firebase-database:20.3.0")
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+    implementation ("com.google.android.material:material:1.9.0")
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
     // ✅ Volley (For Network Requests - Google Directions API)
     implementation("com.android.volley:volley:1.2.1")

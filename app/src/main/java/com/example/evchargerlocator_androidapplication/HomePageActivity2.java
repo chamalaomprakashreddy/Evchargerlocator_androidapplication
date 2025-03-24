@@ -3,22 +3,28 @@ package com.example.evchargerlocator_androidapplication;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -38,6 +44,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,16 +57,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.PolyUtil;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "HomePageActivity";
     private static final String GOOGLE_MAPS_API_KEY = "AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
     private GoogleMap myMap;
     private FusedLocationProviderClient fusedLocationClient;
@@ -71,13 +85,17 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
     private double distanceFilter = 5.0;
     private Polyline routePolyline;
     private Marker searchMarker;
-
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private PlacesClient placesClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page2);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), GOOGLE_MAPS_API_KEY);
+        }
+        placesClient = Places.createClient(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         requestQueue = Volley.newRequestQueue(this);
@@ -104,7 +122,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             distanceFilter = intent.getDoubleExtra("distanceFilter", 5.0);
         }
 
-        setupSearch();
+        setupSearchWithAutocomplete();
         fabCenter.setOnClickListener(v -> fetchCurrentLocation());
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -130,14 +148,13 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         } else {
             fetchCurrentLocation();
         }
-
     }
 
     private void fetchAllEVStations() {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                myMap.clear(); // Ensure old markers don't accumulate
+                myMap.clear();
 
                 for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
@@ -160,8 +177,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         });
     }
 
-
-    private void setupSearch() {
+    private void setupSearchWithAutocomplete() {
         mapSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -171,8 +187,61 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if (newText.length() > 2) {
+                    fetchPlaceSuggestions(newText);
+                }
                 return false;
             }
+        });
+
+        mapSearchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return true;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                Cursor cursor = mapSearchView.getSuggestionsAdapter().getCursor();
+                if (cursor != null && cursor.moveToPosition(position)) {
+                    String suggestion = cursor.getString(cursor.getColumnIndex("suggestion"));
+                    mapSearchView.setQuery(suggestion, true);
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void fetchPlaceSuggestions(String query) {
+        FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                .setQuery(query)
+                .setCountries("US")
+                .build();
+
+        placesClient.findAutocompletePredictions(request).addOnSuccessListener(response -> {
+            List<String> suggestions = new ArrayList<>();
+            for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
+                suggestions.add(prediction.getPrimaryText(null).toString());
+            }
+
+            MatrixCursor cursor = new MatrixCursor(new String[]{BaseColumns._ID, "suggestion"});
+            for (int i = 0; i < suggestions.size(); i++) {
+                cursor.addRow(new Object[]{i, suggestions.get(i)});
+            }
+
+            SimpleCursorAdapter adapter = new SimpleCursorAdapter(
+                    this,
+                    android.R.layout.simple_dropdown_item_1line,
+                    cursor,
+                    new String[]{"suggestion"},
+                    new int[]{android.R.id.text1},
+                    0
+            );
+
+            mapSearchView.setSuggestionsAdapter(adapter);
+        }).addOnFailureListener(exception -> {
+            Log.e(TAG, "Error fetching place suggestions: " + exception.getMessage());
         });
     }
 
@@ -242,30 +311,24 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
     private void setupDrawer() {
         View headerView = navigationView.getHeaderView(0);
 
-        // ✅ Trip Planner Navigation
         TextView tripPlanner = headerView.findViewById(R.id.menu_trip_planner);
         tripPlanner.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, TripPlannerActivity.class)));
 
-        // ✅ Chat Navigation
         TextView chatOption = headerView.findViewById(R.id.menu_chat);
         chatOption.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, ChatActivity.class)));
 
-        // ✅ Filter Navigation
         TextView filterOption = headerView.findViewById(R.id.menu_filter);
         filterOption.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, FilterActivity.class)));
 
-        // ✅ User Profile Navigation
         TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
         userProfile.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, UserProfileActivity.class)));
 
         Button logoutButton = headerView.findViewById(R.id.logoutButton);
         logoutButton.setOnClickListener(v -> {
-            // Log out the user
-            FirebaseAuth.getInstance().signOut();  // Sign out from Firebase Auth
-            startActivity(new Intent(HomePageActivity2.this, MainActivity.class)); // Redirect to login screen
-            finish();  // Close this activity
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(HomePageActivity2.this, MainActivity.class));
+            finish();
         });
-
     }
 
     private void drawRouteAndEVStations() {
@@ -300,6 +363,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
 
         requestQueue.add(request);
     }
+
     private void fetchEVStationsAlongRoute(List<LatLng> routePoints) {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -308,8 +372,6 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
                     if (station != null) {
                         LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
-
-                        // ✅ Check if the EV station is within the specified distance from the route
                         if (PolyUtil.isLocationOnPath(stationLocation, routePoints, true, distanceFilter * 1609.34)) {
                             myMap.addMarker(new MarkerOptions()
                                     .position(stationLocation)
@@ -327,6 +389,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             }
         });
     }
+
     private LatLng getLatLngFromIntent(String locationString) {
         if (locationString == null || locationString.isEmpty()) return null;
         try {
@@ -337,6 +400,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             return null;
         }
     }
+
     private void requestNewLocation() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -368,10 +432,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
-
-
     private void fetchCurrentLocation() {
-        // ✅ Check for location permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
             return;
@@ -383,14 +444,13 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                         LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                         myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 14));
 
-                        // ✅ Reverse Geocoding to get the address
                         Geocoder geocoder = new Geocoder(this);
                         List<Address> addressList;
                         try {
                             addressList = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                             if (addressList != null && !addressList.isEmpty()) {
                                 Address address = addressList.get(0);
-                                String addressText = address.getAddressLine(0); // Get full address
+                                String addressText = address.getAddressLine(0);
 
                                 myMap.addMarker(new MarkerOptions()
                                         .position(userLatLng)
@@ -401,10 +461,9 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                         } catch (IOException e) {
                             Log.e(TAG, "Error fetching address: " + e.getMessage());
                         }
-
                     } else {
                         Log.e(TAG, "Location is null. Requesting new location update.");
-                        requestNewLocation(); // If location is null, request a new location update
+                        requestNewLocation();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -412,5 +471,4 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                     Toast.makeText(this, "Error fetching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
-
 }
