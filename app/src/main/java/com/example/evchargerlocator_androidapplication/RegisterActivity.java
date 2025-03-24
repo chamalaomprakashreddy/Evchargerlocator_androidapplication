@@ -26,9 +26,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     private static final String ADMIN_SECRET_KEY = "EV_ADMIN_2025";
 
-    // Updated Email Regex: At least 1 uppercase, 1 lowercase, 1 number, and 1 special character
     private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$");
+            Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // **Email Validation**
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches() || !EMAIL_PATTERN.matcher(email).matches()) {
-            registerEmail.setError("Invalid email format! Must contain lowercase, 1 number, and 1 special character.");
+            registerEmail.setError("Invalid email format!!");
             return;
         }
 
