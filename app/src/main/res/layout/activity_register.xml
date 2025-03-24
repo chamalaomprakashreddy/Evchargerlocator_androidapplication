@@ -58,7 +58,6 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
         android:layout_marginTop="30dp"
-        android:inputType="text"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
@@ -72,6 +71,7 @@
             android:id="@+id/registerUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:inputType="text"
             android:hint="Enter Your FullName"
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
@@ -83,7 +83,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
-        android:inputType="textEmailAddress"
         android:layout_marginTop="8dp"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
@@ -98,6 +97,7 @@
             android:id="@+id/registerEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
             android:hint="Enter Your Email"
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
@@ -109,7 +109,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
-        android:inputType="phone"
         android:layout_marginTop="8dp"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
@@ -124,6 +123,7 @@
             android:id="@+id/registerPhoneNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:inputType="phone"
             android:hint="Enter Your PhoneNumber"
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
@@ -135,7 +135,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
-        android:inputType="text"
         android:layout_marginTop="8dp"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
@@ -151,7 +150,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter Your VehicleName"
-            android:inputType="phone"
+            android:inputType="text"
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -284,8 +283,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="30dp"
-        android:inputType="textPassword"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="15dp"
         app:boxCornerRadiusTopStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
@@ -301,7 +299,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Admin Key (Only for Admins)"
-            android:inputType="phone"
+            android:inputType="textPassword"
             android:visibility="gone"
             android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>

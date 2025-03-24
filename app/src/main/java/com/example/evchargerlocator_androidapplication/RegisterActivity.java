@@ -3,17 +3,15 @@ package com.example.evchargerlocator_androidapplication;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.*;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.*;
-
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -24,9 +22,12 @@ public class RegisterActivity extends AppCompatActivity {
     private CheckBox adminCheckBox;
     private FirebaseAuth firebaseAuth;
     private ImageView togglePasswordVisibility, toggleConfirmPasswordVisibility;
-    private boolean isPasswordVisible = false, isConfirmPasswordVisible = false;
 
-    private static final String ADMIN_SECRET_KEY = "EV_ADMIN_2025"; // Secure key for admin access
+    private static final String ADMIN_SECRET_KEY = "EV_ADMIN_2025";
+
+    // Updated Email Regex: At least 1 uppercase, 1 lowercase, 1 number, and 1 special character
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +36,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
 
-        // Initialize UI elements
         registerFullName = findViewById(R.id.registerUsername);
         registerEmail = findViewById(R.id.registerEmail);
         registerPhoneNumber = findViewById(R.id.registerPhoneNumber);
@@ -51,28 +51,23 @@ public class RegisterActivity extends AppCompatActivity {
         togglePasswordVisibility = findViewById(R.id.togglePasswordVisibility);
         toggleConfirmPasswordVisibility = findViewById(R.id.toggleConfirmPasswordVisibility);
 
-        // Back Arrow Functionality
         backArrowText.setOnClickListener(v -> {
             startActivity(new Intent(RegisterActivity.this, MainActivity.class));
             finish();
         });
 
-        // Show/Hide Admin Key field
         adminCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             adminKey.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-            registerVehicle.setVisibility(isChecked ? View.GONE : View.VISIBLE); // Hide vehicle field for admins
+            registerVehicle.setVisibility(isChecked ? View.GONE : View.VISIBLE);
         });
 
-        // Register Button Click Listener
         registerButton.setOnClickListener(v -> handleRegistration());
 
-        // Redirect to Login Page
         alreadyHaveAccount.setOnClickListener(v -> {
             startActivity(new Intent(RegisterActivity.this, MainActivity.class));
             finish();
         });
 
-        // Toggle password visibility
         togglePasswordVisibility.setOnClickListener(v -> togglePasswordVisibility(registerPassword, togglePasswordVisibility));
         toggleConfirmPasswordVisibility.setOnClickListener(v -> togglePasswordVisibility(confirmPassword, toggleConfirmPasswordVisibility));
     }
@@ -113,7 +108,19 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // Password validation: Minimum 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
+        // **Phone Number Validation: Must be exactly 10 digits**
+        if (phoneNumber.length() != 10 || !phoneNumber.matches("\\d{10}")) {
+            registerPhoneNumber.setError("Phone number must be exactly 10 digits");
+            return;
+        }
+
+        // **Email Validation**
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches() || !EMAIL_PATTERN.matcher(email).matches()) {
+            registerEmail.setError("Invalid email format! Must contain lowercase, 1 number, and 1 special character.");
+            return;
+        }
+
+        // **Password Validation**
         if (!password.matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$")) {
             passwordErrorText.setVisibility(View.VISIBLE);
             return;
@@ -127,8 +134,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         String role = isAdmin ? "admin" : "user";
-
-        // If admin, set vehicle to "N/A"
         if (isAdmin) {
             vehicle = "N/A";
         }
@@ -145,14 +150,13 @@ public class RegisterActivity extends AppCompatActivity {
                             String userId = user.getUid();
                             DatabaseReference userRef = FirebaseDatabase.getInstance().getReference(role.equals("admin") ? "admins" : "users").child(userId);
 
-                            // ✅ Fixed: Store user details properly
                             HashMap<String, Object> userData = new HashMap<>();
                             userData.put("id", userId);
                             userData.put("fullName", fullName);
                             userData.put("email", email);
                             userData.put("phoneNumber", phoneNumber);
                             userData.put("vehicle", vehicle);
-                            userData.put("status", "Offline"); // Default status
+                            userData.put("status", "Offline");
                             userData.put("role", role);
 
                             userRef.setValue(userData).addOnCompleteListener(task1 -> {

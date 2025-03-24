@@ -15,11 +15,13 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/chatToolbar"
         android:layout_width="match_parent"
-        android:layout_height="95dp"
+        android:layout_height="wrap_content"
         android:background="@android:color/holo_green_dark"
-        app:titleTextColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:titleTextColor="@android:color/white"
+        tools:layout_editor_absoluteX="1dp"
+        tools:ignore="MissingConstraints">
 
         <!-- Back Button -->
         <ImageView
@@ -40,7 +42,7 @@
             android:layout_gravity="center"
             android:text="Chat"
             android:textColor="@android:color/white"
-            android:textSize="18sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <!-- Clear Chat Button (In App Bar) -->
