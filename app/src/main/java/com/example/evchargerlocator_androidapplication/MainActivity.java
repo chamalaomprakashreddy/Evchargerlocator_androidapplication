@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
-                            Log.d(TAG, "User logged in successfully: " + user.getEmail());
                             if (user.isEmailVerified()) {
                                 checkUserInDatabase(user.getUid());
                             } else {

@@ -148,7 +148,6 @@ public class RegisterActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
-                            String userId = user.getUid();
                             sendEmailVerification(user, fullName, email, phoneNumber, vehicle, role);
                         }
                     } else {
