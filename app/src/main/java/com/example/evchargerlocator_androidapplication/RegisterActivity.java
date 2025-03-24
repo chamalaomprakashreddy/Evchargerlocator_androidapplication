@@ -6,21 +6,22 @@ import android.text.InputType;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.*;
 import com.google.firebase.database.*;
+
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText registerFullName, registerEmail, registerPhoneNumber, registerPassword, confirmPassword, registerVehicle, adminKey;
-    private TextView passwordErrorText, alreadyHaveAccount;
+    private TextView passwordErrorText, alreadyHaveAccount, backArrowText;
     private Button registerButton;
-    private TextView backArrowText;
     private CheckBox adminCheckBox;
     private FirebaseAuth firebaseAuth;
+    private DatabaseReference usersRef;
     private ImageView togglePasswordVisibility, toggleConfirmPasswordVisibility;
 
     private static final String ADMIN_SECRET_KEY = "EV_ADMIN_2025";
@@ -35,6 +36,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        usersRef = FirebaseDatabase.getInstance().getReference("users");
 
         registerFullName = findViewById(R.id.registerUsername);
         registerEmail = findViewById(R.id.registerEmail);
@@ -108,7 +110,6 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // **Phone Number Validation: Must be exactly 10 digits**
         if (phoneNumber.length() != 10 || !phoneNumber.matches("\\d{10}")) {
             registerPhoneNumber.setError("Phone number must be exactly 10 digits");
             return;
@@ -148,32 +149,43 @@ public class RegisterActivity extends AppCompatActivity {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
                             String userId = user.getUid();
-                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference(role.equals("admin") ? "admins" : "users").child(userId);
-
-                            HashMap<String, Object> userData = new HashMap<>();
-                            userData.put("id", userId);
-                            userData.put("fullName", fullName);
-                            userData.put("email", email);
-                            userData.put("phoneNumber", phoneNumber);
-                            userData.put("vehicle", vehicle);
-                            userData.put("status", "Offline");
-                            userData.put("role", role);
-
-                            userRef.setValue(userData).addOnCompleteListener(task1 -> {
-                                if (task1.isSuccessful()) {
-                                    Toast.makeText(RegisterActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                    startActivity(intent);
-                                    finish();
-                                } else {
-                                    Toast.makeText(RegisterActivity.this, "Failed to store user data", Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            sendEmailVerification(user, fullName, email, phoneNumber, vehicle, role);
                         }
                     } else {
                         Toast.makeText(RegisterActivity.this, "Registration Failed! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void sendEmailVerification(FirebaseUser user, String fullName, String email, String phoneNumber, String vehicle, String role) {
+        user.sendEmailVerification().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                saveUserToDatabase(user, fullName, email, phoneNumber, vehicle, role);
+                Toast.makeText(RegisterActivity.this, "Verification email sent. Please check your inbox.", Toast.LENGTH_LONG).show();
+                firebaseAuth.signOut();
+                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(RegisterActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void saveUserToDatabase(FirebaseUser user, String fullName, String email, String phoneNumber, String vehicle, String role) {
+        String userId = user.getUid();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+
+        HashMap<String, Object> userData = new HashMap<>();
+        userData.put("id", userId);
+        userData.put("fullName", fullName);
+        userData.put("email", email);
+        userData.put("phoneNumber", phoneNumber);
+        userData.put("vehicle", vehicle);
+        userData.put("role", role);
+        userData.put("emailVerified", false);
+
+        userRef.setValue(userData);
     }
 }

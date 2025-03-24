@@ -6,23 +6,12 @@ import android.text.InputType;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.*;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -110,7 +99,14 @@ public class MainActivity extends AppCompatActivity {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
                             Log.d(TAG, "User logged in successfully: " + user.getEmail());
-                            checkUserInDatabase(user.getUid());
+                            if (user.isEmailVerified()) {
+                                checkUserInDatabase(user.getUid());
+                            } else {
+                                firebaseAuth.signOut();
+                                Toast.makeText(MainActivity.this, "Email not verified! Check your email.", Toast.LENGTH_LONG).show();
+                                progressBar.setVisibility(View.GONE);
+                                loginButton.setEnabled(true);
+                            }
                         }
                     } else {
                         // ✅ Handle login failure
