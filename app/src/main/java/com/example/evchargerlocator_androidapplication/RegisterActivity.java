@@ -21,7 +21,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Button registerButton;
     private CheckBox adminCheckBox;
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference usersRef;
+    private DatabaseReference usersRef, adminsRef;
     private ImageView togglePasswordVisibility, toggleConfirmPasswordVisibility;
 
     private static final String ADMIN_SECRET_KEY = "EV_ADMIN_2025";
@@ -36,6 +36,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         usersRef = FirebaseDatabase.getInstance().getReference("users");
+        adminsRef = FirebaseDatabase.getInstance().getReference("admins");
 
         registerFullName = findViewById(R.id.registerUsername);
         registerEmail = findViewById(R.id.registerEmail);
@@ -114,13 +115,11 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // **Email Validation**
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches() || !EMAIL_PATTERN.matcher(email).matches()) {
             registerEmail.setError("Invalid email format!!");
             return;
         }
 
-        // **Password Validation**
         if (!password.matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$")) {
             passwordErrorText.setVisibility(View.VISIBLE);
             return;
@@ -138,16 +137,16 @@ public class RegisterActivity extends AppCompatActivity {
             vehicle = "N/A";
         }
 
-        registerUserWithFirebase(fullName, email, phoneNumber, vehicle, password, role);
+        registerUserWithFirebase(fullName, email, phoneNumber, vehicle, password, role, isAdmin);
     }
 
-    private void registerUserWithFirebase(String fullName, String email, String phoneNumber, String vehicle, String password, String role) {
+    private void registerUserWithFirebase(String fullName, String email, String phoneNumber, String vehicle, String password, String role, boolean isAdmin) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
-                            sendEmailVerification(user, fullName, email, phoneNumber, vehicle, role);
+                            sendEmailVerification(user, fullName, email, phoneNumber, vehicle, role, isAdmin);
                         }
                     } else {
                         Toast.makeText(RegisterActivity.this, "Registration Failed! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -155,15 +154,13 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
-    private void sendEmailVerification(FirebaseUser user, String fullName, String email, String phoneNumber, String vehicle, String role) {
+    private void sendEmailVerification(FirebaseUser user, String fullName, String email, String phoneNumber, String vehicle, String role, boolean isAdmin) {
         user.sendEmailVerification().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                saveUserToDatabase(user, fullName, email, phoneNumber, vehicle, role);
+                saveUserToDatabase(user, fullName, email, phoneNumber, vehicle, role, isAdmin);
                 Toast.makeText(RegisterActivity.this, "Verification email sent. Please check your inbox.", Toast.LENGTH_LONG).show();
                 firebaseAuth.signOut();
-                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
                 finish();
             } else {
                 Toast.makeText(RegisterActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
@@ -171,9 +168,9 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void saveUserToDatabase(FirebaseUser user, String fullName, String email, String phoneNumber, String vehicle, String role) {
+    private void saveUserToDatabase(FirebaseUser user, String fullName, String email, String phoneNumber, String vehicle, String role, boolean isAdmin) {
         String userId = user.getUid();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        DatabaseReference userRef = isAdmin ? adminsRef.child(userId) : usersRef.child(userId);
 
         HashMap<String, Object> userData = new HashMap<>();
         userData.put("id", userId);
