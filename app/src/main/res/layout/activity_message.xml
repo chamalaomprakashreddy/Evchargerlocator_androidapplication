@@ -42,7 +42,7 @@
             android:layout_gravity="center"
             android:text="Chat"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
         <!-- Clear Chat Button (In App Bar) -->
