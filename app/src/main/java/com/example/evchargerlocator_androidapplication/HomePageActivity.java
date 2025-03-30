@@ -6,11 +6,11 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.ImageButton;
-import android.widget.Toast;
-
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.*;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -19,86 +19,110 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.*;
+import com.google.firebase.database.*;
 import com.google.maps.android.PolyUtil;
+import com.google.maps.android.SphericalUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class HomePageActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class HomePageActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
-    private static final String TAG = "HomePageActivity";
-    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs";
-    private static final int FILTER_REQUEST_CODE = 1002;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
     private GoogleMap myMap;
     private RequestQueue requestQueue;
     private DatabaseReference databaseReference;
+
     private LatLng startLocation, endLocation;
     private double distanceFilter = 5.0;
     private Polyline routePolyline;
-    private String selectedLevel;
-    private String selectedConnector;
-    private String selectedNetwork;
-    private List<LatLng> routePoints; // Store route points for re-filtering
+    private List<LatLng> routePoints;
+    private List<ChargingStation> selectedStations = new ArrayList<>();
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private TextView distanceStat, timeStat, stationStat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
+        distanceStat = findViewById(R.id.distanceStat);
+        timeStat = findViewById(R.id.timeStat);
+        stationStat = findViewById(R.id.stationStat);
         requestQueue = Volley.newRequestQueue(this);
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
 
+        // Handle incoming intent
         Intent intent = getIntent();
-        if (intent != null) {
+        if (intent != null && intent.getBooleanExtra("restoreTrip", false)) {
+            selectedStations = intent.getParcelableArrayListExtra("stations");
+            startLocation = getLatLngFromIntent(intent.getStringExtra("startLocation"));
+            endLocation = getLatLngFromIntent(intent.getStringExtra("endLocation"));
+
+            updateTripBadge();
+            updateStationStat();
+
+            if (startLocation != null && endLocation != null) {
+                drawRouteAndEVStations();
+            }
+        } else {
             startLocation = getLatLngFromIntent(intent.getStringExtra("startLocation"));
             endLocation = getLatLngFromIntent(intent.getStringExtra("endLocation"));
             distanceFilter = intent.getDoubleExtra("distanceFilter", 5.0);
-            selectedLevel = intent.getStringExtra("selectedLevel");
-            selectedConnector = intent.getStringExtra("selectedConnector");
-            selectedNetwork = intent.getStringExtra("selectedNetwork");
         }
 
+        // Setup map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
-        }
+        if (mapFragment != null) mapFragment.getMapAsync(this);
 
-        ImageButton filterButton = findViewById(R.id.filter);
-        filterButton.setOnClickListener(view -> {
-            Intent filterIntent = new Intent(HomePageActivity.this, FilterActivity.class);
-            filterIntent.putExtra("selectedLevel", selectedLevel);
-            filterIntent.putExtra("selectedConnector", selectedConnector);
-            filterIntent.putExtra("selectedNetwork", selectedNetwork);
-            startActivityForResult(filterIntent, FILTER_REQUEST_CODE); // Use startActivityForResult
+        // Trip Badge Click
+        FrameLayout tripBadge = findViewById(R.id.tripBadge);
+        tripBadge.setOnClickListener(v -> {
+            Intent tripIntent = new Intent(HomePageActivity.this, MyTripActivity.class);
+            tripIntent.putParcelableArrayListExtra("stations", new ArrayList<>(selectedStations));
+
+            if (startLocation != null)
+                tripIntent.putExtra("startLocation", startLocation.latitude + "," + startLocation.longitude);
+            if (endLocation != null)
+                tripIntent.putExtra("endLocation", endLocation.latitude + "," + endLocation.longitude);
+
+            Geocoder geocoder = new Geocoder(HomePageActivity.this, Locale.getDefault());
+            try {
+                String fromAddress = "", toAddress = "";
+                if (startLocation != null) {
+                    List<Address> startAddrs = geocoder.getFromLocation(startLocation.latitude, startLocation.longitude, 1);
+                    if (!startAddrs.isEmpty()) fromAddress = startAddrs.get(0).getAddressLine(0);
+                }
+                if (endLocation != null) {
+                    List<Address> endAddrs = geocoder.getFromLocation(endLocation.latitude, endLocation.longitude, 1);
+                    if (!endAddrs.isEmpty()) toAddress = endAddrs.get(0).getAddressLine(0);
+                }
+                tripIntent.putExtra("fromAddress", fromAddress);
+                tripIntent.putExtra("toAddress", toAddress);
+            } catch (Exception e) {
+                tripIntent.putExtra("fromAddress", "");
+                tripIntent.putExtra("toAddress", "");
+            }
+
+            startActivity(tripIntent);
         });
+
+        // Save Trip Dialog
+        ImageButton saveTripButton = findViewById(R.id.saveTripButton);
+        saveTripButton.setOnClickListener(v -> showSaveTripDialog());
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         myMap = googleMap;
         myMap.getUiSettings().setZoomControlsEnabled(true);
+        myMap.setOnMarkerClickListener(this);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             myMap.setMyLocationEnabled(true);
@@ -108,6 +132,24 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
         if (startLocation != null && endLocation != null) {
             drawRouteAndEVStations();
+
+            // ✅ Auto-zoom to fit route and markers
+            LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+            boundsBuilder.include(startLocation);
+            boundsBuilder.include(endLocation);
+
+            if (selectedStations != null && !selectedStations.isEmpty()) {
+                for (ChargingStation station : selectedStations) {
+                    boundsBuilder.include(new LatLng(station.getLatitude(), station.getLongitude()));
+                }
+            }
+
+            LatLngBounds bounds = boundsBuilder.build();
+
+            myMap.setOnMapLoadedCallback(() -> {
+                int padding = 100; // padding in pixels
+                myMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+            });
         }
     }
 
@@ -115,7 +157,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         String url = "https://maps.googleapis.com/maps/api/directions/json?"
                 + "origin=" + startLocation.latitude + "," + startLocation.longitude
                 + "&destination=" + endLocation.latitude + "," + endLocation.longitude
-                + "&key=" + GOOGLE_MAPS_API_KEY;
+                + "&key=" + getString(R.string.google_maps_key);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
@@ -124,98 +166,204 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                         if (routes.length() > 0) {
                             JSONObject route = routes.getJSONObject(0);
                             String polyline = route.getJSONObject("overview_polyline").getString("points");
+                            routePoints = PolyUtil.decode(polyline);
 
-                            routePoints = PolyUtil.decode(polyline); // Store route points
                             if (routePolyline != null) routePolyline.remove();
-
                             routePolyline = myMap.addPolyline(new PolylineOptions()
                                     .addAll(routePoints)
                                     .width(10)
                                     .color(ContextCompat.getColor(this, R.color.black)));
 
+                            JSONObject leg = route.getJSONArray("legs").getJSONObject(0);
+                            distanceStat.setText("🚗 " + leg.getJSONObject("distance").getString("text"));
+                            timeStat.setText("⏱ " + leg.getJSONObject("duration").getString("text"));
+
                             fetchEVStationsAlongRoute(routePoints);
                         }
                     } catch (JSONException e) {
-                        Log.e(TAG, "Error parsing route response: " + e.getMessage());
+                        Toast.makeText(this, "Error parsing route", Toast.LENGTH_SHORT).show();
                     }
                 },
-                error -> Log.e(TAG, "Route request failed: " + error.getMessage()));
+                error -> Toast.makeText(this, "Failed to fetch route", Toast.LENGTH_SHORT).show());
 
         requestQueue.add(request);
     }
 
     private void fetchEVStationsAlongRoute(List<LatLng> routePoints) {
-        myMap.clear(); // Clear existing markers and polyline
-        if (routePolyline != null) {
-            routePolyline.remove();
-        }
-        routePolyline = myMap.addPolyline(new PolylineOptions()
-                .addAll(routePoints)
-                .width(10)
-                .color(ContextCompat.getColor(this, R.color.black)));
-
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
-                    ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
-                    if (station != null) {
-                        LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
+            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int count = 0;
+                for (DataSnapshot stationSnap : snapshot.getChildren()) {
+                    ChargingStation station = stationSnap.getValue(ChargingStation.class);
+                    if (station == null) continue;
 
-                        boolean isWithinRoute = PolyUtil.isLocationOnPath(stationLocation, routePoints, true, distanceFilter * 1609.34);
+                    LatLng loc = new LatLng(station.getLatitude(), station.getLongitude());
+                    boolean isOnRoute = PolyUtil.isLocationOnPath(loc, routePoints, true, distanceFilter * 1609.34);
 
-                        boolean matchesFilters = true;
-                        if (selectedLevel != null && !selectedLevel.isEmpty() && !station.getChargingLevel().equals(selectedLevel)) {
-                            matchesFilters = false;
-                        }
-                        if (selectedConnector != null && !selectedConnector.isEmpty() && !station.getConnectorType().equals(selectedConnector)) {
-                            matchesFilters = false;
-                        }
-                        if (selectedNetwork != null && !selectedNetwork.isEmpty() && !station.getNetwork().equals(selectedNetwork)) {
-                            matchesFilters = false;
-                        }
-
-                        if (isWithinRoute && matchesFilters) {
-                            myMap.addMarker(new MarkerOptions()
-                                    .position(stationLocation)
-                                    .title(station.getName())
-                                    .snippet("EV Charging Station")
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                        }
+                    if (isOnRoute) {
+                        myMap.addMarker(new MarkerOptions()
+                                .position(loc)
+                                .title(station.getName())
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                        count++;
                     }
                 }
+                stationStat.setText("📍 " + count);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(HomePageActivity.this, "Error fetching EV stations", Toast.LENGTH_SHORT).show();
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HomePageActivity.this, "Database error", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private LatLng getLatLngFromIntent(String locationString) {
-        if (locationString == null || locationString.isEmpty()) return null;
-        try {
-            String[] latLng = locationString.split(",");
-            return new LatLng(Double.parseDouble(latLng[0]), Double.parseDouble(latLng[1]));
-        } catch (Exception e) {
-            Log.e(TAG, "Error parsing LatLng from Intent: " + e.getMessage());
-            return null;
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        if (marker.getTitle() == null) return false;
+
+        LatLng position = marker.getPosition();
+        String stationName = marker.getTitle();
+
+        // Construct ChargingStation object from marker
+        ChargingStation clickedStation = new ChargingStation();
+        clickedStation.setName(stationName);
+        clickedStation.setLatitude(position.latitude);
+        clickedStation.setLongitude(position.longitude);
+
+        // Determine the reference point for distance
+        LatLng referencePoint;
+        String distanceLabel;
+        if (selectedStations.isEmpty()) {
+            referencePoint = startLocation;
+            distanceLabel = "Distance from starting point:";
+        } else {
+            ChargingStation last = selectedStations.get(selectedStations.size() - 1);
+            referencePoint = new LatLng(last.getLatitude(), last.getLongitude());
+            distanceLabel = "Distance from previous point:";
         }
+
+        // Compute distance
+        double distance = SphericalUtil.computeDistanceBetween(referencePoint, position) / 1609.34;
+        String distanceText = String.format("%.2f Mi", distance);
+
+        // Show popup
+        findViewById(R.id.stationPopup).setVisibility(View.VISIBLE);
+        ((TextView) findViewById(R.id.stationDistanceText)).setText(distanceLabel + " " + distanceText);
+        ((TextView) findViewById(R.id.popupStationDistance)).setText(distanceText);
+        ((TextView) findViewById(R.id.popupStationName)).setText(stationName);
+        ((TextView) findViewById(R.id.popupStationDetails)).setText("EV Charging Station");
+
+        Button tripToggleBtn = findViewById(R.id.addToTripButton);
+        updateTripButtonState(tripToggleBtn, clickedStation);
+
+        // Prevent popup from closing on click
+        tripToggleBtn.setOnClickListener(v -> {
+            boolean isInTrip = isStationInTrip(clickedStation);
+
+            if (isInTrip) {
+                selectedStations.removeIf(s ->
+                        s.getLatitude() == clickedStation.getLatitude()
+                                && s.getLongitude() == clickedStation.getLongitude()
+                                && s.getName().equals(clickedStation.getName())
+                );
+                Toast.makeText(this, "Removed from trip", Toast.LENGTH_SHORT).show();
+            } else {
+                selectedStations.add(clickedStation);
+                Toast.makeText(this, "Added to trip", Toast.LENGTH_SHORT).show();
+            }
+
+            // Update UI after toggle
+            updateTripBadge();
+            updateStationStat();
+            updateTripButtonState(tripToggleBtn, clickedStation);
+        });
+
+        return true;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == FILTER_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            selectedLevel = data.getStringExtra("selectedLevel");
-            selectedConnector = data.getStringExtra("selectedConnector");
-            selectedNetwork = data.getStringExtra("selectedNetwork");
 
-            // Re-fetch and filter stations with new filters
-            if (routePoints != null) {
-                fetchEVStationsAlongRoute(routePoints);
+    private void updateTripBadge() {
+        ((TextView) findViewById(R.id.badgeCount)).setText(String.valueOf(selectedStations.size()));
+    }
+
+    private void updateStationStat() {
+        ((TextView) findViewById(R.id.stationStat)).setText("📍 " + selectedStations.size());
+    }
+
+    private boolean isStationInTrip(ChargingStation station) {
+        for (ChargingStation s : selectedStations) {
+            if (s.getLatitude() == station.getLatitude()
+                    && s.getLongitude() == station.getLongitude()
+                    && s.getName().equals(station.getName())) {
+                return true;
             }
         }
+        return false;
+    }
+
+    private void updateTripButtonState(Button button, ChargingStation station) {
+        if (isStationInTrip(station)) {
+            button.setText("Remove from Trip");
+            button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_remove_circle, 0, 0, 0);
+        } else {
+            button.setText("Add to Trip");
+            button.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add, 0, 0, 0);
+        }
+    }
+    private LatLng getLatLngFromIntent(String str) {
+        if (str == null || !str.contains(",")) return null;
+        String[] parts = str.split(",");
+        return new LatLng(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]));
+    }
+
+    private void showSaveTripDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_save_trip, null);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView).setCancelable(false).create();
+
+        EditText tripNameInput = dialogView.findViewById(R.id.tripNameInput);
+        Button cancelButton = dialogView.findViewById(R.id.cancelButton);
+        Button saveButton = dialogView.findViewById(R.id.saveButton);
+
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        saveButton.setOnClickListener(v -> {
+            String tripName = tripNameInput.getText().toString().trim();
+            if (tripName.isEmpty()) {
+                tripNameInput.setError("Trip name is required");
+                return;
+            }
+
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            try {
+                String fromAddress = getAddressFromLatLng(startLocation, geocoder);
+                String toAddress = getAddressFromLatLng(endLocation, geocoder);
+
+                SavedTrip trip = new SavedTrip(tripName, fromAddress, toAddress,
+                        startLocation.latitude + "," + startLocation.longitude,
+                        endLocation.latitude + "," + endLocation.longitude,
+                        selectedStations);
+
+                FirebaseDatabase.getInstance().getReference("SavedTrips")
+                        .push().setValue(trip)
+                        .addOnSuccessListener(unused -> {
+                            Toast.makeText(this, "Trip saved!", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(this, "Failed to save trip", Toast.LENGTH_SHORT).show());
+            } catch (Exception e) {
+                Toast.makeText(this, "Error saving trip", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private String getAddressFromLatLng(LatLng latLng, Geocoder geocoder) {
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            if (!addresses.isEmpty()) return addresses.get(0).getAddressLine(0);
+        } catch (Exception ignored) {}
+        return latLng.latitude + ", " + latLng.longitude;
     }
 }

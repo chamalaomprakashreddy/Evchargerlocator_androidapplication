@@ -77,7 +77,8 @@ dependencies {
     // ✅ Google Places API
     implementation(libs.places)
     implementation("com.google.maps.android:android-maps-utils:2.2.3")
-
+    implementation("com.google.maps.android:android-maps-utils:2.3.0")
+    implementation("androidx.cardview:cardview:1.0.0")
 
     // ✅ Glide (Image Loading)
     implementation("com.github.bumptech.glide:glide:4.15.1")

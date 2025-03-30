@@ -70,15 +70,17 @@ public class FilterActivity extends AppCompatActivity {
             String selectedNetwork = networksSpinner.getSelectedItem().toString();
 
             double price = calculatePrice(selectedLevel, selectedConnector, selectedNetwork);
-            pricingTextView.setText("" + price);
+            pricingTextView.setText("Total Price: $" + price);
 
             Intent resultIntent = new Intent();
             resultIntent.putExtra("selectedLevel", selectedLevel);
             resultIntent.putExtra("selectedConnector", selectedConnector);
             resultIntent.putExtra("selectedNetwork", selectedNetwork);
+            resultIntent.putExtra("calculatedPrice", price); // 💰 send price
             setResult(RESULT_OK, resultIntent);
-            finish(); // Return to HomePageActivity
+            finish();
         });
+
 
         resetButton.setOnClickListener(v -> {
             levelsSpinner.setSelection(0);

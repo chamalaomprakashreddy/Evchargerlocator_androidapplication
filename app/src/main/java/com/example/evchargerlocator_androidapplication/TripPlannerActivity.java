@@ -3,10 +3,10 @@ package com.example.evchargerlocator_androidapplication;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
+
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -23,27 +23,30 @@ public class TripPlannerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip_planner);
 
+        // Bind views
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
         backArrowText = findViewById(R.id.backArrowText);
 
-        // Go back to the previous screen
+        // 🔙 Back button to return to previous screen
         backArrowText.setOnClickListener(v -> finish());
 
+        // ✅ Set up ViewPager and Adapter
+        pagerAdapter = new TripPlannerPagerAdapter(this);
+        viewPager.setAdapter(pagerAdapter);
 
+        // ✅ Link tabs to ViewPager
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            if (position == 0) {
+                tab.setText("Create a Trip");
+            } else {
+                tab.setText("My Trips");
+            }
+        }).attach();
 
-        // ✅ Ensure ViewPager2 is NOT null before setting an adapter
-        if (viewPager != null) {
-            pagerAdapter = new TripPlannerPagerAdapter(this);
-            viewPager.setAdapter(pagerAdapter);
-
-            new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-                if (position == 0) {
-                    tab.setText("Create a Trip");
-                } else {
-                    tab.setText("My Trips");
-                }
-            }).attach();
+        // ✅ If navigated from TripBadge or saved trip, switch to "My Trips" tab
+        if (getIntent().getBooleanExtra("navigateToMyTrips", false)) {
+            viewPager.setCurrentItem(1, false);  // 1 = My Trips tab
         }
     }
 }
