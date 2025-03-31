@@ -89,6 +89,45 @@
         app:layout_constraintTop_toBottomOf="@id/distanceText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+    <!-- Vehicle Type Spinner -->
+    <Spinner
+        android:id="@+id/vehicleSpinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="30dp"
+        app:layout_constraintTop_toBottomOf="@id/distanceSeekBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Battery Level Label -->
+    <TextView
+        android:id="@+id/batteryText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Battery Level: 50%"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="30dp"
+        app:layout_constraintTop_toBottomOf="@id/vehicleSpinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Battery SeekBar -->
+    <SeekBar
+        android:id="@+id/batterySeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="50"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="30dp"
+        app:layout_constraintTop_toBottomOf="@id/batteryText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
     <!-- Find Route Button -->
     <Button
@@ -102,9 +141,9 @@
         android:padding="12dp"
         android:layout_marginTop="24dp"
         android:layout_marginHorizontal="30dp"
-        app:layout_constraintTop_toBottomOf="@id/distanceSeekBar"
+        app:layout_constraintTop_toBottomOf="@id/batterySeekBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Save Trip Button -->
     <Button
@@ -120,6 +159,7 @@
         android:layout_marginHorizontal="30dp"
         app:layout_constraintTop_toBottomOf="@id/submitButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

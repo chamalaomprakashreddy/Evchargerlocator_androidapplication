@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,9 +61,12 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         stationStat = findViewById(R.id.stationStat);
         requestQueue = Volley.newRequestQueue(this);
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
+        Intent intent = getIntent();
+        String vehicleType = intent.getStringExtra("vehicleType");
+        int batteryPercent = intent.getIntExtra("batteryPercent", 100);
 
         // Handle incoming intent
-        Intent intent = getIntent();
+        //Intent intent = getIntent();
         if (intent != null && intent.getBooleanExtra("restoreTrip", false)) {
             selectedStations = intent.getParcelableArrayListExtra("stations");
             startLocation = getLatLngFromIntent(intent.getStringExtra("startLocation"));
@@ -204,12 +208,31 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                     boolean isOnRoute = PolyUtil.isLocationOnPath(loc, routePoints, true, distanceFilter * 1609.34);
 
                     if (isOnRoute) {
-                        myMap.addMarker(new MarkerOptions()
-                                .position(loc)
-                                .title(station.getName())
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                        count++;
+                        // 🔋 Get vehicle info
+                        Intent intent = getIntent();
+                        String vehicleType = intent.getStringExtra("vehicleType");
+                        int batteryPercent = intent.getIntExtra("batteryPercent", 100);
+                        VehicleModel vehicle = VehicleData.getVehicleByName(vehicleType);
+                        double usableRangeKm = (batteryPercent / 100.0) * vehicle.maxRangeKm;
+
+                        // 📍 Compute distance from start to station
+                        float[] result = new float[1];
+                        Location.distanceBetween(startLocation.latitude, startLocation.longitude,
+                                station.getLatitude(), station.getLongitude(), result);
+                        float distanceFromStartKm = result[0] / 1000f;
+
+                        if (distanceFromStartKm >= usableRangeKm) {
+                            // ✅ Show station only if it's beyond usable range
+                            myMap.addMarker(new MarkerOptions()
+                                    .position(loc)
+                                    .title(station.getName())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            count++;
+                        } else {
+                            Log.d("SMART_PLAN", "Skipping " + station.getName() + " — " + distanceFromStartKm + " km from start");
+                        }
                     }
+
                 }
                 stationStat.setText("📍 " + count);
             }

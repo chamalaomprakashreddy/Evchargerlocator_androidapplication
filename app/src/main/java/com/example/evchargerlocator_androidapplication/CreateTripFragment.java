@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -34,11 +36,14 @@ public class CreateTripFragment extends Fragment {
     private static final String GOOGLE_PLACES_API_KEY = "YOUR_API_KEY_HERE"; // Replace this
 
     private TextInputEditText startPoint, endPoint;
-    private SeekBar distanceSeekBar;
-    private TextView distanceText;
+    private SeekBar distanceSeekBar, batterySeekBar;
+    private TextView distanceText, batteryText;
+    private Spinner vehicleSpinner;
     private Button findRouteButton, saveButton;
 
     private LatLng startLatLng, endLatLng;
+    private String selectedVehicle = "Tesla";
+    private int batteryPercent = 50;
 
     private final ActivityResultLauncher<Intent> startAutocompleteLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -72,6 +77,9 @@ public class CreateTripFragment extends Fragment {
         endPoint = view.findViewById(R.id.endPoint);
         distanceSeekBar = view.findViewById(R.id.distanceSeekBar);
         distanceText = view.findViewById(R.id.distanceText);
+        batterySeekBar = view.findViewById(R.id.batterySeekBar);
+        batteryText = view.findViewById(R.id.batteryText);
+        vehicleSpinner = view.findViewById(R.id.vehicleSpinner);
         findRouteButton = view.findViewById(R.id.submitButton);
         saveButton = view.findViewById(R.id.saveButton);
 
@@ -82,6 +90,35 @@ public class CreateTripFragment extends Fragment {
         setupAutocomplete(startPoint, true);
         setupAutocomplete(endPoint, false);
 
+        // Vehicle Spinner
+        String[] vehicles = {"Tesla", "Audi", "BMW", "Lamborghini", "Generic"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, vehicles);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        vehicleSpinner.setAdapter(adapter);
+
+        vehicleSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                selectedVehicle = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                selectedVehicle = "Tesla";
+            }
+        });
+
+        // Battery SeekBar
+        batterySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                batteryPercent = progress;
+                batteryText.setText("Battery Level: " + progress + "%");
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        // Distance SeekBar
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 distanceText.setText("Show charging stations within " + progress + " mi");
@@ -100,6 +137,8 @@ public class CreateTripFragment extends Fragment {
             intent.putExtra("startLocation", formatLatLng(startLatLng));
             intent.putExtra("endLocation", formatLatLng(endLatLng));
             intent.putExtra("distanceFilter", distanceSeekBar.getProgress());
+            intent.putExtra("vehicleType", selectedVehicle);
+            intent.putExtra("batteryPercent", batteryPercent);
             startActivity(intent);
         });
 
