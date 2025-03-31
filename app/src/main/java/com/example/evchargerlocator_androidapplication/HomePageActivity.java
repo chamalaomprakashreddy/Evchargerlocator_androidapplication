@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.*;
@@ -14,6 +15,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.example.evchargerlocator_androidapplication.StationDetailsActivity;
+
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -219,6 +222,8 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
+        Log.d("MARKER_CLICK", "Marker clicked: " + marker.getTitle());
+
         if (marker.getTitle() == null) return false;
 
         LatLng position = marker.getPosition();
@@ -229,42 +234,46 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         clickedStation.setName(stationName);
         clickedStation.setLatitude(position.latitude);
         clickedStation.setLongitude(position.longitude);
+        clickedStation.setChargingLevel("Level 2");
+        clickedStation.setConnectorType("J1772");
+        clickedStation.setNetwork("ChargePoint");
+        clickedStation.setPowerOutput("7.2 kW");
+        clickedStation.setAvailability("2/2 Available");
+        clickedStation.setAvailablePorts(2);
+        clickedStation.setTotalPorts(2);
 
-        // Determine the reference point for distance
+        // Determine reference point for distance
         LatLng referencePoint;
-        String distanceLabel;
         if (selectedStations.isEmpty()) {
             referencePoint = startLocation;
-            distanceLabel = "Distance from starting point:";
         } else {
             ChargingStation last = selectedStations.get(selectedStations.size() - 1);
             referencePoint = new LatLng(last.getLatitude(), last.getLongitude());
-            distanceLabel = "Distance from previous point:";
         }
 
-        // Compute distance
+        // Compute distance & time
         double distance = SphericalUtil.computeDistanceBetween(referencePoint, position) / 1609.34;
-        String distanceText = String.format("%.2f Mi", distance);
+        String distanceText = String.format(Locale.getDefault(), "%.2f Mi", distance);
+        String driveTimeText = estimateDriveTime(distance);
 
         // Show popup
         findViewById(R.id.stationPopup).setVisibility(View.VISIBLE);
-        ((TextView) findViewById(R.id.stationDistanceText)).setText(distanceLabel + " " + distanceText);
+        ((TextView) findViewById(R.id.stationDistanceText)).setText("Distance: " + distanceText);
         ((TextView) findViewById(R.id.popupStationDistance)).setText(distanceText);
         ((TextView) findViewById(R.id.popupStationName)).setText(stationName);
         ((TextView) findViewById(R.id.popupStationDetails)).setText("EV Charging Station");
 
+        // Trip toggle logic
         Button tripToggleBtn = findViewById(R.id.addToTripButton);
         updateTripButtonState(tripToggleBtn, clickedStation);
-
-        // Prevent popup from closing on click
         tripToggleBtn.setOnClickListener(v -> {
             boolean isInTrip = isStationInTrip(clickedStation);
 
             if (isInTrip) {
                 selectedStations.removeIf(s ->
-                        s.getLatitude() == clickedStation.getLatitude()
-                                && s.getLongitude() == clickedStation.getLongitude()
-                                && s.getName().equals(clickedStation.getName())
+                        s.getLatitude() == clickedStation.getLatitude() &&
+                                s.getLongitude() == clickedStation.getLongitude() &&
+                                s.getName().equals(clickedStation.getName())
                 );
                 Toast.makeText(this, "Removed from trip", Toast.LENGTH_SHORT).show();
             } else {
@@ -272,14 +281,51 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                 Toast.makeText(this, "Added to trip", Toast.LENGTH_SHORT).show();
             }
 
-            // Update UI after toggle
             updateTripBadge();
             updateStationStat();
             updateTripButtonState(tripToggleBtn, clickedStation);
         });
 
+        // Details button logic
+        Button detailsBtn = findViewById(R.id.viewStationDetails);
+        detailsBtn.setOnClickListener(v -> {
+            Log.d("DETAILS_BTN", "Opening StationDetailsActivity...");
+
+            Intent detailsIntent = new Intent(HomePageActivity.this, StationDetailsActivity.class);
+
+            // Required fields
+            detailsIntent.putExtra("stationName", clickedStation.getName());
+            detailsIntent.putExtra("paymentMethods", "Google Pay, PayPal");
+            detailsIntent.putExtra("plugType", clickedStation.getConnectorType());
+            detailsIntent.putExtra("plugPrice", "$0.40/kWh");
+            detailsIntent.putExtra("plugAvailability", clickedStation.getAvailability());
+
+            // Already calculated distance/time (from marker popup or routing logic)
+            detailsIntent.putExtra("distance", distanceText);   // e.g., "2.4 mi"
+            detailsIntent.putExtra("duration", driveTimeText);  // e.g., "5 min"
+
+            // Latitude/Longitude for reverse geocoding
+            detailsIntent.putExtra("latitude", clickedStation.getLatitude());
+            detailsIntent.putExtra("longitude", clickedStation.getLongitude());
+
+            Log.d("DETAILS_BTN", "Intent data: " + clickedStation.getName() + ", " + clickedStation.getConnectorType());
+
+            startActivity(detailsIntent);
+        });
+
+
+
         return true;
     }
+
+
+    private String estimateDriveTime(double miles) {
+        double avgSpeed = 30.0; // mph
+        double minutes = (miles / avgSpeed) * 60;
+        return String.format(Locale.getDefault(), "%.0f min", minutes);
+    }
+
+
 
 
     private void updateTripBadge() {

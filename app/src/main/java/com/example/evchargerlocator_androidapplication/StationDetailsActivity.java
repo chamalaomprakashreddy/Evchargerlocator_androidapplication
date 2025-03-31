@@ -1,69 +1,124 @@
 package com.example.evchargerlocator_androidapplication;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
-import androidx.annotation.Nullable;
+import android.widget.Button;
+import android.net.Uri;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.List;
+import java.util.Locale;
 
 public class StationDetailsActivity extends AppCompatActivity {
 
-    private TextView stationNameText, powerOutputText, availabilityText,
-            chargingLevelText, connectorTypeText, networkText;
-    private Button bookStationButton;
+    private static final String TAG = "StationDetailsActivity";
 
-    private String name, powerOutput, availability, chargingLevel, connectorType, network;
-    private double latitude, longitude;
+    private TextView stationName, stationAddress, distanceText, timeText;
+    private TextView accessType, accessTime, paymentMethods, fullAddress;
+    private TextView plugType, plugPrice, plugAvailability, lastUsed;
+    private TextView infoDistance, infoDriveTime;
+    private Button startChargingBtn;
+    private ImageButton navButton, backBtn;
+
+    private String finalAddress = "";
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_station_details);
 
-        // Set up back arrow
-        TextView backArrowText = findViewById(R.id.back_arrow);
-        backArrowText.setOnClickListener(v -> finish());
+        // Bind views
+        stationName = findViewById(R.id.detailStationName);
+        stationAddress = findViewById(R.id.detailStationAddress);
+        distanceText = findViewById(R.id.detailDistanceText);
+        timeText = findViewById(R.id.detailDurationText);
+        accessType = findViewById(R.id.accessTypeText);
+        accessTime = findViewById(R.id.accessTimeText);
+        paymentMethods = findViewById(R.id.paymentMethodText);
+        fullAddress = findViewById(R.id.fullAddressText);
+        plugType = findViewById(R.id.plugTypeText);
+        plugPrice = findViewById(R.id.plugPriceText);
+        plugAvailability = findViewById(R.id.plugAvailabilityText);
+        lastUsed = findViewById(R.id.lastUsedText);
+        infoDistance = findViewById(R.id.infoDistance);
+        infoDriveTime = findViewById(R.id.infoDriveTime);
+        startChargingBtn = findViewById(R.id.startChargingBtn);
+        navButton = findViewById(R.id.navigationBtn);
+        backBtn = findViewById(R.id.backBtn);
 
-        stationNameText = findViewById(R.id.station_name);
-        powerOutputText = findViewById(R.id.power_output_text);
-        availabilityText = findViewById(R.id.availability_text);
-        chargingLevelText = findViewById(R.id.charging_level_text);
-        connectorTypeText = findViewById(R.id.connector_type_text);
-        networkText = findViewById(R.id.network_text);
-        bookStationButton = findViewById(R.id.btn_book_station);
+        // Get data from Intent
+        Intent intent = getIntent();
+        String name = intent.getStringExtra("stationName");
+        String payment = intent.getStringExtra("paymentMethods");
+        String plug = intent.getStringExtra("plugType");
+        String price = intent.getStringExtra("plugPrice");
+        String availability = intent.getStringExtra("plugAvailability");
+        String distance = intent.getStringExtra("distance");
+        String duration = intent.getStringExtra("duration");
 
-        // Retrieve data from Intent
-        name = getIntent().getStringExtra("name");
-        latitude = getIntent().getDoubleExtra("latitude", 0);
-        longitude = getIntent().getDoubleExtra("longitude", 0);
-        powerOutput = getIntent().getStringExtra("powerOutput");
-        availability = getIntent().getStringExtra("availability");
-        chargingLevel = getIntent().getStringExtra("chargingLevel");
-        connectorType = getIntent().getStringExtra("connectorType");
-        network = getIntent().getStringExtra("network");
+        double latitude = intent.getDoubleExtra("latitude", 0.0);
+        double longitude = intent.getDoubleExtra("longitude", 0.0);
 
-        if (name != null) {
-            stationNameText.setText(name);
-            powerOutputText.setText(powerOutput);
-            availabilityText.setText(availability);
-            chargingLevelText.setText(chargingLevel);
-            connectorTypeText.setText(connectorType);
-            networkText.setText(network);
-        } else {
-            Toast.makeText(this, "Error: Station details not available", Toast.LENGTH_LONG).show();
+        // Get address from lat/lng using Geocoder
+        finalAddress = getAddressFromLatLng(latitude, longitude);
+        if (finalAddress == null || finalAddress.isEmpty()) {
+            finalAddress = "Address not available";
         }
 
-        // Booking button click event
-        bookStationButton.setOnClickListener(view -> {
-            Intent intent = new Intent(StationDetailsActivity.this, BookingStationActivity.class);
-            intent.putExtra("name", name);
-            intent.putExtra("latitude", latitude);
-            intent.putExtra("longitude", longitude);
-            startActivity(intent);
+        // Populate data
+        stationName.setText(name != null ? name : "EV Station");
+        stationAddress.setText(finalAddress);
+        fullAddress.setText(finalAddress);
+
+        distanceText.setText("🚗 " + (distance != null ? distance : "N/A"));
+        timeText.setText(duration != null ? duration : "N/A");
+        infoDistance.setText(distance != null ? distance : "N/A");
+        infoDriveTime.setText(duration != null ? duration : "N/A");
+
+        accessType.setText("Public");
+        accessTime.setText("24 Hours");
+        paymentMethods.setText(payment != null ? payment : "Google Pay, PayPal, Credit/Debit");
+        plugType.setText(plug != null ? plug : "J1772");
+        plugPrice.setText(price != null ? price : "$0.40/kWh");
+        plugAvailability.setText(availability != null ? availability : "2/2 Available");
+        lastUsed.setText("Last used 2 days ago");
+
+        // Google Maps Navigation
+        navButton.setOnClickListener(v -> {
+            Uri gmmIntentUri = Uri.parse("google.navigation:q=" + Uri.encode(finalAddress));
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            mapIntent.setPackage("com.google.android.apps.maps");
+            if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(mapIntent);
+            }
         });
+
+        // Back button
+        backBtn.setOnClickListener(v -> onBackPressed());
+
+        // Start charging
+        startChargingBtn.setOnClickListener(v ->
+                startActivity(new Intent(this, PaymentActivity.class))
+        );
+    }
+
+    private String getAddressFromLatLng(double lat, double lng) {
+        try {
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            List<Address> list = geocoder.getFromLocation(lat, lng, 1);
+            if (list != null && !list.isEmpty()) {
+                Address address = list.get(0);
+                return address.getAddressLine(0);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Geocoder failed", e);
+        }
+        return null;
     }
 }
