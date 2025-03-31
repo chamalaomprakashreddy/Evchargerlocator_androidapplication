@@ -1,11 +1,15 @@
 package com.example.evchargerlocator_androidapplication;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,14 +19,17 @@ public class SavedTripAdapter extends RecyclerView.Adapter<SavedTripAdapter.Save
 
     public interface OnTripClickListener {
         void onTripClick(SavedTrip trip);
+        void onTripDelete(SavedTrip trip, int position);
     }
 
     private List<SavedTrip> tripList;
     private OnTripClickListener listener;
+    private Context context;
 
-    public SavedTripAdapter(List<SavedTrip> tripList, OnTripClickListener listener) {
+    public SavedTripAdapter(List<SavedTrip> tripList, OnTripClickListener listener, Context context) {
         this.tripList = tripList;
         this.listener = listener;
+        this.context = context;
     }
 
     @NonNull
@@ -45,6 +52,20 @@ public class SavedTripAdapter extends RecyclerView.Adapter<SavedTripAdapter.Save
                 listener.onTripClick(trip);
             }
         });
+
+        holder.deleteButton.setOnClickListener(v -> {
+            // Show confirmation dialog
+            new AlertDialog.Builder(context)
+                    .setTitle("Delete Trip")
+                    .setMessage("Are you sure you want to delete this trip?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        if (listener != null) {
+                            listener.onTripDelete(trip, position);
+                        }
+                    })
+                    .setNegativeButton("No", null) // Cancel deletion
+                    .show();
+        });
     }
 
     @Override
@@ -52,9 +73,15 @@ public class SavedTripAdapter extends RecyclerView.Adapter<SavedTripAdapter.Save
         return tripList.size();
     }
 
+    public void removeItem(int position) {
+        tripList.remove(position);
+        notifyItemRemoved(position);
+    }
+
     static class SavedTripViewHolder extends RecyclerView.ViewHolder {
         TextView tripName, fromAddress, toAddress;
         CardView tripCard;
+        ImageButton deleteButton;
 
         public SavedTripViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -62,6 +89,7 @@ public class SavedTripAdapter extends RecyclerView.Adapter<SavedTripAdapter.Save
             fromAddress = itemView.findViewById(R.id.fromAddress);
             toAddress = itemView.findViewById(R.id.toAddress);
             tripCard = itemView.findViewById(R.id.tripCard);
+            deleteButton = itemView.findViewById(R.id.deleteTripButton);
         }
     }
 }

@@ -10,37 +10,53 @@
     app:cardElevation="4dp"
     android:background="@android:color/white">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tripTitle"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Trip to Kansas"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"/>
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/fromAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="From: Maryville"
-            android:textSize="14sp"
-            android:layout_marginTop="4dp"
-            android:textColor="@android:color/darker_gray"/>
+            <TextView
+                android:id="@+id/tripTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trip to Kansas"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@android:color/black"/>
 
-        <TextView
-            android:id="@+id/toAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="To: Kansas"
-            android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"/>
-    </LinearLayout>
+            <TextView
+                android:id="@+id/fromAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="From: Maryville"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@android:color/darker_gray"/>
+
+            <TextView
+                android:id="@+id/toAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="To: Kansas"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"/>
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/deleteTripButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete Trip"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"/>
+
+    </RelativeLayout>
 
 </androidx.cardview.widget.CardView>
