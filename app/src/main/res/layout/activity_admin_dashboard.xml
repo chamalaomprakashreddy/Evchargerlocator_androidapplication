@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Map fragment to display Google Maps -->
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -10,6 +11,7 @@
         android:layout_height="match_parent"
         android:layout_below="@id/searchLayout" />
 
+    <!-- Layout for the search bar and options button -->
     <LinearLayout
         android:id="@+id/searchLayout"
         android:layout_width="match_parent"
@@ -21,6 +23,7 @@
         android:padding="10dp"
         android:layout_alignParentTop="true">
 
+        <!-- Input field for searching charging stations -->
         <EditText
             android:id="@+id/searchBar"
             android:layout_width="0dp"
@@ -29,6 +32,7 @@
             android:hint="Search for a charging station"
             android:padding="10dp" />
 
+        <!-- ImageView for additional options menu -->
         <ImageView
             android:id="@+id/moreOptions"
             android:layout_width="40dp"
@@ -38,6 +42,7 @@
             android:src="@drawable/ic_menu_more" />
     </LinearLayout>
 
+    <!-- Button to trigger the search action -->
     <Button
         android:id="@+id/searchButton"
         android:layout_width="match_parent"
@@ -49,6 +54,7 @@
         android:backgroundTint="@android:color/holo_green_dark"
         android:text="Search" />
 
+    <!-- Button to add a new charging station -->
     <Button
         android:id="@+id/btnAddStation"
         android:layout_width="match_parent"
@@ -59,6 +65,8 @@
         android:layout_marginBottom="60dp"
         android:backgroundTint="@android:color/holo_green_dark"
         android:text="Add Station" />
+
+    <!-- Button to view existing charging stations -->
     <Button
         android:id="@+id/btnViewStations"
         android:layout_width="match_parent"
@@ -69,6 +77,5 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:layout_above="@id/btnAddStation"/>
-
 
 </RelativeLayout>
