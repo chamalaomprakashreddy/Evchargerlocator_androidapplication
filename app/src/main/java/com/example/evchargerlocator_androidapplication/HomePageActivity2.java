@@ -161,11 +161,27 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                     if (station != null) {
                         LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
 
+                        // Set marker color based on charging level
+                        float markerColor;
+                        switch (station.getChargingLevel().toLowerCase()) {
+                            case "level 1":
+                                markerColor = BitmapDescriptorFactory.HUE_YELLOW; // Yellow for Level 1
+                                break;
+                            case "level 2":
+                                markerColor = BitmapDescriptorFactory.HUE_GREEN;  // Green for Level 2
+                                break;
+                            case "dc fast":
+                                markerColor = BitmapDescriptorFactory.HUE_BLUE;    // Red for DC Fast
+                                break;
+                            default:
+                                markerColor = BitmapDescriptorFactory.HUE_BLUE;   // Default color
+                        }
+
                         myMap.addMarker(new MarkerOptions()
                                 .position(stationLocation)
                                 .title(station.getName())
                                 .snippet("EV Charging Station")
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
                     }
                 }
             }

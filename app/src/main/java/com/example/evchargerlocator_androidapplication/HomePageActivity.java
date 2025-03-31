@@ -198,7 +198,8 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void fetchEVStationsAlongRoute(List<LatLng> routePoints) {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int count = 0;
                 for (DataSnapshot stationSnap : snapshot.getChildren()) {
                     ChargingStation station = stationSnap.getValue(ChargingStation.class);
@@ -208,36 +209,49 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                     boolean isOnRoute = PolyUtil.isLocationOnPath(loc, routePoints, true, distanceFilter * 1609.34);
 
                     if (isOnRoute) {
-                        // 🔋 Get vehicle info
                         Intent intent = getIntent();
                         String vehicleType = intent.getStringExtra("vehicleType");
                         int batteryPercent = intent.getIntExtra("batteryPercent", 100);
                         VehicleModel vehicle = VehicleData.getVehicleByName(vehicleType);
                         double usableRangeKm = (batteryPercent / 100.0) * vehicle.maxRangeKm;
 
-                        // 📍 Compute distance from start to station
                         float[] result = new float[1];
                         Location.distanceBetween(startLocation.latitude, startLocation.longitude,
                                 station.getLatitude(), station.getLongitude(), result);
                         float distanceFromStartKm = result[0] / 1000f;
 
                         if (distanceFromStartKm >= usableRangeKm) {
-                            // ✅ Show station only if it's beyond usable range
+                            // Set marker color based on charging level
+                            float markerColor;
+                            switch (station.getChargingLevel().toLowerCase()) {
+                                case "level 1":
+                                    markerColor = BitmapDescriptorFactory.HUE_YELLOW; // Yellow for Level 1
+                                    break;
+                                case "level 2":
+                                    markerColor = BitmapDescriptorFactory.HUE_GREEN;  // Green for Level 2
+                                    break;
+                                case "dc fast":
+                                    markerColor = BitmapDescriptorFactory.HUE_BLUE;    // Red for DC Fast
+                                    break;
+                                default:
+                                    markerColor = BitmapDescriptorFactory.HUE_BLUE;   // Default color
+                            }
+
                             myMap.addMarker(new MarkerOptions()
                                     .position(loc)
                                     .title(station.getName())
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                    .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
                             count++;
                         } else {
                             Log.d("SMART_PLAN", "Skipping " + station.getName() + " — " + distanceFromStartKm + " km from start");
                         }
                     }
-
                 }
                 stationStat.setText("📍 " + count);
             }
 
-            @Override public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(HomePageActivity.this, "Database error", Toast.LENGTH_SHORT).show();
             }
         });

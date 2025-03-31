@@ -27,6 +27,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -213,7 +214,27 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
                     if (station != null) {
                         stationList.add(station);
                         LatLng location = new LatLng(station.getLatitude(), station.getLongitude());
-                        myMap.addMarker(new MarkerOptions().position(location).title(station.getName()));
+
+                        // Set marker color based on charging level
+                        float markerColor;
+                        switch (station.getChargingLevel().toLowerCase()) {
+                            case "level 1":
+                                markerColor = BitmapDescriptorFactory.HUE_YELLOW; // Yellow for Level 1
+                                break;
+                            case "level 2":
+                                markerColor = BitmapDescriptorFactory.HUE_GREEN;  // Green for Level 2
+                                break;
+                            case "dc fast":
+                                markerColor = BitmapDescriptorFactory.HUE_BLUE;   // Blue for DC Fast (changed from red)
+                                break;
+                            default:
+                                markerColor = BitmapDescriptorFactory.HUE_BLUE;   // Default color
+                        }
+
+                        myMap.addMarker(new MarkerOptions()
+                                .position(location)
+                                .title(station.getName())
+                                .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
                     }
                 }
             }
@@ -224,7 +245,6 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
             }
         });
     }
-
     private void searchPlaceOrStation(String query) {
         Geocoder geocoder = new Geocoder(AdminDashboardActivity.this);
         try {
