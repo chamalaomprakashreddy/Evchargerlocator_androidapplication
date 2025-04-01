@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -48,6 +49,7 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -82,7 +84,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
     private SearchView mapSearchView;
     private FloatingActionButton fabCenter;
     private LatLng startLocation, endLocation;
-    private double distanceFilter = 5.0;
+    private double distanceFilter = 5.0; // Distance filter in miles
     private Polyline routePolyline;
     private Marker searchMarker;
     private PlacesClient placesClient;
@@ -143,6 +145,14 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
 
+        myMap.setOnMarkerClickListener(marker -> {
+            if (marker.getSnippet() != null && marker.getSnippet().equals("EV Charging Station")) {
+                showBottomSheet(marker);
+                return true;
+            }
+            return false;
+        });
+
         if (startLocation != null && endLocation != null) {
             drawRouteAndEVStations();
         } else {
@@ -160,28 +170,14 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
                     if (station != null) {
                         LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
+                        float markerColor = getMarkerColor(station.getChargingLevel());
 
-                        // Set marker color based on charging level
-                        float markerColor;
-                        switch (station.getChargingLevel().toLowerCase()) {
-                            case "level 1":
-                                markerColor = BitmapDescriptorFactory.HUE_YELLOW; // Yellow for Level 1
-                                break;
-                            case "level 2":
-                                markerColor = BitmapDescriptorFactory.HUE_GREEN;  // Green for Level 2
-                                break;
-                            case "dc fast":
-                                markerColor = BitmapDescriptorFactory.HUE_BLUE;    // Red for DC Fast
-                                break;
-                            default:
-                                markerColor = BitmapDescriptorFactory.HUE_BLUE;   // Default color
-                        }
-
-                        myMap.addMarker(new MarkerOptions()
+                        Marker marker = myMap.addMarker(new MarkerOptions()
                                 .position(stationLocation)
                                 .title(station.getName())
                                 .snippet("EV Charging Station")
                                 .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+                        marker.setTag(station);
                     }
                 }
             }
@@ -298,14 +294,14 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
                     if (station != null) {
                         LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
-
                         double distance = distanceBetween(searchedLocation, stationLocation);
-                        if (distance <= distanceFilter * 1.60934) {
-                            myMap.addMarker(new MarkerOptions()
+                        if (distance <= distanceFilter) { // Distance filter in miles
+                            Marker marker = myMap.addMarker(new MarkerOptions()
                                     .position(stationLocation)
                                     .title(station.getName())
                                     .snippet("EV Charging Station")
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            marker.setTag(station);
                         }
                     }
                 }
@@ -321,7 +317,8 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
     private double distanceBetween(LatLng latLng1, LatLng latLng2) {
         double latDiff = latLng1.latitude - latLng2.latitude;
         double lonDiff = latLng1.longitude - latLng2.longitude;
-        return Math.sqrt(latDiff * latDiff + lonDiff * lonDiff) * 111.32;
+        double distanceInKm = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff) * 111.32;
+        return distanceInKm * 0.621371; // Convert kilometers to miles
     }
 
     private void setupDrawer() {
@@ -351,6 +348,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         String url = "https://maps.googleapis.com/maps/api/directions/json?"
                 + "origin=" + startLocation.latitude + "," + startLocation.longitude
                 + "&destination=" + endLocation.latitude + "," + endLocation.longitude
+                + "&units=imperial" // Request distances in miles
                 + "&key=" + GOOGLE_MAPS_API_KEY;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -388,12 +386,13 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
                     if (station != null) {
                         LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
-                        if (PolyUtil.isLocationOnPath(stationLocation, routePoints, true, distanceFilter * 1609.34)) {
-                            myMap.addMarker(new MarkerOptions()
+                        if (PolyUtil.isLocationOnPath(stationLocation, routePoints, true, distanceFilter * 1609.34)) { // Convert miles to meters
+                            Marker marker = myMap.addMarker(new MarkerOptions()
                                     .position(stationLocation)
                                     .title(station.getName())
                                     .snippet("EV Charging Station")
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            marker.setTag(station);
                         }
                     }
                 }
@@ -417,7 +416,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
-    private void requestNewLocation() {
+    private void requestNewLocation(LocationCallbackHandler callback) {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(5000);
@@ -438,14 +437,20 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 
                 fusedLocationClient.removeLocationUpdates(this);
+                callback.onLocationReceived(userLatLng);
             }
         };
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
             return;
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+
+    interface LocationCallbackHandler {
+        void onLocationReceived(LatLng latLng);
     }
 
     private void fetchCurrentLocation() {
@@ -479,12 +484,152 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                         }
                     } else {
                         Log.e(TAG, "Location is null. Requesting new location update.");
-                        requestNewLocation();
+                        requestNewLocation(latLng -> {});
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to get current location: " + e.getMessage());
                     Toast.makeText(this, "Error fetching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private float getMarkerColor(String chargingLevel) {
+        switch (chargingLevel.toLowerCase()) {
+            case "level 1":
+                return BitmapDescriptorFactory.HUE_YELLOW;
+            case "level 2":
+                return BitmapDescriptorFactory.HUE_GREEN;
+            case "dc fast":
+                return BitmapDescriptorFactory.HUE_BLUE;
+            default:
+                return BitmapDescriptorFactory.HUE_BLUE;
+        }
+    }
+
+    private void showBottomSheet(Marker marker) {
+        ChargingStation station = (ChargingStation) marker.getTag();
+        if (station == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_station, null);
+        bottomSheetDialog.setContentView(bottomSheetView);
+
+        TextView stationName = bottomSheetView.findViewById(R.id.station_name);
+        TextView stationAddress = bottomSheetView.findViewById(R.id.station_address);
+        TextView stationLevel = bottomSheetView.findViewById(R.id.station_level);
+        Button navigateButton = bottomSheetView.findViewById(R.id.navigate_button);
+        Button detailsButton = bottomSheetView.findViewById(R.id.details_button);
+
+        stationName.setText(station.getName());
+        stationLevel.setText("Charging Level: " + station.getChargingLevel());
+
+        String addressText = "Address not available";
+        try {
+            Geocoder geocoder = new Geocoder(this);
+            List<Address> addresses = geocoder.getFromLocation(station.getLatitude(), station.getLongitude(), 1);
+            if (!addresses.isEmpty()) {
+                addressText = addresses.get(0).getAddressLine(0);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Geocoder error: " + e.getMessage());
+        }
+        stationAddress.setText(addressText);
+
+        final String finalAddressText = addressText;
+
+        navigateButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW,
+                    android.net.Uri.parse("google.navigation:q=" + station.getLatitude() + "," + station.getLongitude()));
+            startActivity(intent);
+            bottomSheetDialog.dismiss();
+        });
+
+        detailsButton.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                    if (location != null) {
+                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                        LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
+
+                        double distanceMiles = distanceBetween(userLocation, stationLocation);
+                        String distanceStr = String.format("%.2f miles", distanceMiles);
+
+                        fetchTravelTime(userLocation, stationLocation, (distanceResult, durationResult) -> {
+                            Intent intent = new Intent(HomePageActivity2.this, StationDetailsActivity.class);
+                            intent.putExtra("stationName", station.getName());
+                            intent.putExtra("latitude", station.getLatitude());
+                            intent.putExtra("longitude", station.getLongitude());
+                            intent.putExtra("address", finalAddressText);
+                            intent.putExtra("distance", distanceResult != null ? distanceResult : distanceStr);
+                            intent.putExtra("duration", durationResult != null ? durationResult : "N/A");
+                            intent.putExtra("plugType", station.getChargingLevel());
+                            intent.putExtra("plugPrice", "$0.40/kWh");
+                            intent.putExtra("plugAvailability", "2/2 Available");
+                            startActivity(intent);
+                            bottomSheetDialog.dismiss();
+                        });
+                    } else {
+                        requestNewLocation(latLng -> {
+                            double distanceMiles = distanceBetween(latLng, new LatLng(station.getLatitude(), station.getLongitude()));
+                            String distanceStr = String.format("%.2f miles", distanceMiles);
+                            fetchTravelTime(latLng, new LatLng(station.getLatitude(), station.getLongitude()), (distanceResult, durationResult) -> {
+                                Intent intent = new Intent(HomePageActivity2.this, StationDetailsActivity.class);
+                                intent.putExtra("stationName", station.getName());
+                                intent.putExtra("latitude", station.getLatitude());
+                                intent.putExtra("longitude", station.getLongitude());
+                                intent.putExtra("address", finalAddressText);
+                                intent.putExtra("distance", distanceResult != null ? distanceResult : distanceStr);
+                                intent.putExtra("duration", durationResult != null ? durationResult : "N/A");
+                                intent.putExtra("plugType", station.getChargingLevel());
+                                intent.putExtra("plugPrice", "$0.40/kWh");
+                                intent.putExtra("plugAvailability", "2/2 Available");
+                                startActivity(intent);
+                                bottomSheetDialog.dismiss();
+                            });
+                        });
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Location permission required", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void fetchTravelTime(LatLng origin, LatLng destination, TravelTimeCallback callback) {
+        String url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
+                + "origins=" + origin.latitude + "," + origin.longitude
+                + "&destinations=" + destination.latitude + "," + destination.longitude
+                + "&units=imperial" // Request distances in miles
+                + "&key=" + GOOGLE_MAPS_API_KEY;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONArray rows = response.getJSONArray("rows");
+                        if (rows.length() > 0) {
+                            JSONObject elements = rows.getJSONObject(0).getJSONArray("elements").getJSONObject(0);
+                            String distance = elements.getJSONObject("distance").getString("text"); // Already in miles
+                            String duration = elements.getJSONObject("duration").getString("text");
+                            callback.onResult(distance, duration);
+                        } else {
+                            callback.onResult(null, null);
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing Distance Matrix response: " + e.getMessage());
+                        callback.onResult(null, null);
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "Distance Matrix request failed: " + error.getMessage());
+                    callback.onResult(null, null);
+                });
+
+        requestQueue.add(request);
+    }
+
+    interface TravelTimeCallback {
+        void onResult(String distance, String duration);
     }
 }

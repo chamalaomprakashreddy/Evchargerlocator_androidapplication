@@ -5,15 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/drawer_layout"
-    tools:context=".HomePageActivity">
+    tools:context=".HomePageActivity2">
 
-    <!-- Main content (map and search) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
-        <!-- Google Map Fragment -->
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -24,7 +22,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Navigation Icon (Hamburger Icon) floating on top of the map -->
         <ImageView
             android:id="@+id/nav_icon"
             android:layout_width="40dp"
@@ -36,7 +33,6 @@
             android:layout_marginTop="20dp"
             android:layout_marginStart="16dp"/>
 
-        <!-- SearchView floating below the navigation icon -->
         <SearchView
             android:id="@+id/mapSearch"
             android:layout_width="340dp"
@@ -50,7 +46,6 @@
             app:layout_constraintStart_toEndOf="@+id/nav_icon"
             app:layout_constraintTop_toTopOf="@+id/map" />
 
-        <!-- Floating Action Button for recentering the map -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_center"
             android:layout_width="wrap_content"
@@ -66,7 +61,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Side Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"

@@ -61,12 +61,12 @@ public class StationDetailsActivity extends AppCompatActivity {
         String availability = intent.getStringExtra("plugAvailability");
         String distance = intent.getStringExtra("distance");
         String duration = intent.getStringExtra("duration");
-
+        String address = intent.getStringExtra("address");
         double latitude = intent.getDoubleExtra("latitude", 0.0);
         double longitude = intent.getDoubleExtra("longitude", 0.0);
 
-        // Get address from lat/lng using Geocoder
-        finalAddress = getAddressFromLatLng(latitude, longitude);
+        // Use provided address or fallback to Geocoder
+        finalAddress = address != null && !address.isEmpty() ? address : getAddressFromLatLng(latitude, longitude);
         if (finalAddress == null || finalAddress.isEmpty()) {
             finalAddress = "Address not available";
         }
@@ -91,7 +91,7 @@ public class StationDetailsActivity extends AppCompatActivity {
 
         // Google Maps Navigation
         navButton.setOnClickListener(v -> {
-            Uri gmmIntentUri = Uri.parse("google.navigation:q=" + Uri.encode(finalAddress));
+            Uri gmmIntentUri = Uri.parse("google.navigation:q=" + latitude + "," + longitude);
             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
             mapIntent.setPackage("com.google.android.apps.maps");
             if (mapIntent.resolveActivity(getPackageManager()) != null) {
