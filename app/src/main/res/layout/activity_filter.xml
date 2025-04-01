@@ -1,165 +1,275 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/scrollContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context=".FilterActivity">
+    android:background="@android:color/white">
 
-    <TextView
-        android:id="@+id/backArrowText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="←"
-        android:textSize="32sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintBottom_toBottomOf="@id/title" />
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Filters"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp" />
-
-    <TextView
-        android:id="@+id/label_levels"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Levels"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/title"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="80dp" />
-
-    <Spinner
-        android:id="@+id/spinner_levels"
-        android:layout_width="150dp"
-        android:layout_height="35dp"
-        android:entries="@array/levels_array"
-        android:background="@drawable/spinner_background"
-        app:layout_constraintTop_toBottomOf="@id/title"
-        app:layout_constraintStart_toEndOf="@id/label_levels"
-        android:layout_marginStart="108dp"
-        android:layout_marginTop="80dp" />
-
-    <TextView
-        android:id="@+id/label_connectors"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Connectors"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/spinner_levels"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="32dp"
-        android:layout_marginStart="16dp" />
-
-    <Spinner
-        android:id="@+id/spinner_connectors"
-        android:layout_width="150dp"
-        android:layout_height="35dp"
-        android:entries="@array/connectors_array"
-        android:background="@drawable/spinner_background"
-        app:layout_constraintTop_toBottomOf="@id/spinner_levels"
-        app:layout_constraintStart_toEndOf="@id/label_connectors"
-        android:layout_marginTop="32dp"
-        android:layout_marginStart="72dp" />
-
-    <TextView
-        android:id="@+id/label_networks"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Networks"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/spinner_connectors"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="28dp"
-        android:layout_marginStart="16dp" />
-
-    <Spinner
-        android:id="@+id/spinner_networks"
-        android:layout_width="150dp"
-        android:layout_height="35dp"
-        android:entries="@array/networks_array"
-        android:background="@drawable/spinner_background"
-        app:layout_constraintTop_toBottomOf="@id/spinner_connectors"
-        app:layout_constraintStart_toEndOf="@id/label_networks"
-        android:layout_marginTop="32dp"
-        android:layout_marginStart="84dp" />
-
-    <TextView
-        android:id="@+id/label_pricing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pricing"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/spinner_networks"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="44dp"
-        android:layout_marginStart="25dp" />
-
-    <TextView
-        android:id="@+id/text_pricing"
-        android:layout_width="169dp"
-        android:layout_height="22dp"
-        android:text="Select filters to calculate price"
-        android:textColor="@color/black"
-        android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@id/spinner_networks"
-        app:layout_constraintStart_toEndOf="@id/label_pricing"
-        android:layout_marginTop="44dp"
-        android:layout_marginStart="88dp" />
-
-    <Button
-        android:id="@+id/resetButton"
+    <LinearLayout
+        android:id="@+id/mainLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reset"
-        android:textSize="15sp"
-        android:textColor="@color/white"
-        android:backgroundTint="@android:color/holo_green_dark"
-        app:layout_constraintTop_toBottomOf="@id/text_pricing"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="48dp"
-        android:layout_marginHorizontal="45dp" />
+        android:padding="16dp"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/button_apply"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Apply"
-        android:textColor="@color/white"
-        android:backgroundTint="@android:color/holo_blue_dark"
-        app:layout_constraintTop_toBottomOf="@id/resetButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"
-        android:layout_marginHorizontal="45dp" />
+        <!-- Top Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:weightSum="3"
+            android:paddingBottom="12dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/backArrowText"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="←"
+                android:textSize="32sp"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Filters"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/resetText"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Reset"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/teal_700"
+                android:gravity="end" />
+        </LinearLayout>
+
+        <!-- LEVELS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LEVELS"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="20dp"
+            android:textColor="@android:color/black" />
+
+        <Switch
+            android:id="@+id/switch_level1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Level 1" />
+
+        <Switch
+            android:id="@+id/switch_level2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Level 2" />
+
+        <Switch
+            android:id="@+id/switch_level3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Level 3 (DCFC)" />
+
+        <!-- CONNECTORS SECTION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CONNECTORS"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="24dp"
+            android:textColor="@android:color/black" />
+
+        <!-- Row 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginTop="8dp">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="100dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/connector_bg">
+
+                <ImageView
+                    android:id="@+id/type1_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_type1"
+                    android:scaleType="centerInside"
+                    android:padding="12dp" />
+
+                <ImageView
+                    android:id="@+id/type1_tick"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="6dp"
+                    android:visibility="gone"
+                    android:src="@drawable/ic_check"
+                    android:tint="@android:color/holo_green_dark" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="100dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/connector_bg">
+
+                <ImageView
+                    android:id="@+id/type2_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_type2"
+                    android:scaleType="centerInside"
+                    android:padding="12dp" />
+
+                <ImageView
+                    android:id="@+id/type2_tick"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="6dp"
+                    android:visibility="gone"
+                    android:src="@drawable/ic_check"
+                    android:tint="@android:color/holo_green_dark" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Row 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginTop="8dp">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="100dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/connector_bg">
+
+                <ImageView
+                    android:id="@+id/ccs_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_css_png"
+                    android:scaleType="centerInside"
+                    android:padding="12dp" />
+
+                <ImageView
+                    android:id="@+id/ccs_tick"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="6dp"
+                    android:visibility="gone"
+                    android:src="@drawable/ic_check"
+                    android:tint="@android:color/holo_green_dark" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="100dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/connector_bg">
+
+                <ImageView
+                    android:id="@+id/chademo_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_chademo"
+                    android:scaleType="centerInside"
+                    android:padding="12dp" />
+
+                <ImageView
+                    android:id="@+id/chademo_tick"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="6dp"
+                    android:visibility="gone"
+                    android:src="@drawable/ic_check"
+                    android:tint="@android:color/holo_green_dark" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- NETWORKS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NETWORKS"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="24dp"
+            android:textColor="@android:color/black" />
+
+        <Switch
+            android:id="@+id/tesla_toggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tesla" />
+
+        <Switch
+            android:id="@+id/chargepoint_toggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ChargePoint" />
+
+        <Switch
+            android:id="@+id/evgo_toggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="EVgo" />
+
+        <Switch
+            android:id="@+id/electrify_toggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Electrify America" />
+
+        <Switch
+            android:id="@+id/select_all_toggle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select All" />
+
+        <!-- Buttons -->
+        <Button
+            android:id="@+id/button_apply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Apply"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/button_reset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reset"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+</ScrollView>

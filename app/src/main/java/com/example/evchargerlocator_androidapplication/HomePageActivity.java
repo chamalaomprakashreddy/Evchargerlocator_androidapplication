@@ -50,6 +50,10 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
     private List<ChargingStation> selectedStations = new ArrayList<>();
 
     private TextView distanceStat, timeStat, stationStat;
+    private boolean filterLevel1 = false, filterLevel2 = false, filterLevel3 = false;
+    private Set<String> filterConnectors = new HashSet<>();
+    private Set<String> filterNetworks = new HashSet<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,34 +65,49 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         stationStat = findViewById(R.id.stationStat);
         requestQueue = Volley.newRequestQueue(this);
         databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
+
         Intent intent = getIntent();
+        startLocation = getLatLngFromIntent(intent.getStringExtra("startLocation"));
+        endLocation = getLatLngFromIntent(intent.getStringExtra("endLocation"));
+        distanceFilter = intent.getDoubleExtra("distanceFilter", 5.0);
+
+        // ✅ Only apply filters if passed via Intent
+        if (intent.hasExtra("level1") || intent.hasExtra("connectorTypes") || intent.hasExtra("networkTesla")) {
+            filterLevel1 = intent.getBooleanExtra("level1", false);
+            filterLevel2 = intent.getBooleanExtra("level2", false);
+            filterLevel3 = intent.getBooleanExtra("level3", false);
+
+            String[] connectorTypes = intent.getStringArrayExtra("connectorTypes");
+            if (connectorTypes != null) filterConnectors.addAll(Arrays.asList(connectorTypes));
+
+            if (intent.getBooleanExtra("networkTesla", false)) filterNetworks.add("Tesla");
+            if (intent.getBooleanExtra("networkChargePoint", false)) filterNetworks.add("ChargePoint");
+            if (intent.getBooleanExtra("networkEVgo", false)) filterNetworks.add("EVgo");
+            if (intent.getBooleanExtra("networkElectrify", false)) filterNetworks.add("Electrify America");
+        }
+
+        // Vehicle info for smart planning
         String vehicleType = intent.getStringExtra("vehicleType");
         int batteryPercent = intent.getIntExtra("batteryPercent", 100);
 
-        // Handle incoming intent
-        //Intent intent = getIntent();
-        if (intent != null && intent.getBooleanExtra("restoreTrip", false)) {
+        // Restore trip if reopening
+        if (intent.getBooleanExtra("restoreTrip", false)) {
             selectedStations = intent.getParcelableArrayListExtra("stations");
-            startLocation = getLatLngFromIntent(intent.getStringExtra("startLocation"));
-            endLocation = getLatLngFromIntent(intent.getStringExtra("endLocation"));
 
             updateTripBadge();
             updateStationStat();
+        }
 
-            if (startLocation != null && endLocation != null) {
-                drawRouteAndEVStations();
-            }
-        } else {
-            startLocation = getLatLngFromIntent(intent.getStringExtra("startLocation"));
-            endLocation = getLatLngFromIntent(intent.getStringExtra("endLocation"));
-            distanceFilter = intent.getDoubleExtra("distanceFilter", 5.0);
+        // Always draw route if valid
+        if (startLocation != null && endLocation != null) {
+            drawRouteAndEVStations();
         }
 
         // Setup map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) mapFragment.getMapAsync(this);
 
-        // Trip Badge Click
+        // Trip Badge click
         FrameLayout tripBadge = findViewById(R.id.tripBadge);
         tripBadge.setOnClickListener(v -> {
             Intent tripIntent = new Intent(HomePageActivity.this, MyTripActivity.class);
@@ -120,10 +139,18 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             startActivity(tripIntent);
         });
 
-        // Save Trip Dialog
+        // Save trip button
         ImageButton saveTripButton = findViewById(R.id.saveTripButton);
         saveTripButton.setOnClickListener(v -> showSaveTripDialog());
+
+        // Filter button
+        ImageButton filterBtn = findViewById(R.id.filter);
+        filterBtn.setOnClickListener(v -> {
+            Intent filterIntent = new Intent(HomePageActivity.this, FilterActivity.class);
+            startActivityForResult(filterIntent, 101);
+        });
     }
+
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
@@ -221,32 +248,55 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                         float distanceFromStartKm = result[0] / 1000f;
 
                         if (distanceFromStartKm >= usableRangeKm) {
-                            // Set marker color based on charging level
-                            float markerColor;
-                            switch (station.getChargingLevel().toLowerCase()) {
-                                case "level 1":
-                                    markerColor = BitmapDescriptorFactory.HUE_YELLOW; // Yellow for Level 1
-                                    break;
-                                case "level 2":
-                                    markerColor = BitmapDescriptorFactory.HUE_GREEN;  // Green for Level 2
-                                    break;
-                                case "dc fast":
-                                    markerColor = BitmapDescriptorFactory.HUE_BLUE;    // Red for DC Fast
-                                    break;
-                                default:
-                                    markerColor = BitmapDescriptorFactory.HUE_BLUE;   // Default color
+
+                            // Apply filters only if intent contains any filter keys
+                            boolean shouldApplyFilter = intent.hasExtra("level1") || intent.hasExtra("connectorTypes") || intent.hasExtra("networkTesla");
+
+                            boolean matchesLevel = true;
+                            boolean matchesConnector = true;
+                            boolean matchesNetwork = true;
+
+                            if (shouldApplyFilter) {
+                                String level = station.getChargingLevel().toLowerCase();
+                                String connector = station.getConnectorType();
+                                String network = station.getNetwork();
+
+                                matchesLevel =
+                                        (filterLevel1 && level.contains("level 1")) ||
+                                                (filterLevel2 && level.contains("level 2")) ||
+                                                (filterLevel3 && level.contains("dc"));
+
+                                matchesConnector = filterConnectors.isEmpty() || filterConnectors.contains(connector);
+                                matchesNetwork = filterNetworks.isEmpty() || filterNetworks.contains(network);
                             }
 
-                            myMap.addMarker(new MarkerOptions()
-                                    .position(loc)
-                                    .title(station.getName())
-                                    .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
-                            count++;
+                            if (matchesLevel && matchesConnector && matchesNetwork) {
+                                // Set marker color
+                                float markerColor;
+                                String level = station.getChargingLevel().toLowerCase();
+                                switch (level) {
+                                    case "level 1": markerColor = BitmapDescriptorFactory.HUE_YELLOW; break;
+                                    case "level 2": markerColor = BitmapDescriptorFactory.HUE_GREEN; break;
+                                    case "dc fast": markerColor = BitmapDescriptorFactory.HUE_BLUE; break;
+                                    default: markerColor = BitmapDescriptorFactory.HUE_RED; break;
+                                }
+
+                                myMap.addMarker(new MarkerOptions()
+                                        .position(loc)
+                                        .title(station.getName())
+                                        .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+
+                                count++;
+                            } else {
+                                Log.d("FILTER", "Skipping " + station.getName() + " due to filter mismatch.");
+                            }
+
                         } else {
                             Log.d("SMART_PLAN", "Skipping " + station.getName() + " — " + distanceFromStartKm + " km from start");
                         }
                     }
                 }
+
                 stationStat.setText("📍 " + count);
             }
 
@@ -449,4 +499,40 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         } catch (Exception ignored) {}
         return latLng.latitude + ", " + latLng.longitude;
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 101 && resultCode == RESULT_OK && data != null) {
+            boolean level1 = data.getBooleanExtra("level1", false);
+            boolean level2 = data.getBooleanExtra("level2", false);
+            boolean level3 = data.getBooleanExtra("level3", false);
+
+            String[] connectors = data.getStringArrayExtra("connectorTypes");
+            boolean netTesla = data.getBooleanExtra("networkTesla", false);
+            boolean netChargePoint = data.getBooleanExtra("networkChargePoint", false);
+            boolean netEVgo = data.getBooleanExtra("networkEVgo", false);
+            boolean netElectrify = data.getBooleanExtra("networkElectrify", false);
+
+            Intent refreshed = new Intent(HomePageActivity.this, HomePageActivity.class);
+            refreshed.putExtra("startLocation", startLocation.latitude + "," + startLocation.longitude);
+            refreshed.putExtra("endLocation", endLocation.latitude + "," + endLocation.longitude);
+            refreshed.putExtra("vehicleType", getIntent().getStringExtra("vehicleType"));
+            refreshed.putExtra("batteryPercent", getIntent().getIntExtra("batteryPercent", 100));
+            refreshed.putExtra("distanceFilter", distanceFilter);
+
+            refreshed.putExtra("level1", level1);
+            refreshed.putExtra("level2", level2);
+            refreshed.putExtra("level3", level3);
+            refreshed.putExtra("connectorTypes", connectors);
+            refreshed.putExtra("networkTesla", netTesla);
+            refreshed.putExtra("networkChargePoint", netChargePoint);
+            refreshed.putExtra("networkEVgo", netEVgo);
+            refreshed.putExtra("networkElectrify", netElectrify);
+
+            startActivity(refreshed);
+            finish();
+        }
+    }
+
 }
