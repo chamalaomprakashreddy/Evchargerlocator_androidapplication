@@ -66,13 +66,17 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "HomePageActivity";
     private static final String GOOGLE_MAPS_API_KEY = "AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final int FILTER_REQUEST_CODE = 1002;
 
     private GoogleMap myMap;
     private FusedLocationProviderClient fusedLocationClient;
@@ -88,6 +92,17 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
     private Polyline routePolyline;
     private Marker searchMarker;
     private PlacesClient placesClient;
+    private ImageView filterButton; // Add filter button reference
+
+    // Filter variables
+    private boolean filterLevel1 = false;
+    private boolean filterLevel2 = false;
+    private boolean filterLevel3 = false;
+    private Set<String> filterConnectorTypes = new HashSet<>();
+    private boolean filterNetworkTesla = false;
+    private boolean filterNetworkChargePoint = false;
+    private boolean filterNetworkEVgo = false;
+    private boolean filterNetworkElectrify = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,11 +123,18 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         navigationView = findViewById(R.id.nav_view);
         mapSearchView = findViewById(R.id.mapSearch);
         fabCenter = findViewById(R.id.fab_center);
+        filterButton = findViewById(R.id.filterbutton); // Initialize filter button
 
         navIcon.setOnClickListener(v -> {
             if (!drawerLayout.isDrawerOpen(Gravity.LEFT)) {
                 drawerLayout.openDrawer(Gravity.LEFT);
             }
+        });
+
+        // Set up filter button click listener
+        filterButton.setOnClickListener(v -> {
+            Intent intent = new Intent(HomePageActivity2.this, FilterActivity.class);
+            startActivityForResult(intent, FILTER_REQUEST_CODE);
         });
 
         setupDrawer();
@@ -160,6 +182,59 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
+    private void setupDrawer() {
+        View headerView = navigationView.getHeaderView(0);
+
+        TextView tripPlanner = headerView.findViewById(R.id.menu_trip_planner);
+        tripPlanner.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, TripPlannerActivity.class)));
+
+        TextView chatOption = headerView.findViewById(R.id.menu_chat);
+        chatOption.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, ChatActivity.class)));
+
+
+
+        TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
+        userProfile.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, UserProfileActivity.class)));
+
+        Button logoutButton = headerView.findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(HomePageActivity2.this, MainActivity.class));
+            finish();
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FILTER_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            // Update filter variables with the result from FilterActivity
+            filterLevel1 = data.getBooleanExtra("level1", false);
+            filterLevel2 = data.getBooleanExtra("level2", false);
+            filterLevel3 = data.getBooleanExtra("level3", false);
+
+            String[] connectorTypes = data.getStringArrayExtra("connectorTypes");
+            filterConnectorTypes.clear();
+            if (connectorTypes != null) {
+                filterConnectorTypes.addAll(Arrays.asList(connectorTypes));
+            }
+
+            filterNetworkTesla = data.getBooleanExtra("networkTesla", false);
+            filterNetworkChargePoint = data.getBooleanExtra("networkChargePoint", false);
+            filterNetworkEVgo = data.getBooleanExtra("networkEVgo", false);
+            filterNetworkElectrify = data.getBooleanExtra("networkElectrify", false);
+
+            // Re-fetch and filter EV stations based on the new filter settings
+            fetchAllEVStations();
+            if (startLocation != null && endLocation != null) {
+                drawRouteAndEVStations();
+            } else if (searchMarker != null) {
+                fetchEVStationsNearby(searchMarker.getPosition());
+            }
+            Toast.makeText(this, "Filters applied", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void fetchAllEVStations() {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -168,7 +243,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
 
                 for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
-                    if (station != null) {
+                    if (station != null && passesFilter(station)) {
                         LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
                         float markerColor = getMarkerColor(station.getChargingLevel());
 
@@ -272,7 +347,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                 searchMarker = myMap.addMarker(new MarkerOptions()
                         .position(searchedLocation)
                         .title(query)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
                 myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(searchedLocation, 14));
                 fetchEVStationsNearby(searchedLocation);
@@ -292,10 +367,10 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
-                    if (station != null) {
+                    if (station != null && passesFilter(station)) {
                         LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
                         double distance = distanceBetween(searchedLocation, stationLocation);
-                        if (distance <= distanceFilter) { // Distance filter in miles
+                        if (distance <= distanceFilter) {
                             Marker marker = myMap.addMarker(new MarkerOptions()
                                     .position(stationLocation)
                                     .title(station.getName())
@@ -321,34 +396,11 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         return distanceInKm * 0.621371; // Convert kilometers to miles
     }
 
-    private void setupDrawer() {
-        View headerView = navigationView.getHeaderView(0);
-
-        TextView tripPlanner = headerView.findViewById(R.id.menu_trip_planner);
-        tripPlanner.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, TripPlannerActivity.class)));
-
-        TextView chatOption = headerView.findViewById(R.id.menu_chat);
-        chatOption.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, ChatActivity.class)));
-
-        TextView filterOption = headerView.findViewById(R.id.menu_filter);
-        filterOption.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, FilterActivity.class)));
-
-        TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
-        userProfile.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, UserProfileActivity.class)));
-
-        Button logoutButton = headerView.findViewById(R.id.logoutButton);
-        logoutButton.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(HomePageActivity2.this, MainActivity.class));
-            finish();
-        });
-    }
-
     private void drawRouteAndEVStations() {
         String url = "https://maps.googleapis.com/maps/api/directions/json?"
                 + "origin=" + startLocation.latitude + "," + startLocation.longitude
                 + "&destination=" + endLocation.latitude + "," + endLocation.longitude
-                + "&units=imperial" // Request distances in miles
+                + "&units=imperial"
                 + "&key=" + GOOGLE_MAPS_API_KEY;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -384,9 +436,9 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot stationSnapshot : snapshot.getChildren()) {
                     ChargingStation station = stationSnapshot.getValue(ChargingStation.class);
-                    if (station != null) {
+                    if (station != null && passesFilter(station)) {
                         LatLng stationLocation = new LatLng(station.getLatitude(), station.getLongitude());
-                        if (PolyUtil.isLocationOnPath(stationLocation, routePoints, true, distanceFilter * 1609.34)) { // Convert miles to meters
+                        if (PolyUtil.isLocationOnPath(stationLocation, routePoints, true, distanceFilter * 1609.34)) {
                             Marker marker = myMap.addMarker(new MarkerOptions()
                                     .position(stationLocation)
                                     .title(station.getName())
@@ -403,6 +455,36 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                 Toast.makeText(HomePageActivity2.this, "Error fetching EV stations", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private boolean passesFilter(ChargingStation station) {
+        boolean noLevelFilter = !filterLevel1 && !filterLevel2 && !filterLevel3;
+        boolean noConnectorFilter = filterConnectorTypes.isEmpty();
+        boolean noNetworkFilter = !filterNetworkTesla && !filterNetworkChargePoint && !filterNetworkEVgo && !filterNetworkElectrify;
+
+        if (noLevelFilter && noConnectorFilter && noNetworkFilter) {
+            return true; // No filters applied, show all stations
+        }
+
+        String level = station.getChargingLevel().toLowerCase();
+        boolean levelMatch = (filterLevel1 && level.contains("level 1")) ||
+                (filterLevel2 && level.contains("level 2")) ||
+                (filterLevel3 && level.contains("dc fast"));
+
+        String connectorType = station.getConnectorType() != null ? station.getConnectorType() : "";
+        boolean connectorMatch = filterConnectorTypes.isEmpty() || filterConnectorTypes.contains(connectorType);
+
+        String network = station.getNetwork() != null ? station.getNetwork().toLowerCase() : "";
+        boolean networkMatch = (filterNetworkTesla && network.contains("tesla")) ||
+                (filterNetworkChargePoint && network.contains("chargepoint")) ||
+                (filterNetworkEVgo && network.contains("evgo")) ||
+                (filterNetworkElectrify && network.contains("electrify america"));
+
+        if (!noLevelFilter && !levelMatch) return false;
+        if (!noConnectorFilter && !connectorMatch) return false;
+        if (!noNetworkFilter && !networkMatch) return false;
+
+        return true;
     }
 
     private LatLng getLatLngFromIntent(String locationString) {
@@ -434,7 +516,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                 myMap.addMarker(new MarkerOptions()
                         .position(userLatLng)
                         .title("Updated Location")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
                 fusedLocationClient.removeLocationUpdates(this);
                 callback.onLocationReceived(userLatLng);
@@ -601,7 +683,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         String url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
                 + "origins=" + origin.latitude + "," + origin.longitude
                 + "&destinations=" + destination.latitude + "," + destination.longitude
-                + "&units=imperial" // Request distances in miles
+                + "&units=imperial"
                 + "&key=" + GOOGLE_MAPS_API_KEY;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -610,7 +692,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                         JSONArray rows = response.getJSONArray("rows");
                         if (rows.length() > 0) {
                             JSONObject elements = rows.getJSONObject(0).getJSONArray("elements").getJSONObject(0);
-                            String distance = elements.getJSONObject("distance").getString("text"); // Already in miles
+                            String distance = elements.getJSONObject("distance").getString("text");
                             String duration = elements.getJSONObject("duration").getString("text");
                             callback.onResult(distance, duration);
                         } else {

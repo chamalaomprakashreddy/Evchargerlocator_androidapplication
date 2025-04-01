@@ -65,18 +65,7 @@
             android:drawablePadding="12dp"
             android:gravity="start|center_vertical"/>
 
-        <!-- Filter -->
-        <TextView
-            android:id="@+id/menu_filter"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Filter"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"
-            android:padding="12dp"
-            android:drawableStart="@drawable/filter"
-            android:drawablePadding="12dp"
-            android:gravity="start|center_vertical"/>
+
 
         <!-- User Profile -->
         <TextView
