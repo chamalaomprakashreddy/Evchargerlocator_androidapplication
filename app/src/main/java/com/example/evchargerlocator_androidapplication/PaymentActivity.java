@@ -33,18 +33,15 @@ public class PaymentActivity extends AppCompatActivity {
         });
 
         // Initialize UI elements
-        TextView backArrowText = findViewById(R.id.backArrowText);
         Button googlePayButton = findViewById(R.id.googlePayButton);
         Button paypalButton = findViewById(R.id.paypalButton);
         TextView addPaymentMethodText = findViewById(R.id.addPaymentMethodText);
         TextView savedPaymentMethodText = findViewById(R.id.savedPaymentMethodText);
 
-        // Navigate to Profile when clicking back arrow
-        backArrowText.setOnClickListener(v -> {
-            Intent intent = new Intent(PaymentActivity.this, UserProfileActivity.class);
-            startActivity(intent);
-            finish();
-        });
+        TextView backArrowText = findViewById(R.id.backArrowText);
+
+        // Back button functionality
+        backArrowText.setOnClickListener(v -> finish());
 
         // Open Saved Payment Method Activity
         savedPaymentMethodText.setOnClickListener(v -> {

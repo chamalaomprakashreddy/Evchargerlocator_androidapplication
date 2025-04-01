@@ -21,6 +21,7 @@ public class TripPlannerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_trip_planner);
 
         // Bind views
@@ -28,7 +29,7 @@ public class TripPlannerActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         backArrowText = findViewById(R.id.backArrowText);
 
-        // 🔙 Back button to return to previous screen
+        // Back button to return to previous screen
         backArrowText.setOnClickListener(v -> finish());
 
         // ✅ Set up ViewPager and Adapter
