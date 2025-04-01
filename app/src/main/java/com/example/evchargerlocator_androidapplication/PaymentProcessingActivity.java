@@ -41,7 +41,7 @@ public class PaymentProcessingActivity extends AppCompatActivity {
 
         // Navigate to HomeActivity when Home button is clicked
         homeButton.setOnClickListener(v -> {
-            Intent intent = new Intent(PaymentProcessingActivity.this, HomePageActivity.class);
+            Intent intent = new Intent(PaymentProcessingActivity.this, HomePageActivity2.class);
             startActivity(intent);
             finish(); // Close this activity
         });

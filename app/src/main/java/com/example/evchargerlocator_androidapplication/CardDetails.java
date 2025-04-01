@@ -2,7 +2,6 @@ package com.example.evchargerlocator_androidapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -14,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Calendar;
 
 public class CardDetails extends AppCompatActivity {
 
@@ -62,7 +63,8 @@ public class CardDetails extends AppCompatActivity {
         }
 
         if (cardNumber.length() < 16) {
-            Toast.makeText(this, "Enter a valid 16-digit card number", Toast.LENGTH_SHORT).show();
+        if (cardNumber.length() != 12 && cardNumber.length() != 16) {
+            Toast.makeText(this, "Enter a valid 12 or 16-digit card number", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -71,8 +73,22 @@ public class CardDetails extends AppCompatActivity {
             return;
         }
 
-        if (cvv.length() < 3) {
-            Toast.makeText(this, "Enter a valid 3-digit CVV", Toast.LENGTH_SHORT).show();
+        // Validate expiry date
+        Calendar calendar = Calendar.getInstance();
+        int currentMonth = calendar.get(Calendar.MONTH) + 1;
+        int currentYear = calendar.get(Calendar.YEAR) % 100;
+
+        String[] expiryParts = expiryDate.split("/");
+        int expiryMonth = Integer.parseInt(expiryParts[0]);
+        int expiryYear = Integer.parseInt(expiryParts[1]);
+
+        if (expiryYear < currentYear || (expiryYear == currentYear && expiryMonth < currentMonth)) {
+            Toast.makeText(this, "Expiry date must be in the future", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (cvv.length() != 3 && cvv.length() != 4) {
+            Toast.makeText(this, "Enter a valid 3 or 4-digit CVV", Toast.LENGTH_SHORT).show();
             return;
         }
 
