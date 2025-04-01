@@ -60,6 +60,11 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
+        TextView backArrowText = findViewById(R.id.backArrowText);
+
+        // Back button functionality
+        backArrowText.setOnClickListener(v -> finish());
+
         distanceStat = findViewById(R.id.distanceStat);
         timeStat = findViewById(R.id.timeStat);
         stationStat = findViewById(R.id.stationStat);
