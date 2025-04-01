@@ -62,7 +62,6 @@ public class CardDetails extends AppCompatActivity {
             return;
         }
 
-        if (cardNumber.length() < 16) {
         if (cardNumber.length() != 12 && cardNumber.length() != 16) {
             Toast.makeText(this, "Enter a valid 12 or 16-digit card number", Toast.LENGTH_SHORT).show();
             return;
