@@ -115,14 +115,21 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         // Trip Badge click
         FrameLayout tripBadge = findViewById(R.id.tripBadge);
         tripBadge.setOnClickListener(v -> {
+            if (startLocation == null || endLocation == null) {
+                Toast.makeText(HomePageActivity.this, "Trip locations not set", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Intent tripIntent = new Intent(HomePageActivity.this, MyTripActivity.class);
+
+            // ✅ Send selected stations
             tripIntent.putParcelableArrayListExtra("stations", new ArrayList<>(selectedStations));
 
-            if (startLocation != null)
-                tripIntent.putExtra("startLocation", startLocation.latitude + "," + startLocation.longitude);
-            if (endLocation != null)
-                tripIntent.putExtra("endLocation", endLocation.latitude + "," + endLocation.longitude);
+            // ✅ Send coordinates
+            tripIntent.putExtra("startLocation", startLocation.latitude + "," + startLocation.longitude);
+            tripIntent.putExtra("endLocation", endLocation.latitude + "," + endLocation.longitude);
 
+            // ✅ Use Geocoder to get addresses
             Geocoder geocoder = new Geocoder(HomePageActivity.this, Locale.getDefault());
             try {
                 String fromAddress = "", toAddress = "";
@@ -139,10 +146,18 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             } catch (Exception e) {
                 tripIntent.putExtra("fromAddress", "");
                 tripIntent.putExtra("toAddress", "");
+                Log.e("TripBadge", "Failed to get addresses", e);
             }
+
+            // ✅ Debug logs
+            Log.d("TripBadge", "Launching MyTripActivity with:");
+            Log.d("TripBadge", "Start: " + startLocation);
+            Log.d("TripBadge", "End: " + endLocation);
+            Log.d("TripBadge", "Stations: " + selectedStations.size());
 
             startActivity(tripIntent);
         });
+
 
         // Save trip button
         ImageButton saveTripButton = findViewById(R.id.saveTripButton);
