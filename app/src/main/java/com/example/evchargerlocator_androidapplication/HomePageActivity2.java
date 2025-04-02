@@ -92,7 +92,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
     private Polyline routePolyline;
     private Marker searchMarker;
     private PlacesClient placesClient;
-    private ImageView filterButton; // Add filter button reference
+    private ImageView filterButton;
 
     // Filter variables
     private boolean filterLevel1 = false;
@@ -123,7 +123,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         navigationView = findViewById(R.id.nav_view);
         mapSearchView = findViewById(R.id.mapSearch);
         fabCenter = findViewById(R.id.fab_center);
-        filterButton = findViewById(R.id.filterbutton); // Initialize filter button
+        filterButton = findViewById(R.id.filterbutton);
 
         navIcon.setOnClickListener(v -> {
             if (!drawerLayout.isDrawerOpen(Gravity.LEFT)) {
@@ -131,7 +131,6 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             }
         });
 
-        // Set up filter button click listener
         filterButton.setOnClickListener(v -> {
             Intent intent = new Intent(HomePageActivity2.this, FilterActivity.class);
             startActivityForResult(intent, FILTER_REQUEST_CODE);
@@ -191,8 +190,6 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         TextView chatOption = headerView.findViewById(R.id.menu_chat);
         chatOption.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, ChatActivity.class)));
 
-
-
         TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
         userProfile.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, UserProfileActivity.class)));
 
@@ -208,7 +205,6 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILTER_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            // Update filter variables with the result from FilterActivity
             filterLevel1 = data.getBooleanExtra("level1", false);
             filterLevel2 = data.getBooleanExtra("level2", false);
             filterLevel3 = data.getBooleanExtra("level3", false);
@@ -224,7 +220,6 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             filterNetworkEVgo = data.getBooleanExtra("networkEVgo", false);
             filterNetworkElectrify = data.getBooleanExtra("networkElectrify", false);
 
-            // Re-fetch and filter EV stations based on the new filter settings
             fetchAllEVStations();
             if (startLocation != null && endLocation != null) {
                 drawRouteAndEVStations();
@@ -463,7 +458,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         boolean noNetworkFilter = !filterNetworkTesla && !filterNetworkChargePoint && !filterNetworkEVgo && !filterNetworkElectrify;
 
         if (noLevelFilter && noConnectorFilter && noNetworkFilter) {
-            return true; // No filters applied, show all stations
+            return true;
         }
 
         String level = station.getChargingLevel().toLowerCase();
@@ -588,6 +583,46 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
+    private String calculatePricing(ChargingStation station) {
+        String level = station.getChargingLevel() != null ? station.getChargingLevel().toLowerCase() : "";
+        String connector = station.getConnectorType() != null ? station.getConnectorType().toLowerCase() : "";
+        String network = station.getNetwork() != null ? station.getNetwork().toLowerCase() : "";
+
+        double basePricePerKWh = 0.0;
+
+        // Base pricing based on charging level
+        if (level.contains("level 1")) {
+            basePricePerKWh = 0.20; // Cheaper for Level 1
+        } else if (level.contains("level 2")) {
+            basePricePerKWh = 0.35; // Moderate for Level 2
+        } else if (level.contains("dc fast")) {
+            basePricePerKWh = 0.50; // Expensive for DC Fast
+        } else {
+            basePricePerKWh = 0.40; // Default fallback
+        }
+
+        // Adjust price based on connector type
+        if (connector.contains("tesla")) {
+            basePricePerKWh += 0.10; // Premium for Tesla connectors
+        } else if (connector.contains("ccs") || connector.contains("chademo")) {
+            basePricePerKWh += 0.05; // Slight increase for fast-charging connectors
+        }
+
+        // Adjust price based on network
+        if (network.contains("tesla")) {
+            basePricePerKWh += 0.15; // Tesla network premium
+        } else if (network.contains("electrify america")) {
+            basePricePerKWh += 0.10; // Higher rates for Electrify America
+        } else if (network.contains("chargepoint")) {
+            basePricePerKWh -= 0.05; // Slightly cheaper for ChargePoint
+        } else if (network.contains("evgo")) {
+            basePricePerKWh += 0.05; // Moderate increase for EVgo
+        }
+
+        // Format the price as a string
+        return String.format("$%.2f/kWh", basePricePerKWh);
+    }
+
     private void showBottomSheet(Marker marker) {
         ChargingStation station = (ChargingStation) marker.getTag();
         if (station == null) return;
@@ -599,11 +634,16 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         TextView stationName = bottomSheetView.findViewById(R.id.station_name);
         TextView stationAddress = bottomSheetView.findViewById(R.id.station_address);
         TextView stationLevel = bottomSheetView.findViewById(R.id.station_level);
+        TextView stationPricing = bottomSheetView.findViewById(R.id.station_pricing);
         Button navigateButton = bottomSheetView.findViewById(R.id.navigate_button);
         Button detailsButton = bottomSheetView.findViewById(R.id.details_button);
 
         stationName.setText(station.getName());
         stationLevel.setText("Charging Level: " + station.getChargingLevel());
+
+        // Calculate pricing based on level, connector, and network
+        String pricing = calculatePricing(station);
+        stationPricing.setText("Pricing: " + pricing);
 
         String addressText = "Address not available";
         try {
@@ -645,7 +685,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                             intent.putExtra("distance", distanceResult != null ? distanceResult : distanceStr);
                             intent.putExtra("duration", durationResult != null ? durationResult : "N/A");
                             intent.putExtra("plugType", station.getChargingLevel());
-                            intent.putExtra("plugPrice", "$0.40/kWh");
+                            intent.putExtra("plugPrice", pricing);
                             intent.putExtra("plugAvailability", "2/2 Available");
                             startActivity(intent);
                             bottomSheetDialog.dismiss();
@@ -663,7 +703,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                                 intent.putExtra("distance", distanceResult != null ? distanceResult : distanceStr);
                                 intent.putExtra("duration", durationResult != null ? durationResult : "N/A");
                                 intent.putExtra("plugType", station.getChargingLevel());
-                                intent.putExtra("plugPrice", "$0.40/kWh");
+                                intent.putExtra("plugPrice", pricing);
                                 intent.putExtra("plugAvailability", "2/2 Available");
                                 startActivity(intent);
                                 bottomSheetDialog.dismiss();

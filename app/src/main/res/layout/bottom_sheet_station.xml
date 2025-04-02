@@ -32,6 +32,16 @@
         android:textColor="#17C31E"
         android:textSize="14sp" />
 
+    <!-- Add pricing TextView -->
+    <TextView
+        android:id="@+id/station_pricing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pricing: Not available"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

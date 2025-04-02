@@ -14,6 +14,7 @@ public class ChargingStation implements Parcelable {
     private String connectorType;
     private String network;
     private String adminId;
+    private int pricing;
     private int availablePorts;
     private int totalPorts;
 
@@ -45,6 +46,7 @@ public class ChargingStation implements Parcelable {
 
     // 🔹 Getters
     public String getStationId() { return stationId; }
+    public int getPricing() { return pricing; }
 
     public String getName() { return name; }
 
@@ -72,6 +74,7 @@ public class ChargingStation implements Parcelable {
     public void setStationId(String stationId) { this.stationId = stationId; }
 
     public void setName(String name) { this.name = name; }
+    public void setPricing(int pricing) { this.pricing = pricing; }
 
     public void setLatitude(double latitude) { this.latitude = latitude; }
 
