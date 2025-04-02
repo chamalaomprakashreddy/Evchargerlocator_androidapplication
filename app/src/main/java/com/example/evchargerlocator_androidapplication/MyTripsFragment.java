@@ -77,6 +77,7 @@ public class MyTripsFragment extends Fragment {
                 for (DataSnapshot tripSnap : snapshot.getChildren()) {
                     SavedTrip trip = tripSnap.getValue(SavedTrip.class);
                     if (trip != null) {
+                        trip.setId(tripSnap.getKey()); // 🔥 Needed for deletion
                         tripList.add(trip);
                     }
                 }
@@ -85,24 +86,30 @@ public class MyTripsFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Optional: handle Firebase error
+                Toast.makeText(getContext(), "Failed to load trips", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+
     private void deleteTripFromDatabase(SavedTrip trip, int position) {
-        // Firebase code to delete the trip from the database
+        String tripId = trip.getId();
+        if (tripId == null || tripId.isEmpty()) {
+            Toast.makeText(getContext(), "Trip ID is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         DatabaseReference tripsRef = FirebaseDatabase.getInstance().getReference("SavedTrips");
-        tripsRef.child(trip.getTripName()).removeValue()
-                .addOnSuccessListener(aVoid -> {
-                    // Remove from the adapter list
-                    adapter.removeItem(position);
-                    // Show toast message
+        tripsRef.child(tripId).removeValue()
+                .addOnSuccessListener(unused -> {
+                    tripList.remove(position);
+                    adapter.notifyItemRemoved(position);
                     Toast.makeText(getContext(), "Trip deleted successfully", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
-                    // Show error toast if deletion fails
                     Toast.makeText(getContext(), "Failed to delete trip", Toast.LENGTH_SHORT).show();
                 });
     }
+
+
 }

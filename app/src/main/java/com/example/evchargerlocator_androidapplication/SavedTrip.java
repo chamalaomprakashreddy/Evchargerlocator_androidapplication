@@ -3,6 +3,9 @@ package com.example.evchargerlocator_androidapplication;
 import java.util.List;
 
 public class SavedTrip {
+    // Firebase-generated key used for deleting or updating this trip
+    private String id;
+
     private String tripName;
     private String fromAddress;
     private String toAddress;
@@ -14,6 +17,18 @@ public class SavedTrip {
     public SavedTrip() {
     }
 
+    public SavedTrip(String id, String tripName, String fromAddress, String toAddress,
+                     String fromLatLng, String toLatLng, List<ChargingStation> stations) {
+        this.id = id;
+        this.tripName = tripName;
+        this.fromAddress = fromAddress;
+        this.toAddress = toAddress;
+        this.fromLatLng = fromLatLng;
+        this.toLatLng = toLatLng;
+        this.stations = stations;
+    }
+
+    // Constructor without id (used while saving new trip, id is generated later)
     public SavedTrip(String tripName, String fromAddress, String toAddress,
                      String fromLatLng, String toLatLng, List<ChargingStation> stations) {
         this.tripName = tripName;
@@ -22,6 +37,16 @@ public class SavedTrip {
         this.fromLatLng = fromLatLng;
         this.toLatLng = toLatLng;
         this.stations = stations;
+    }
+
+    // ✅ Getters and Setters
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTripName() {

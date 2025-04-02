@@ -6,8 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
@@ -22,9 +20,9 @@ public class SavedTripAdapter extends RecyclerView.Adapter<SavedTripAdapter.Save
         void onTripDelete(SavedTrip trip, int position);
     }
 
-    private List<SavedTrip> tripList;
-    private OnTripClickListener listener;
-    private Context context;
+    private final List<SavedTrip> tripList;
+    private final OnTripClickListener listener;
+    private final Context context;
 
     public SavedTripAdapter(List<SavedTrip> tripList, OnTripClickListener listener, Context context) {
         this.tripList = tripList;
@@ -47,25 +45,36 @@ public class SavedTripAdapter extends RecyclerView.Adapter<SavedTripAdapter.Save
         holder.fromAddress.setText("From\n" + trip.getFromAddress());
         holder.toAddress.setText("To\n" + trip.getToAddress());
 
+        // Tap to view trip details
         holder.tripCard.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onTripClick(trip);
             }
         });
 
-        holder.deleteButton.setOnClickListener(v -> {
-            // Show confirmation dialog
-            new AlertDialog.Builder(context)
-                    .setTitle("Delete Trip")
-                    .setMessage("Are you sure you want to delete this trip?")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        if (listener != null) {
-                            listener.onTripDelete(trip, position);
-                        }
-                    })
-                    .setNegativeButton("No", null) // Cancel deletion
-                    .show();
+        // Long press to delete
+        holder.tripCard.setOnLongClickListener(v -> {
+            showDeleteDialog(trip, position);
+            return true;
         });
+
+        // Optional: delete button (icon) as alternate way to delete
+        holder.deleteButton.setOnClickListener(v -> {
+            showDeleteDialog(trip, position);
+        });
+    }
+
+    private void showDeleteDialog(SavedTrip trip, int position) {
+        new AlertDialog.Builder(context)
+                .setTitle("Delete Trip")
+                .setMessage("Are you sure you want to delete \"" + trip.getTripName() + "\"?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    if (listener != null) {
+                        listener.onTripDelete(trip, position);
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     @Override

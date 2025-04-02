@@ -6,12 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Button;
-import android.widget.Spinner;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -33,7 +28,7 @@ import java.util.List;
 public class CreateTripFragment extends Fragment {
 
     private static final String TAG = "CreateTripFragment";
-    private static final String GOOGLE_PLACES_API_KEY = "YOUR_API_KEY_HERE"; // Replace this
+    private static final String GOOGLE_PLACES_API_KEY = "AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs"; // Replace with actual key
 
     private TextInputEditText startPoint, endPoint;
     private SeekBar distanceSeekBar, batterySeekBar;
@@ -45,27 +40,25 @@ public class CreateTripFragment extends Fragment {
     private String selectedVehicle = "Tesla";
     private int batteryPercent = 50;
 
-    private final ActivityResultLauncher<Intent> startAutocompleteLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == AutocompleteActivity.RESULT_OK && result.getData() != null) {
-                    Place place = Autocomplete.getPlaceFromIntent(result.getData());
-                    startLatLng = place.getLatLng();
-                    startPoint.setText(place.getName());
-                    Log.d(TAG, "Start Location: " + place.getName());
-                }
-            });
+    private boolean selectingStart = true;
 
-    private final ActivityResultLauncher<Intent> endAutocompleteLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> autocompleteLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == AutocompleteActivity.RESULT_OK && result.getData() != null) {
                     Place place = Autocomplete.getPlaceFromIntent(result.getData());
-                    endLatLng = place.getLatLng();
-                    endPoint.setText(place.getName());
-                    Log.d(TAG, "End Location: " + place.getName());
+                    if (selectingStart) {
+                        startLatLng = place.getLatLng();
+                        startPoint.setText(place.getName());
+                        Log.d(TAG, "Start: " + place.getName());
+                    } else {
+                        endLatLng = place.getLatLng();
+                        endPoint.setText(place.getName());
+                        Log.d(TAG, "End: " + place.getName());
+                    }
                 }
-            });
+            }
+    );
 
     @Nullable
     @Override
@@ -83,32 +76,29 @@ public class CreateTripFragment extends Fragment {
         findRouteButton = view.findViewById(R.id.submitButton);
         saveButton = view.findViewById(R.id.saveButton);
 
+        // Initialize Google Places
         if (!Places.isInitialized()) {
             Places.initialize(requireContext(), GOOGLE_PLACES_API_KEY);
         }
 
-        setupAutocomplete(startPoint, true);
-        setupAutocomplete(endPoint, false);
+        setupAutocomplete();
 
-        // Vehicle Spinner
+        // Spinner setup
         String[] vehicles = {"Tesla", "Audi", "BMW", "Lamborghini", "Generic"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, vehicles);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         vehicleSpinner.setAdapter(adapter);
 
-        vehicleSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+        vehicleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedVehicle = parent.getItemAtPosition(position).toString();
             }
-
-            @Override
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+            @Override public void onNothingSelected(AdapterView<?> parent) {
                 selectedVehicle = "Tesla";
             }
         });
 
-        // Battery SeekBar
+        // Battery slider
         batterySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 batteryPercent = progress;
@@ -118,18 +108,19 @@ public class CreateTripFragment extends Fragment {
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        // Distance SeekBar
+        // Distance slider
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                distanceText.setText("Show charging stations within " + progress + " mi");
+                distanceText.setText("Show stations within " + progress + " mi");
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
+        // Route button
         findRouteButton.setOnClickListener(v -> {
             if (startLatLng == null || endLatLng == null) {
-                Toast.makeText(requireContext(), "Please select valid locations.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Please select both locations", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -149,16 +140,24 @@ public class CreateTripFragment extends Fragment {
         return view;
     }
 
-    private void setupAutocomplete(TextInputEditText input, boolean isStart) {
-        input.setOnClickListener(v -> {
-            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
-            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
-                    .setCountry("US")
-                    .build(requireContext());
-
-            if (isStart) startAutocompleteLauncher.launch(intent);
-            else endAutocompleteLauncher.launch(intent);
+    private void setupAutocomplete() {
+        startPoint.setOnClickListener(v -> {
+            selectingStart = true;
+            launchAutocomplete();
         });
+
+        endPoint.setOnClickListener(v -> {
+            selectingStart = false;
+            launchAutocomplete();
+        });
+    }
+
+    private void launchAutocomplete() {
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                .setCountry("US")
+                .build(requireContext());
+        autocompleteLauncher.launch(intent);
     }
 
     private String formatLatLng(LatLng latLng) {

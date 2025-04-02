@@ -482,13 +482,15 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
                         endLocation.latitude + "," + endLocation.longitude,
                         selectedStations);
 
-                FirebaseDatabase.getInstance().getReference("SavedTrips")
-                        .push().setValue(trip)
+                DatabaseReference tripRef = FirebaseDatabase.getInstance().getReference("SavedTrips").push();
+                trip.setId(tripRef.getKey()); // 🔐 Save ID to the object
+                tripRef.setValue(trip)
                         .addOnSuccessListener(unused -> {
                             Toast.makeText(this, "Trip saved!", Toast.LENGTH_SHORT).show();
                             dialog.dismiss();
                         })
                         .addOnFailureListener(e -> Toast.makeText(this, "Failed to save trip", Toast.LENGTH_SHORT).show());
+
             } catch (Exception e) {
                 Toast.makeText(this, "Error saving trip", Toast.LENGTH_SHORT).show();
             }
