@@ -46,11 +46,10 @@ public class Faqs extends AppCompatActivity {
         faqList.add(new FaqItem("How do I get directions to a charger?", "You can get directions to a selected charger through Google Maps integration in the app."));
         faqList.add(new FaqItem("Can I see the charging status of a station?", "Yes, the app provides real-time information on charger availability and status."));
         faqList.add(new FaqItem("How do I change my user details?", "You can update your user details through the 'user profile' section in the app."));
-        faqList.add(new FaqItem("How do I contact support?", "You can contact support through the 'Chat' section in the app."));
+        faqList.add(new FaqItem("How do I contact support?", "You can contact support through the 'Chat' section in the app or email us at support@evchargerapp.com."));
         faqList.add(new FaqItem("What should I do if the app crashes?", "Try restarting the app. If the issue persists, please contact customer support."));
-        faqList.add(new FaqItem("Can I see the cost of charging?", "Yes, the app displays the cost in station details"));
+        faqList.add(new FaqItem("Can I see the cost of charging?", "Yes, the app displays the cost in station details."));
         faqList.add(new FaqItem("How do I update the app?", "You can update the app through the Google Play Store depending on your device."));
-
 
         // Setting up adapter
         faqAdapter = new FaqAdapter(faqList);
