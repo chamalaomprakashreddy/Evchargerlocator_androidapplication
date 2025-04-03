@@ -6,29 +6,28 @@
     android:fillViewport="true"
     android:background="@android:color/white">
 
+    <!-- Distance + Time + Navigate + backarrow -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
-
-        <!-- Back Button -->
-        <ImageButton
-            android:id="@+id/backBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_previous"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Distance + Time + Navigate -->
+        <!-- Station Name -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="12dp"
             android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/backArrowText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:text="←"
+                android:textColor="@android:color/black"
+                android:textSize="32sp" />
 
             <TextView
                 android:id="@+id/detailDistanceText"
@@ -36,30 +35,29 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.4"
                 android:text="🚗 2.36 Mi"
-                android:textSize="16sp"
-                android:textColor="#000000" />
+                android:textColor="#000000"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/detailDurationText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_weight="0.3"
                 android:text="5 min"
-                android:textSize="16sp"
                 android:textColor="#000000"
-                android:layout_marginStart="8dp" />
+                android:textSize="16sp" />
 
             <ImageButton
                 android:id="@+id/navigationBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_directions"
+                android:layout_marginStart="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Navigate"
-                android:layout_marginStart="8dp" />
+                android:src="@android:drawable/ic_menu_directions" />
         </LinearLayout>
 
-        <!-- Station Name -->
         <TextView
             android:id="@+id/detailStationName"
             android:layout_width="match_parent"

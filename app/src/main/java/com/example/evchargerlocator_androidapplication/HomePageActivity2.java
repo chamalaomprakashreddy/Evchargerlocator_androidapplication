@@ -1,6 +1,7 @@
 package com.example.evchargerlocator_androidapplication;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -193,6 +194,10 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
         userProfile.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, UserProfileActivity.class)));
 
+        TextView faqs = headerView.findViewById(R.id.faqs);
+        faqs.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, Faqs.class)));
+
+
         Button logoutButton = headerView.findViewById(R.id.logoutButton);
         logoutButton.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
@@ -286,7 +291,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             public boolean onSuggestionClick(int position) {
                 Cursor cursor = mapSearchView.getSuggestionsAdapter().getCursor();
                 if (cursor != null && cursor.moveToPosition(position)) {
-                    String suggestion = cursor.getString(cursor.getColumnIndex("suggestion"));
+                    @SuppressLint("Range") String suggestion = cursor.getString(cursor.getColumnIndex("suggestion"));
                     mapSearchView.setQuery(suggestion, true);
                     return true;
                 }

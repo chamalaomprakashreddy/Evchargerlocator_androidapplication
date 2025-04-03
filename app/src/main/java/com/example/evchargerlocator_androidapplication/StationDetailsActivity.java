@@ -5,6 +5,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Button;
@@ -50,7 +51,7 @@ public class StationDetailsActivity extends AppCompatActivity {
         infoDriveTime = findViewById(R.id.infoDriveTime);
         startChargingBtn = findViewById(R.id.startChargingBtn);
         navButton = findViewById(R.id.navigationBtn);
-        backBtn = findViewById(R.id.backBtn);
+        View backArrowText = findViewById(R.id.backArrowText);
 
         // Get data from Intent
         Intent intent = getIntent();
@@ -100,7 +101,7 @@ public class StationDetailsActivity extends AppCompatActivity {
         });
 
         // Back button
-        backBtn.setOnClickListener(v -> onBackPressed());
+        backArrowText.setOnClickListener(v -> onBackPressed());
 
         // Start charging
         startChargingBtn.setOnClickListener(v ->
