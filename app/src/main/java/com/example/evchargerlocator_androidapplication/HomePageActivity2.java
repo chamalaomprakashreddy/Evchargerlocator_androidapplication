@@ -194,10 +194,6 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         TextView userProfile = headerView.findViewById(R.id.menu_user_profile);
         userProfile.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, UserProfileActivity.class)));
 
-        // Adding Notifications option
-        TextView notifications = headerView.findViewById(R.id.menu_notifications); // Assuming you have the corresponding ID in your layout
-        notifications.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, NotificationsActivity.class)));
-
         TextView faqs = headerView.findViewById(R.id.faqs);
         faqs.setOnClickListener(v -> startActivity(new Intent(HomePageActivity2.this, Faqs.class)));
 
