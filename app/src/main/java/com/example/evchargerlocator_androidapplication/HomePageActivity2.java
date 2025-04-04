@@ -634,7 +634,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_station, null);
-        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.setContentView(bottomSheetView); // Fix this to bottomSheetView, see note below
 
         TextView stationName = bottomSheetView.findViewById(R.id.station_name);
         TextView stationAddress = bottomSheetView.findViewById(R.id.station_address);
@@ -646,7 +646,6 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         stationName.setText(station.getName());
         stationLevel.setText("Charging Level: " + station.getChargingLevel());
 
-        // Calculate pricing based on level, connector, and network
         String pricing = calculatePricing(station);
         stationPricing.setText("Pricing: " + pricing);
 
@@ -691,7 +690,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                             intent.putExtra("duration", durationResult != null ? durationResult : "N/A");
                             intent.putExtra("plugType", station.getChargingLevel());
                             intent.putExtra("plugPrice", pricing);
-                            intent.putExtra("plugAvailability", "2/2 Available");
+                            intent.putExtra("plugAvailability", station.getAvailability()); // Use database value only
                             startActivity(intent);
                             bottomSheetDialog.dismiss();
                         });
@@ -709,7 +708,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                                 intent.putExtra("duration", durationResult != null ? durationResult : "N/A");
                                 intent.putExtra("plugType", station.getChargingLevel());
                                 intent.putExtra("plugPrice", pricing);
-                                intent.putExtra("plugAvailability", "2/2 Available");
+                                intent.putExtra("plugAvailability", station.getAvailability()); // Use database value only
                                 startActivity(intent);
                                 bottomSheetDialog.dismiss();
                             });
