@@ -260,6 +260,9 @@
             android:layout_height="wrap_content"
             android:text="Apply"
             android:layout_marginTop="16dp"
+            android:textSize="16dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:backgroundTint="@android:color/holo_green_dark"
             android:textColor="@android:color/white" />
 
@@ -269,6 +272,9 @@
             android:layout_height="wrap_content"
             android:text="Reset"
             android:layout_marginTop="8dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:textSize="16dp"
             android:backgroundTint="@android:color/holo_blue_dark"
             android:textColor="@android:color/white" />
     </LinearLayout>
