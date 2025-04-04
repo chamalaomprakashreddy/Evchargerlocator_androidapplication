@@ -123,6 +123,11 @@ public class CreateTripFragment extends Fragment {
                 Toast.makeText(requireContext(), "Please select both locations", Toast.LENGTH_SHORT).show();
                 return;
             }
+            // Create Intent for NotificationsActivity to show the trip confirmation notification
+            Intent notificationIntent = new Intent(requireContext(), NotificationsActivity.class);
+            notificationIntent.putExtra("notification_type", "trip_confirmed");
+            notificationIntent.putExtra("message", "Your EV trip is confirmed. Safe travels!");
+            startActivity(notificationIntent);
 
             Intent intent = new Intent(requireContext(), HomePageActivity.class);
             intent.putExtra("startLocation", formatLatLng(startLatLng));
