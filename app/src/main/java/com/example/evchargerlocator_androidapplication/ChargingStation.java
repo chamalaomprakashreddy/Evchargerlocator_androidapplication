@@ -22,7 +22,7 @@ public class ChargingStation implements Parcelable {
     public ChargingStation(String stationId, String name, double latitude, double longitude,
                            String powerOutput, String availability,
                            String chargingLevel, String connectorType,
-                           String network, String adminId) {
+                           String network, String adminId, int pricing) {
         this.stationId = stationId;
         this.name = name;
         this.latitude = latitude;
@@ -33,7 +33,9 @@ public class ChargingStation implements Parcelable {
         this.connectorType = connectorType;
         this.network = network;
         this.adminId = adminId;
+        this.pricing = pricing;
     }
+
 
     // 🔹 Minimal constructor
     public ChargingStation(String name, double latitude, double longitude) {
@@ -45,6 +47,7 @@ public class ChargingStation implements Parcelable {
     public ChargingStation() {}
 
     // 🔹 Getters
+
     public String getStationId() { return stationId; }
     public int getPricing() { return pricing; }
 
@@ -63,6 +66,9 @@ public class ChargingStation implements Parcelable {
     public String getConnectorType() { return connectorType; }
 
     public String getNetwork() { return network; }
+
+    // REMOVE THESE if already present
+
 
     public String getAdminId() { return adminId; }
 
@@ -110,6 +116,7 @@ public class ChargingStation implements Parcelable {
         adminId = in.readString();
         availablePorts = in.readInt();
         totalPorts = in.readInt();
+        pricing = in.readInt();
     }
 
     public static final Creator<ChargingStation> CREATOR = new Creator<>() {

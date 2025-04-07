@@ -17,7 +17,7 @@ import com.google.firebase.database.DatabaseError;
 
 public class EditDetailsActivity extends AppCompatActivity {
 
-    private EditText edtStationName, edtPowerOutput, edtAvailability;
+    private EditText edtStationName, edtPowerOutput, edtAvailability,edtPricing;
     private Spinner spinnerChargingLevel, spinnerConnectorType, spinnerNetwork;
     private Button btnUpdate;
 
@@ -37,6 +37,8 @@ public class EditDetailsActivity extends AppCompatActivity {
         edtStationName = findViewById(R.id.edtStationName);
         edtPowerOutput = findViewById(R.id.edtPowerOutput);
         edtAvailability = findViewById(R.id.edtAvailability);
+        edtPricing = findViewById(R.id.edtPricing);
+
 
         spinnerChargingLevel = findViewById(R.id.spinnerChargingLevel);
         spinnerConnectorType = findViewById(R.id.spinnerConnectorType);
@@ -80,6 +82,7 @@ public class EditDetailsActivity extends AppCompatActivity {
                     edtStationName.setText(station.getName());
                     edtPowerOutput.setText(station.getPowerOutput());
                     edtAvailability.setText(station.getAvailability());
+                    edtPricing.setText(String.valueOf(station.getPricing())); // Set pricing EditText
 
                     setSpinnerSelection(spinnerChargingLevel, station.getChargingLevel());
                     setSpinnerSelection(spinnerConnectorType, station.getConnectorType());
@@ -93,6 +96,7 @@ public class EditDetailsActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void setSpinnerSelection(Spinner spinner, String value) {
         ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spinner.getAdapter();
@@ -109,12 +113,29 @@ public class EditDetailsActivity extends AppCompatActivity {
         String chargingLevel = spinnerChargingLevel.getSelectedItem().toString();
         String connectorType = spinnerConnectorType.getSelectedItem().toString();
         String network = spinnerNetwork.getSelectedItem().toString();
+        String pricingStr = edtPricing.getText().toString().trim();
+        if (pricingStr.isEmpty()) {
+            Toast.makeText(this, "Please enter pricing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        int pricing = (int) Double.parseDouble(pricingStr);
+        databaseReference.child("pricing").setValue(pricing).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(EditDetailsActivity.this, "Details updated successfully", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(EditDetailsActivity.this, "Update failed", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
 
         databaseReference.child("name").setValue(name);
         databaseReference.child("powerOutput").setValue(powerOutput);
         databaseReference.child("availability").setValue(availability);
         databaseReference.child("chargingLevel").setValue(chargingLevel);
         databaseReference.child("connectorType").setValue(connectorType);
+        databaseReference.child("pricing").setValue(pricing);
         databaseReference.child("network").setValue(network).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(EditDetailsActivity.this, "Details updated successfully", Toast.LENGTH_SHORT).show();

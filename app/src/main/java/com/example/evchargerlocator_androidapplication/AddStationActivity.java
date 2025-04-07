@@ -44,6 +44,8 @@ public class AddStationActivity extends AppCompatActivity {
         EditText edtStationName = findViewById(R.id.edtStationName);
         EditText edtPowerOutput = findViewById(R.id.edtPowerOutput);
         EditText edtAvailability = findViewById(R.id.edtAvailability);
+        EditText edtPricing = findViewById(R.id.edtPricing);
+
 
         Spinner spinnerChargingLevel = findViewById(R.id.spinnerChargingLevel);
         Spinner spinnerConnectorType = findViewById(R.id.spinnerConnectorType);
@@ -74,6 +76,13 @@ public class AddStationActivity extends AppCompatActivity {
             String chargingLevel = spinnerChargingLevel.getSelectedItem().toString();
             String connectorType = spinnerConnectorType.getSelectedItem().toString();
             String network = spinnerNetwork.getSelectedItem().toString();
+            String pricingStr = edtPricing.getText().toString().trim();
+            if (pricingStr.isEmpty()) {
+                Toast.makeText(this, "Please enter pricing", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int pricing = (int) Double.parseDouble(pricingStr);
+
 
             if (name.isEmpty() || powerOutput.isEmpty() || availability.isEmpty()) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
@@ -83,7 +92,9 @@ public class AddStationActivity extends AppCompatActivity {
             String adminId = firebaseAuth.getCurrentUser().getUid();
             String stationId = databaseReference.push().getKey();
 
-            ChargingStation station = new ChargingStation(stationId, name, latitude, longitude, powerOutput, availability, chargingLevel, connectorType, network, adminId);
+            ChargingStation station = new ChargingStation(stationId, name, latitude, longitude, powerOutput, availability, chargingLevel, connectorType, network, adminId, pricing);
+            station.setPricing(pricing);
+
 
             if (stationId != null) {
                 databaseReference.child(stationId).setValue(station).addOnCompleteListener(task -> {

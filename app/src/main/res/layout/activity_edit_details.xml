@@ -114,6 +114,30 @@
                 android:padding="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Pricing Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/pricingContainer"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="45dp"
+            android:layout_marginTop="15dp"
+            app:boxCornerRadiusTopStart="15dp"
+            app:boxCornerRadiusTopEnd="15dp"
+            app:boxCornerRadiusBottomStart="15dp"
+            app:boxCornerRadiusBottomEnd="15dp"
+            app:boxStrokeColor="#888888">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtPricing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Pricing ($/kWh)"
+                android:inputType="numberDecimal"
+                android:padding="12dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
         <!-- Charging Level Spinner -->
         <Spinner
             android:id="@+id/spinnerChargingLevel"
