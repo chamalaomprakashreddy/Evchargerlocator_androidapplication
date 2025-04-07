@@ -634,7 +634,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_station, null);
-        bottomSheetDialog.setContentView(bottomSheetView); // Fix this to bottomSheetView, see note below
+        bottomSheetDialog.setContentView(bottomSheetView);
 
         TextView stationName = bottomSheetView.findViewById(R.id.station_name);
         TextView stationAddress = bottomSheetView.findViewById(R.id.station_address);
@@ -646,9 +646,12 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
         stationName.setText(station.getName());
         stationLevel.setText("Charging Level: " + station.getChargingLevel());
 
-        String pricing = calculatePricing(station);
+        // ✅ Fetch price from Firebase object directly
+        double price = station.getPricing();
+        String pricing = String.format("$%.2f/kWh", price);
         stationPricing.setText("Pricing: " + pricing);
 
+        // 🧭 Fetch address from coordinates
         String addressText = "Address not available";
         try {
             Geocoder geocoder = new Geocoder(this);
@@ -660,7 +663,6 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             Log.e(TAG, "Geocoder error: " + e.getMessage());
         }
         stationAddress.setText(addressText);
-
         final String finalAddressText = addressText;
 
         navigateButton.setOnClickListener(v -> {
@@ -690,7 +692,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                             intent.putExtra("duration", durationResult != null ? durationResult : "N/A");
                             intent.putExtra("plugType", station.getChargingLevel());
                             intent.putExtra("plugPrice", pricing);
-                            intent.putExtra("plugAvailability", station.getAvailability()); // Use database value only
+                            intent.putExtra("plugAvailability", station.getAvailability());
                             startActivity(intent);
                             bottomSheetDialog.dismiss();
                         });
@@ -708,7 +710,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
                                 intent.putExtra("duration", durationResult != null ? durationResult : "N/A");
                                 intent.putExtra("plugType", station.getChargingLevel());
                                 intent.putExtra("plugPrice", pricing);
-                                intent.putExtra("plugAvailability", station.getAvailability()); // Use database value only
+                                intent.putExtra("plugAvailability", station.getAvailability());
                                 startActivity(intent);
                                 bottomSheetDialog.dismiss();
                             });
@@ -722,6 +724,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
 
         bottomSheetDialog.show();
     }
+
 
     private void fetchTravelTime(LatLng origin, LatLng destination, TravelTimeCallback callback) {
         String url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
