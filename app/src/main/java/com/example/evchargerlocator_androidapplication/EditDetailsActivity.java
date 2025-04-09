@@ -15,6 +15,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class EditDetailsActivity extends AppCompatActivity {
 
     private EditText edtStationName, edtPowerOutput, edtAvailability,edtPricing;
@@ -114,35 +117,39 @@ public class EditDetailsActivity extends AppCompatActivity {
         String connectorType = spinnerConnectorType.getSelectedItem().toString();
         String network = spinnerNetwork.getSelectedItem().toString();
         String pricingStr = edtPricing.getText().toString().trim();
+
         if (pricingStr.isEmpty()) {
             Toast.makeText(this, "Please enter pricing", Toast.LENGTH_SHORT).show();
             return;
         }
-        int pricing = (int) Double.parseDouble(pricingStr);
-        databaseReference.child("pricing").setValue(pricing).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(EditDetailsActivity.this, "Details updated successfully", Toast.LENGTH_SHORT).show();
-                finish();
-            } else {
-                Toast.makeText(EditDetailsActivity.this, "Update failed", Toast.LENGTH_SHORT).show();
-            }
-        });
 
+        // Use double instead of int for pricing
+        double pricing = Double.parseDouble(pricingStr);
 
+        // Create a map of values to update
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", name);
+        updates.put("powerOutput", powerOutput);
+        updates.put("availability", availability);
+        updates.put("chargingLevel", chargingLevel);
+        updates.put("connectorType", connectorType);
+        updates.put("network", network);
+        updates.put("pricing", pricing);  // Store as double
 
-        databaseReference.child("name").setValue(name);
-        databaseReference.child("powerOutput").setValue(powerOutput);
-        databaseReference.child("availability").setValue(availability);
-        databaseReference.child("chargingLevel").setValue(chargingLevel);
-        databaseReference.child("connectorType").setValue(connectorType);
-        databaseReference.child("pricing").setValue(pricing);
-        databaseReference.child("network").setValue(network).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(EditDetailsActivity.this, "Details updated successfully", Toast.LENGTH_SHORT).show();
-                finish();
-            } else {
-                Toast.makeText(EditDetailsActivity.this, "Update failed", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Update all values at once
+        databaseReference.updateChildren(updates)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(EditDetailsActivity.this, "Details updated successfully", Toast.LENGTH_SHORT).show();
+                        finish();
+                    } else {
+                        Toast.makeText(EditDetailsActivity.this, "Update failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
+
+
+
+
+
 }

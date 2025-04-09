@@ -104,9 +104,9 @@ public class StationDetailsActivity extends AppCompatActivity {
                                         plugLevel.setText(station.getChargingLevel() != null ? station.getChargingLevel() : "Unknown");
                                         plugAvailability.setText(station.getAvailability() != null ? station.getAvailability() : "N/A");
 
-                                        int price = station.getPricing(); // In cents
+                                        double price = station.getPricing(); // In cents
                                         if (price > 0) {
-                                            plugPrice.setText(String.format(Locale.getDefault(), "$%.2f/kWh", price / 100.0));
+                                            plugPrice.setText(String.format(Locale.getDefault(), "$%.2f/kWh", price ));
                                         } else {
                                             plugPrice.setText("Not Available");
                                         }

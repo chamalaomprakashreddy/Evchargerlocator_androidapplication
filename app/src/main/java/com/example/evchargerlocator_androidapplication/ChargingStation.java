@@ -14,7 +14,7 @@ public class ChargingStation implements Parcelable {
     private String connectorType;
     private String network;
     private String adminId;
-    private int pricing;
+    private double pricing;
     private int availablePorts;
     private int totalPorts;
 
@@ -22,7 +22,7 @@ public class ChargingStation implements Parcelable {
     public ChargingStation(String stationId, String name, double latitude, double longitude,
                            String powerOutput, String availability,
                            String chargingLevel, String connectorType,
-                           String network, String adminId, int pricing) {
+                           String network, String adminId, double pricing) {
         this.stationId = stationId;
         this.name = name;
         this.latitude = latitude;
@@ -56,7 +56,7 @@ public class ChargingStation implements Parcelable {
     public String getConnectorType() { return connectorType; }
     public String getNetwork() { return network; }
     public String getAdminId() { return adminId; }
-    public int getPricing() { return pricing; }
+    public double getPricing() { return pricing; }
     public int getAvailablePorts() { return availablePorts; }
     public int getTotalPorts() { return totalPorts; }
 
@@ -71,7 +71,7 @@ public class ChargingStation implements Parcelable {
     public void setConnectorType(String connectorType) { this.connectorType = connectorType; }
     public void setNetwork(String network) { this.network = network; }
     public void setAdminId(String adminId) { this.adminId = adminId; }
-    public void setPricing(int pricing) { this.pricing = pricing; }
+    public void setPricing(double pricing) { this.pricing = pricing; }
     public void setAvailablePorts(int availablePorts) { this.availablePorts = availablePorts; }
     public void setTotalPorts(int totalPorts) { this.totalPorts = totalPorts; }
 
@@ -118,7 +118,7 @@ public class ChargingStation implements Parcelable {
         parcel.writeString(adminId);
         parcel.writeInt(availablePorts);
         parcel.writeInt(totalPorts);
-        parcel.writeInt(pricing); // ✅ must be last to match read order
+        parcel.writeDouble(pricing); // ✅ must be last to match read order
     }
 
     @Override

@@ -77,12 +77,14 @@ public class AddStationActivity extends AppCompatActivity {
             String connectorType = spinnerConnectorType.getSelectedItem().toString();
             String network = spinnerNetwork.getSelectedItem().toString();
             String pricingStr = edtPricing.getText().toString().trim();
+
             if (pricingStr.isEmpty()) {
                 Toast.makeText(this, "Please enter pricing", Toast.LENGTH_SHORT).show();
                 return;
             }
-            int pricing = (int) Double.parseDouble(pricingStr);
 
+            // Use double instead of int for pricing
+            double pricing = Double.parseDouble(pricingStr);
 
             if (name.isEmpty() || powerOutput.isEmpty() || availability.isEmpty()) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
@@ -92,19 +94,20 @@ public class AddStationActivity extends AppCompatActivity {
             String adminId = firebaseAuth.getCurrentUser().getUid();
             String stationId = databaseReference.push().getKey();
 
-            ChargingStation station = new ChargingStation(stationId, name, latitude, longitude, powerOutput, availability, chargingLevel, connectorType, network, adminId, pricing);
-            station.setPricing(pricing);
-
+            // Assuming ChargingStation class has a constructor or setters that accept double for pricing
+            ChargingStation station = new ChargingStation(stationId, name, latitude, longitude,
+                    powerOutput, availability, chargingLevel, connectorType, network, adminId, pricing);
 
             if (stationId != null) {
-                databaseReference.child(stationId).setValue(station).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(this, "Station added successfully!", Toast.LENGTH_SHORT).show();
-                        finish();
-                    } else {
-                        Toast.makeText(this, "Failed to add station", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                databaseReference.child(stationId).setValue(station)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(this, "Station added successfully!", Toast.LENGTH_SHORT).show();
+                                finish();
+                            } else {
+                                Toast.makeText(this, "Failed to add station", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
     }

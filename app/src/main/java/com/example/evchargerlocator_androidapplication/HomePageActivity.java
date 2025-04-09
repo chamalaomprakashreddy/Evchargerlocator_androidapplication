@@ -390,7 +390,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
 
                 String priceText = "$0.40/kWh";
                 if (clickedStation.getPricing() > 0) {
-                    priceText = String.format(Locale.getDefault(), "$%.2f/kWh", clickedStation.getPricing() / 100.0);
+                    priceText = String.format(Locale.getDefault(), "$%.2f/kWh", clickedStation.getPricing());
                 }
                 ((TextView) findViewById(R.id.popupStationPrice)).setText("Price: " + priceText);
 
