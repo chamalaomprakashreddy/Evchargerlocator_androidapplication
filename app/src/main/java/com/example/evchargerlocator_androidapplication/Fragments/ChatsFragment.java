@@ -45,7 +45,7 @@ public class ChatsFragment extends Fragment {
         recyclerViewChats.setLayoutManager(new LinearLayoutManager(getContext()));
 
         userList = new ArrayList<>();
-        usersAdapter = new UsersAdapter(userList, getContext(), this::openChat);
+        usersAdapter = new UsersAdapter(userList, getContext(), this::openChat, this::deleteChat);
         recyclerViewChats.setAdapter(usersAdapter);
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -220,4 +220,28 @@ public class ChatsFragment extends Fragment {
         intent.putExtra("receiverUserName", user.getFullName());
         startActivity(intent);
     }
+    private void deleteChat(User user) {
+        if (user == null || user.getId() == null) return;
+
+        String otherUserId = user.getId();
+        String chatId = getChatId(currentUserId, otherUserId);
+
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+
+        // 1. Remove user_chats for current user
+        dbRef.child("user_chats").child(currentUserId).child(otherUserId).removeValue()
+                .addOnCompleteListener(task1 -> {
+                    // 2. Remove user_chats for other user
+                    dbRef.child("user_chats").child(otherUserId).child(currentUserId).removeValue()
+                            .addOnCompleteListener(task2 -> {
+                                // 3. Remove shared chat history
+                                dbRef.child("chats").child(chatId).removeValue()
+                                        .addOnSuccessListener(unused ->
+                                                Toast.makeText(getContext(), "Chat deleted for both users", Toast.LENGTH_SHORT).show())
+                                        .addOnFailureListener(e ->
+                                                Toast.makeText(getContext(), "Failed to delete messages", Toast.LENGTH_SHORT).show());
+                            });
+                });
+    }
+
 }

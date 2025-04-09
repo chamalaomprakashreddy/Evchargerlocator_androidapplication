@@ -89,7 +89,7 @@ public class ChargingStation implements Parcelable {
         adminId = in.readString();
         availablePorts = in.readInt();
         totalPorts = in.readInt();
-        pricing = in.readInt(); // ✅ correctly restored
+        pricing = in.readDouble(); // ✅ FIXED: read as double
     }
 
     public static final Creator<ChargingStation> CREATOR = new Creator<>() {

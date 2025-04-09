@@ -61,9 +61,13 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         setContentView(R.layout.activity_home_page);
 
         TextView backArrowText = findViewById(R.id.backArrowText);
-
-        // Back button functionality
         backArrowText.setOnClickListener(v -> finish());
+        ImageButton saveTripButton = findViewById(R.id.saveTripButton);
+        saveTripButton.setOnClickListener(v -> {
+            Log.d("SaveTrip", "Save trip button clicked");
+            showSaveTripDialog();
+        });
+
 
         distanceStat = findViewById(R.id.distanceStat);
         timeStat = findViewById(R.id.timeStat);
@@ -76,7 +80,7 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         endLocation = getLatLngFromIntent(intent.getStringExtra("endLocation"));
         distanceFilter = intent.getDoubleExtra("distanceFilter", 5.0);
 
-        // ✅ Only apply filters if passed via Intent
+        // Apply filters if available
         if (intent.hasExtra("level1") || intent.hasExtra("connectorTypes") || intent.hasExtra("networkTesla")) {
             filterLevel1 = intent.getBooleanExtra("level1", false);
             filterLevel2 = intent.getBooleanExtra("level2", false);
@@ -91,28 +95,21 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             if (intent.getBooleanExtra("networkElectrify", false)) filterNetworks.add("Electrify America");
         }
 
-        // Vehicle info for smart planning
-        String vehicleType = intent.getStringExtra("vehicleType");
-        int batteryPercent = intent.getIntExtra("batteryPercent", 100);
-
-        // Restore trip if reopening
+        // Restore trip
         if (intent.getBooleanExtra("restoreTrip", false)) {
             selectedStations = intent.getParcelableArrayListExtra("stations");
-
             updateTripBadge();
             updateStationStat();
         }
 
-        // Always draw route if valid
         if (startLocation != null && endLocation != null) {
             drawRouteAndEVStations();
         }
 
-        // Setup map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) mapFragment.getMapAsync(this);
 
-        // Trip Badge click
+        // Trip badge click
         FrameLayout tripBadge = findViewById(R.id.tripBadge);
         tripBadge.setOnClickListener(v -> {
             if (startLocation == null || endLocation == null) {
@@ -121,55 +118,35 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
             }
 
             Intent tripIntent = new Intent(HomePageActivity.this, MyTripActivity.class);
-
-            // ✅ Send selected stations
             tripIntent.putParcelableArrayListExtra("stations", new ArrayList<>(selectedStations));
-
-            // ✅ Send coordinates
             tripIntent.putExtra("startLocation", startLocation.latitude + "," + startLocation.longitude);
             tripIntent.putExtra("endLocation", endLocation.latitude + "," + endLocation.longitude);
 
-            // ✅ Use Geocoder to get addresses
-            Geocoder geocoder = new Geocoder(HomePageActivity.this, Locale.getDefault());
-            try {
-                String fromAddress = "", toAddress = "";
-                if (startLocation != null) {
-                    List<Address> startAddrs = geocoder.getFromLocation(startLocation.latitude, startLocation.longitude, 1);
-                    if (!startAddrs.isEmpty()) fromAddress = startAddrs.get(0).getAddressLine(0);
-                }
-                if (endLocation != null) {
-                    List<Address> endAddrs = geocoder.getFromLocation(endLocation.latitude, endLocation.longitude, 1);
-                    if (!endAddrs.isEmpty()) toAddress = endAddrs.get(0).getAddressLine(0);
-                }
-                tripIntent.putExtra("fromAddress", fromAddress);
-                tripIntent.putExtra("toAddress", toAddress);
-            } catch (Exception e) {
-                tripIntent.putExtra("fromAddress", "");
-                tripIntent.putExtra("toAddress", "");
-                Log.e("TripBadge", "Failed to get addresses", e);
-            }
+            final String[] fromAddrHolder = {""};
+            final String[] toAddrHolder = {""};
 
-            // ✅ Debug logs
-            Log.d("TripBadge", "Launching MyTripActivity with:");
-            Log.d("TripBadge", "Start: " + startLocation);
-            Log.d("TripBadge", "End: " + endLocation);
-            Log.d("TripBadge", "Stations: " + selectedStations.size());
+            fetchAddressFromLatLng(startLocation, fromAddress -> {
+                fromAddrHolder[0] = fromAddress;
 
-            startActivity(tripIntent);
+                fetchAddressFromLatLng(endLocation, toAddress -> {
+                    toAddrHolder[0] = toAddress;
+
+                    tripIntent.putExtra("fromAddress", fromAddrHolder[0]);
+                    tripIntent.putExtra("toAddress", toAddrHolder[0]);
+
+                    Log.d("TripBadge", "Launching MyTripActivity:");
+                    Log.d("TripBadge", "From: " + fromAddrHolder[0]);
+                    Log.d("TripBadge", "To: " + toAddrHolder[0]);
+                    Log.d("TripBadge", "Stations: " + selectedStations.size());
+
+                    startActivity(tripIntent);
+                });
+            });
         });
 
 
-        // Save trip button
-        ImageButton saveTripButton = findViewById(R.id.saveTripButton);
-        saveTripButton.setOnClickListener(v -> showSaveTripDialog());
-
-        // Filter button
-        ImageButton filterBtn = findViewById(R.id.filter);
-        filterBtn.setOnClickListener(v -> {
-            Intent filterIntent = new Intent(HomePageActivity.this, FilterActivity.class);
-            startActivityForResult(filterIntent, 101);
-        });
     }
+
 
 
     @Override
@@ -448,6 +425,35 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         double minutes = (miles / avgSpeed) * 60;
         return String.format(Locale.getDefault(), "%.0f min", minutes);
     }
+    private void fetchAddressFromLatLng(LatLng latLng, AddressCallback callback) {
+        String apiKey = getString(R.string.google_maps_key);
+        String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng="
+                + latLng.latitude + "," + latLng.longitude + "&key=" + apiKey;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONArray results = response.getJSONArray("results");
+                        if (results.length() > 0) {
+                            String address = results.getJSONObject(0).getString("formatted_address");
+                            callback.onAddressFound(address);
+                        } else {
+                            callback.onAddressFound(latLng.latitude + ", " + latLng.longitude);
+                        }
+                    } catch (JSONException e) {
+                        callback.onAddressFound(latLng.latitude + ", " + latLng.longitude);
+                    }
+                },
+                error -> callback.onAddressFound(latLng.latitude + ", " + latLng.longitude)
+        );
+
+        requestQueue.add(request);
+    }
+
+    interface AddressCallback {
+        void onAddressFound(String address);
+    }
+
 
 
 

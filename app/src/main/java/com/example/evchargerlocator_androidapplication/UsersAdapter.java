@@ -18,15 +18,32 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
     private List<User> userList;
     private Context context;
     private OnUserClickListener onUserClickListener;
+    private OnUserDeleteListener onUserDeleteListener;
 
+    // ✅ Click Listener Interface
     public interface OnUserClickListener {
         void onUserClick(User user);
     }
 
-    public UsersAdapter(List<User> userList, Context context, OnUserClickListener onUserClickListener) {
+    // ✅ Delete Listener Interface
+    public interface OnUserDeleteListener {
+        void onUserDelete(User user);
+    }
+
+    // ✅ Constructor with click + delete listener (for ChatsFragment)
+    public UsersAdapter(List<User> userList, Context context,
+                        OnUserClickListener onUserClickListener,
+                        OnUserDeleteListener onUserDeleteListener) {
         this.userList = userList;
         this.context = context;
         this.onUserClickListener = onUserClickListener;
+        this.onUserDeleteListener = onUserDeleteListener;
+    }
+
+    // ✅ Overloaded constructor (for UsersFragment — no deletion)
+    public UsersAdapter(List<User> userList, Context context,
+                        OnUserClickListener onUserClickListener) {
+        this(userList, context, onUserClickListener, null); // Pass null for delete
     }
 
     @NonNull
@@ -61,6 +78,22 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             holder.unreadBadge.setVisibility(View.GONE);
         }
 
+        // ✅ Handle long press for deletion (only if listener is provided)
+        holder.itemView.setOnLongClickListener(v -> {
+            if (onUserDeleteListener != null) {
+                new androidx.appcompat.app.AlertDialog.Builder(context)
+                        .setTitle("Delete Chat")
+                        .setMessage("Are you sure you want to delete this chat?")
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            onUserDeleteListener.onUserDelete(user);
+                        })
+                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                        .show();
+                return true;
+            }
+            return false;
+        });
+
         // ✅ Handle chat click
         holder.itemView.setOnClickListener(v -> onUserClickListener.onUserClick(user));
     }
@@ -70,11 +103,13 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         return userList.size();
     }
 
+    // ✅ Sort by latest message
     public void sortUsersByRecentChats() {
         Collections.sort(userList);
         notifyDataSetChanged();
     }
 
+    // ✅ ViewHolder class
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView userName, userStatus, unreadBadge, lastMessagePreview;
 
@@ -83,7 +118,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             userName = itemView.findViewById(R.id.usernameText);
             userStatus = itemView.findViewById(R.id.userStatusText);
             unreadBadge = itemView.findViewById(R.id.unreadBadge);
-            lastMessagePreview = itemView.findViewById(R.id.lastMessagePreview); // ✅ Make sure it's in XML
+            lastMessagePreview = itemView.findViewById(R.id.lastMessagePreview);
         }
     }
 }
