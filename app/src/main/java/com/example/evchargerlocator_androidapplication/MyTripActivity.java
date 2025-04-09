@@ -7,11 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -46,16 +42,18 @@ public class MyTripActivity extends AppCompatActivity {
             fromAddress = getIntent().getStringExtra("fromAddress");
             toAddress = getIntent().getStringExtra("toAddress");
 
-            Log.d("MyTripActivity", "Start: " + startLatLng + " End: " + endLatLng + " Stations: " + (stations != null ? stations.size() : 0));
+            Log.d("MyTripActivity", "Start: " + startLatLng + " End: " + endLatLng +
+                    " Stations: " + (stations != null ? stations.size() : 0));
 
-            if (stations != null && startLatLng != null && endLatLng != null) {
+            if (stations != null && !stations.isEmpty() && startLatLng != null && endLatLng != null) {
                 renderTripTimeline(stations);
             } else {
-                Toast.makeText(this, "Missing trip data", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Missing or empty trip data", Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {
-            Log.e("MyTripActivity", "Error in onCreate", e);
+            Log.e("MyTripActivity", "Error initializing trip", e);
+            Toast.makeText(this, "Failed to load trip data", Toast.LENGTH_SHORT).show();
         }
 
         ImageButton backBtn = findViewById(R.id.backButton);
@@ -168,6 +166,7 @@ public class MyTripActivity extends AppCompatActivity {
     }
 
     private String formatLatLng(LatLng latLng) {
+        if (latLng == null) return "";
         return latLng.latitude + "," + latLng.longitude;
     }
 

@@ -336,91 +336,108 @@ public class HomePageActivity extends AppCompatActivity implements OnMapReadyCal
         LatLng position = marker.getPosition();
         String stationName = marker.getTitle();
 
-        // Construct ChargingStation object from marker
-        ChargingStation clickedStation = new ChargingStation();
-        clickedStation.setName(stationName);
-        clickedStation.setLatitude(position.latitude);
-        clickedStation.setLongitude(position.longitude);
-        clickedStation.setChargingLevel("Level 2");
-        clickedStation.setConnectorType("J1772");
-        clickedStation.setNetwork("ChargePoint");
-        clickedStation.setPowerOutput("7.2 kW");
-        clickedStation.setAvailability("2/2 Available");
-        clickedStation.setAvailablePorts(2);
-        clickedStation.setTotalPorts(2);
+        DatabaseReference stationRef = FirebaseDatabase.getInstance().getReference("ChargingStations");
 
-        // Determine reference point for distance
-        LatLng referencePoint;
-        if (selectedStations.isEmpty()) {
-            referencePoint = startLocation;
-        } else {
-            ChargingStation last = selectedStations.get(selectedStations.size() - 1);
-            referencePoint = new LatLng(last.getLatitude(), last.getLongitude());
-        }
+        stationRef.orderByChild("name").equalTo(stationName).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                final ChargingStation[] clickedStationHolder = new ChargingStation[1];  // ✅ Use array to bypass final restriction
 
-        // Compute distance & time
-        double distance = SphericalUtil.computeDistanceBetween(referencePoint, position) / 1609.34;
-        String distanceText = String.format(Locale.getDefault(), "%.2f Mi", distance);
-        String driveTimeText = estimateDriveTime(distance);
+                for (DataSnapshot snap : snapshot.getChildren()) {
+                    ChargingStation s = snap.getValue(ChargingStation.class);
+                    if (s != null &&
+                            s.getLatitude() == position.latitude &&
+                            s.getLongitude() == position.longitude) {
+                        clickedStationHolder[0] = s;
+                        break;
+                    }
+                }
 
-        // Show popup
-        findViewById(R.id.stationPopup).setVisibility(View.VISIBLE);
-        ((TextView) findViewById(R.id.stationDistanceText)).setText("Distance: " + distanceText);
-        ((TextView) findViewById(R.id.popupStationDistance)).setText(distanceText);
-        ((TextView) findViewById(R.id.popupStationName)).setText(stationName);
-        ((TextView) findViewById(R.id.popupStationDetails)).setText("EV Charging Station");
+                ChargingStation clickedStation = clickedStationHolder[0];
 
-        // Trip toggle logic
-        Button tripToggleBtn = findViewById(R.id.addToTripButton);
-        updateTripButtonState(tripToggleBtn, clickedStation);
-        tripToggleBtn.setOnClickListener(v -> {
-            boolean isInTrip = isStationInTrip(clickedStation);
+                if (clickedStation == null) {
+                    Toast.makeText(HomePageActivity.this, "Station data not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-            if (isInTrip) {
-                selectedStations.removeIf(s ->
-                        s.getLatitude() == clickedStation.getLatitude() &&
-                                s.getLongitude() == clickedStation.getLongitude() &&
-                                s.getName().equals(clickedStation.getName())
+                // Compute distance & time
+                LatLng referencePoint = selectedStations.isEmpty()
+                        ? startLocation
+                        : new LatLng(
+                        selectedStations.get(selectedStations.size() - 1).getLatitude(),
+                        selectedStations.get(selectedStations.size() - 1).getLongitude()
                 );
-                Toast.makeText(this, "Removed from trip", Toast.LENGTH_SHORT).show();
-            } else {
-                selectedStations.add(clickedStation);
-                Toast.makeText(this, "Added to trip", Toast.LENGTH_SHORT).show();
+
+                double distance = SphericalUtil.computeDistanceBetween(referencePoint, position) / 1609.34;
+                String distanceText = String.format(Locale.getDefault(), "%.2f Mi", distance);
+                String driveTimeText = estimateDriveTime(distance);
+
+                // Show popup
+                findViewById(R.id.stationPopup).setVisibility(View.VISIBLE);
+                String label = selectedStations.isEmpty() ? "Distance from starting point: " : "Distance from previous point: ";
+                ((TextView) findViewById(R.id.stationDistanceText)).setText(label + distanceText);
+
+                ((TextView) findViewById(R.id.popupStationDistance)).setText(distanceText);
+                ((TextView) findViewById(R.id.popupStationName)).setText(clickedStation.getName());
+                ((TextView) findViewById(R.id.popupStationDetails)).setText(
+                        clickedStation.getConnectorType() + " • " + clickedStation.getNetwork()
+                );
+
+                // Charging level & pricing
+                ((TextView) findViewById(R.id.popupStationChargingLevel)).setText(
+                        "Charging Level: " + (clickedStation.getChargingLevel() != null ? clickedStation.getChargingLevel() : "N/A")
+                );
+
+                String priceText = "$0.40/kWh";
+                if (clickedStation.getPricing() > 0) {
+                    priceText = String.format(Locale.getDefault(), "$%.2f/kWh", clickedStation.getPricing() / 100.0);
+                }
+                ((TextView) findViewById(R.id.popupStationPrice)).setText("Price: " + priceText);
+
+                // Trip button logic
+                Button tripToggleBtn = findViewById(R.id.addToTripButton);
+                updateTripButtonState(tripToggleBtn, clickedStation);
+                tripToggleBtn.setOnClickListener(v -> {
+                    if (isStationInTrip(clickedStation)) {
+                        selectedStations.removeIf(s ->
+                                s.getLatitude() == clickedStation.getLatitude() &&
+                                        s.getLongitude() == clickedStation.getLongitude() &&
+                                        s.getName().equals(clickedStation.getName())
+                        );
+                        Toast.makeText(HomePageActivity.this, "Removed from trip", Toast.LENGTH_SHORT).show();
+                    } else {
+                        selectedStations.add(clickedStation);
+                        Toast.makeText(HomePageActivity.this, "Added to trip", Toast.LENGTH_SHORT).show();
+                    }
+
+                    updateTripBadge();
+                    updateStationStat();
+                    updateTripButtonState(tripToggleBtn, clickedStation);
+                });
+
+                // View details button
+                Button detailsBtn = findViewById(R.id.viewStationDetails);
+                detailsBtn.setOnClickListener(v -> {
+                    Intent detailsIntent = new Intent(HomePageActivity.this, StationDetailsActivity.class);
+                    detailsIntent.putExtra("stationName", clickedStation.getName());
+                    detailsIntent.putExtra("paymentMethods", "Google Pay, PayPal");
+                    detailsIntent.putExtra("plugType", clickedStation.getConnectorType());
+                    detailsIntent.putExtra("plugAvailability", clickedStation.getAvailability());
+                    detailsIntent.putExtra("stationLevel", clickedStation.getChargingLevel());
+                    detailsIntent.putExtra("price", clickedStation.getPricing());
+                    detailsIntent.putExtra("distance", distanceText);
+                    detailsIntent.putExtra("duration", driveTimeText);
+                    detailsIntent.putExtra("latitude", clickedStation.getLatitude());
+                    detailsIntent.putExtra("longitude", clickedStation.getLongitude());
+                    startActivity(detailsIntent);
+                });
             }
 
-            updateTripBadge();
-            updateStationStat();
-            updateTripButtonState(tripToggleBtn, clickedStation);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HomePageActivity.this, "Failed to load station data", Toast.LENGTH_SHORT).show();
+            }
         });
-
-        // Details button logic
-        Button detailsBtn = findViewById(R.id.viewStationDetails);
-        detailsBtn.setOnClickListener(v -> {
-            Log.d("DETAILS_BTN", "Opening StationDetailsActivity...");
-
-            Intent detailsIntent = new Intent(HomePageActivity.this, StationDetailsActivity.class);
-
-            // Required fields
-            detailsIntent.putExtra("stationName", clickedStation.getName());
-            detailsIntent.putExtra("paymentMethods", "Google Pay, PayPal");
-            detailsIntent.putExtra("plugType", clickedStation.getConnectorType());
-            detailsIntent.putExtra("plugPrice", "$0.40/kWh");
-            detailsIntent.putExtra("plugAvailability", clickedStation.getAvailability());
-
-            // Already calculated distance/time (from marker popup or routing logic)
-            detailsIntent.putExtra("distance", distanceText);   // e.g., "2.4 mi"
-            detailsIntent.putExtra("duration", driveTimeText);  // e.g., "5 min"
-
-            // Latitude/Longitude for reverse geocoding
-            detailsIntent.putExtra("latitude", clickedStation.getLatitude());
-            detailsIntent.putExtra("longitude", clickedStation.getLongitude());
-
-            Log.d("DETAILS_BTN", "Intent data: " + clickedStation.getName() + ", " + clickedStation.getConnectorType());
-
-            startActivity(detailsIntent);
-        });
-
-
 
         return true;
     }

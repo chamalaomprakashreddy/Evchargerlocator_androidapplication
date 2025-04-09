@@ -18,7 +18,7 @@ public class ChargingStation implements Parcelable {
     private int availablePorts;
     private int totalPorts;
 
-    // 🔹 Full constructor used in AddStationActivity
+    // 🔹 Full constructor
     public ChargingStation(String stationId, String name, double latitude, double longitude,
                            String powerOutput, String availability,
                            String chargingLevel, String connectorType,
@@ -36,7 +36,6 @@ public class ChargingStation implements Parcelable {
         this.pricing = pricing;
     }
 
-
     // 🔹 Minimal constructor
     public ChargingStation(String name, double latitude, double longitude) {
         this.name = name;
@@ -47,59 +46,33 @@ public class ChargingStation implements Parcelable {
     public ChargingStation() {}
 
     // 🔹 Getters
-
     public String getStationId() { return stationId; }
-    public int getPricing() { return pricing; }
-
     public String getName() { return name; }
-
     public double getLatitude() { return latitude; }
-
     public double getLongitude() { return longitude; }
-
     public String getPowerOutput() { return powerOutput; }
-
     public String getAvailability() { return availability; }
-
     public String getChargingLevel() { return chargingLevel; }
-
     public String getConnectorType() { return connectorType; }
-
     public String getNetwork() { return network; }
-
-    // REMOVE THESE if already present
-
-
     public String getAdminId() { return adminId; }
-
+    public int getPricing() { return pricing; }
     public int getAvailablePorts() { return availablePorts; }
-
     public int getTotalPorts() { return totalPorts; }
 
     // 🔹 Setters
     public void setStationId(String stationId) { this.stationId = stationId; }
-
     public void setName(String name) { this.name = name; }
-    public void setPricing(int pricing) { this.pricing = pricing; }
-
     public void setLatitude(double latitude) { this.latitude = latitude; }
-
     public void setLongitude(double longitude) { this.longitude = longitude; }
-
     public void setPowerOutput(String powerOutput) { this.powerOutput = powerOutput; }
-
     public void setAvailability(String availability) { this.availability = availability; }
-
     public void setChargingLevel(String chargingLevel) { this.chargingLevel = chargingLevel; }
-
     public void setConnectorType(String connectorType) { this.connectorType = connectorType; }
-
     public void setNetwork(String network) { this.network = network; }
-
     public void setAdminId(String adminId) { this.adminId = adminId; }
-
+    public void setPricing(int pricing) { this.pricing = pricing; }
     public void setAvailablePorts(int availablePorts) { this.availablePorts = availablePorts; }
-
     public void setTotalPorts(int totalPorts) { this.totalPorts = totalPorts; }
 
     // 🔹 Parcelable implementation
@@ -116,7 +89,7 @@ public class ChargingStation implements Parcelable {
         adminId = in.readString();
         availablePorts = in.readInt();
         totalPorts = in.readInt();
-        pricing = in.readInt();
+        pricing = in.readInt(); // ✅ correctly restored
     }
 
     public static final Creator<ChargingStation> CREATOR = new Creator<>() {
@@ -145,6 +118,7 @@ public class ChargingStation implements Parcelable {
         parcel.writeString(adminId);
         parcel.writeInt(availablePorts);
         parcel.writeInt(totalPorts);
+        parcel.writeInt(pricing); // ✅ must be last to match read order
     }
 
     @Override

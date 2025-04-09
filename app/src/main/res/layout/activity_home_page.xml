@@ -114,7 +114,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_trip"
+            android:src="@drawable/trip"
             android:contentDescription="Trip Icon" />
 
         <TextView
@@ -230,6 +230,25 @@
             android:textSize="14sp"
             android:textColor="@android:color/darker_gray"
             android:layout_marginTop="2dp"/>
+        <TextView
+            android:id="@+id/popupStationPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price: N/A"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Charging Level Information -->
+        <TextView
+            android:id="@+id/popupStationChargingLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Charging Level: N/A"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="4dp"/>
+
 
         <Button
             android:id="@+id/viewStationDetails"

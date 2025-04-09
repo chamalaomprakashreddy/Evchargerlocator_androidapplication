@@ -6,13 +6,13 @@
     android:fillViewport="true"
     android:background="@android:color/white">
 
-    <!-- Distance + Time + Navigate + backarrow -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
-        <!-- Station Name -->
+
+        <!-- Top Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,8 +32,8 @@
             <TextView
                 android:id="@+id/detailDistanceText"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
                 android:layout_weight="0.4"
+                android:layout_height="wrap_content"
                 android:text="🚗 2.36 Mi"
                 android:textColor="#000000"
                 android:textSize="16sp" />
@@ -41,12 +41,12 @@
             <TextView
                 android:id="@+id/detailDurationText"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:layout_weight="0.3"
+                android:layout_height="wrap_content"
                 android:text="5 min"
                 android:textColor="#000000"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:layout_marginStart="8dp" />
 
             <ImageButton
                 android:id="@+id/navigationBtn"
@@ -67,7 +67,6 @@
             android:textSize="20sp"
             android:layout_marginTop="12dp" />
 
-        <!-- Station Address -->
         <TextView
             android:id="@+id/detailStationAddress"
             android:layout_width="match_parent"
@@ -77,7 +76,6 @@
             android:layout_marginTop="4dp"
             android:textColor="#444444" />
 
-        <!-- Start Charging Button -->
         <Button
             android:id="@+id/startChargingBtn"
             android:layout_width="match_parent"
@@ -87,7 +85,7 @@
             android:backgroundTint="@color/teal_700"
             android:textColor="@android:color/white" />
 
-        <!-- Station Info Title -->
+        <!-- Section Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,165 +94,81 @@
             android:textSize="18sp"
             android:layout_marginTop="24dp" />
 
-        <!-- Station Info Fields -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Address"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
+        <!-- Address -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Address" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/fullAddressText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:id="@+id/fullAddressText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
+        <!-- Access Type -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Access" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/accessTypeText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Access"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
+        <!-- Access Time -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Access Time" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/accessTimeText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:id="@+id/accessTypeText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
+        <!-- Payment Methods -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Payment Methods" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/paymentMethodText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Access Time"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
+        <!-- Distance -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Distance" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/infoDistance" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:id="@+id/accessTimeText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
+        <!-- Driving Time -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Driving Time" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/infoDriveTime" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Payment Methods"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
+        <!-- Plug Type -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Plug Type" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/plugTypeText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:id="@+id/paymentMethodText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
+        <!-- Charging Level -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Charging Level" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/plugLevelText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Distance"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
+        <!-- Price -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Price" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/plugPriceText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:id="@+id/infoDistance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
+        <!-- Availability -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Availability" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/plugAvailabilityText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Driving Time"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
-
-        <TextView
-            android:id="@+id/infoDriveTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Plug Type"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
-
-        <TextView
-            android:id="@+id/plugTypeText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Price"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
-
-        <TextView
-            android:id="@+id/plugPriceText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Availability"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
-
-        <TextView
-            android:id="@+id/plugAvailabilityText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Last Used"
-            android:textStyle="bold"
-            android:textColor="#555"
-            android:textSize="14sp"
-            android:layout_marginTop="12dp" />
-
-        <TextView
-            android:id="@+id/lastUsedText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333333" />
+        <!-- Last Used -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Last Used" android:textStyle="bold" android:textColor="#555"
+            android:textSize="14sp" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/lastUsedText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="#333333" />
     </LinearLayout>
 </ScrollView>
