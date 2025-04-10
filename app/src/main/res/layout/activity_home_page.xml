@@ -20,7 +20,7 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
@@ -101,14 +101,49 @@
             android:textSize="14sp"
             android:layout_marginHorizontal="8dp"/>
     </LinearLayout>
+    <!-- FILTER STATUS CONTAINER -->
+    <LinearLayout
+        android:id="@+id/filterStatusContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="6dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_filter_status"
+        android:visibility="gone"
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/tripSummaryBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Top-Left Trip Badge -->
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_filter_applied"
+            android:contentDescription="Filter Icon"
+            android:tint="@color/teal_700" />
+
+        <TextView
+            android:id="@+id/filterStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="Filters are currently applied"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="normal" />
+    </LinearLayout>
+
+    <!-- TRIP BADGE BELOW FILTER STATUS -->
     <FrameLayout
         android:id="@+id/tripBadge"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_margin="12dp"
-        app:layout_constraintTop_toBottomOf="@id/tripSummaryBar"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/filterStatusContainer"
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
@@ -131,17 +166,35 @@
             android:layout_marginEnd="2dp"/>
     </FrameLayout>
 
-    <!-- Filter Button (outside popup) -->
-    <ImageButton
-        android:id="@+id/filter"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/filter"
-        android:background="@android:color/transparent"
-        android:contentDescription="Filter"
+
+
+    <FrameLayout
+        android:id="@+id/filterButtonContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         app:layout_constraintTop_toBottomOf="@id/tripSummaryBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp"/>
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/filter"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/filter"
+            android:background="@android:color/transparent"
+            android:contentDescription="Filter" />
+
+        <View
+            android:id="@+id/filterDot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_gravity="end|top"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/green_dot_background"
+            android:visibility="gone"/>
+    </FrameLayout>
+
 
     <!-- Station Popup -->
     <LinearLayout
@@ -265,11 +318,13 @@
         android:id="@+id/saveTripButton"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Save Trip"
         android:src="@drawable/ic_save"
-        app:layout_constraintEnd_toEndOf="@+id/map"
-        app:layout_constraintTop_toBottomOf="@+id/filter" />
+        app:layout_constraintTop_toBottomOf="@id/filterButtonContainer"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
