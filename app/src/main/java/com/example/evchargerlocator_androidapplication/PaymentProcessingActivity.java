@@ -3,12 +3,14 @@ package com.example.evchargerlocator_androidapplication;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Locale;
 import java.util.Random;
 
 public class PaymentProcessingActivity extends AppCompatActivity {
@@ -16,6 +18,8 @@ public class PaymentProcessingActivity extends AppCompatActivity {
     private TextView totalAmountText, usedEnergyText, chargingTimeText, chargerIdText;
     private ImageView thumbsUp, thumbsDown;
     private Button homeButton;
+
+    private String chargingLevel, connectorType, network;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,81 +29,145 @@ public class PaymentProcessingActivity extends AppCompatActivity {
         totalAmountText = findViewById(R.id.totalAmount);
         usedEnergyText = findViewById(R.id.usedEnergyText);
         chargingTimeText = findViewById(R.id.chargingTimeText);
-        chargerIdText = findViewById(R.id.chargerIdText); // Added chargerIdText
+        chargerIdText = findViewById(R.id.chargerIdText);
         thumbsUp = findViewById(R.id.thumbsUp);
         thumbsDown = findViewById(R.id.thumbsDown);
         homeButton = findViewById(R.id.homeButton);
 
-        // Simulate payment processing
+        // Get extras from Intent
+        Intent intent = getIntent();
+        chargingLevel = intent.getStringExtra("chargingLevel");
+        connectorType = intent.getStringExtra("connectorType");
+        network = intent.getStringExtra("network");
+
+        // Simulate payment processing delay
         new Handler().postDelayed(this::displayChargingDetails, 3000);
 
-        // Handle thumbs up feedback
+        // Feedback handling
         thumbsUp.setOnClickListener(v -> showFeedbackPopup(true));
-
-        // Handle thumbs down feedback
         thumbsDown.setOnClickListener(v -> showFeedbackPopup(false));
 
-        // Navigate to HomeActivity when Home button is clicked
+        // Navigate to Home Page
         homeButton.setOnClickListener(v -> {
-            Intent intent = new Intent(PaymentProcessingActivity.this, HomePageActivity2.class);
-            startActivity(intent);
-            finish(); // Close this activity
+            Intent homeIntent = new Intent(PaymentProcessingActivity.this, HomePageActivity2.class);
+            startActivity(homeIntent);
+            finish();
         });
     }
 
     private void displayChargingDetails() {
         Random random = new Random();
 
-        // Generate random charging time (1 to 5 hours)
+        // Simulated values
+        int energyUsed = random.nextInt(40) + 10; // 10 to 50 kWh
         int hours = random.nextInt(5) + 1;
         int minutes = random.nextInt(60);
-        double totalTime = hours + (minutes / 60.0);
+        String chargerId = "CHARGER PORT " + (random.nextInt(6) + 1);
 
-        // Generate random energy used (10-50 kWh)
-        int energyUsed = random.nextInt(40) + 10;
+        // Update UI
+        chargerIdText.setText(chargerId);
+        usedEnergyText.setText(String.format(Locale.getDefault(), "Used Energy: %d kWh", energyUsed));
+        chargingTimeText.setText(String.format(Locale.getDefault(), "Time: %dh %dm", hours, minutes));
 
-        // Generate random charger ID and pricing type
-        String chargerId = getRandomChargerId(random);
-        double pricePerHour = getChargerPrice(chargerId); // Get the price based on charger type
-
-        // Calculate total amount based on the price per hour
-        double totalAmount = totalTime * pricePerHour;
-
-        // Update UI with generated values
-        chargerIdText.setText(chargerId); // Display random charger ID
-        chargingTimeText.setText(String.format("Time: %dh %dm", hours, minutes));
-        usedEnergyText.setText(String.format("Used Energy: %d kWh", energyUsed));
-        totalAmountText.setText(String.format("$%.2f", totalAmount));
-    }
-
-    private String getRandomChargerId(Random random) {
-        String[] chargerTypes = {"Level 1", "Level 2", "DC Fast"};
-        int randomIndex = random.nextInt(chargerTypes.length);
-        return "CHARGER #" + (randomIndex + 1) + " - " + chargerTypes[randomIndex];
-    }
-
-    private double getChargerPrice(String chargerId) {
-        // Price adjustments based on charger type
-        if (chargerId.contains("DC Fast")) {
-            return 7.50; // Triple the regular price of $2.50
-        } else if (chargerId.contains("Level 1")) {
-            return 5.00; // Double the regular price of $2.50
+        // Calculate total amount based on real pricing
+        double pricePerKWh = getRealisticPrice(chargingLevel, connectorType, network);
+        if (pricePerKWh > 0) {
+            double totalAmount = energyUsed * pricePerKWh;
+            totalAmountText.setText(String.format(Locale.getDefault(), "$%.2f", totalAmount));
         } else {
-            return 2.50; // Regular price
+            chargerIdText.setText("Start Charging Now!!");
+            usedEnergyText.setText("Used Energy: 0 kWh");
+            chargingTimeText.setText("Time: 0h 0m");
+            totalAmountText.setText("Payment is Not Available!!");
         }
+    }
+
+    private double getRealisticPrice(String level, String connector, String network) {
+        if (level == null || connector == null || network == null) return 0.0;
+
+        // Realistic pricing based on your DOC
+        if (level.equals("Level 1")) {
+            if (connector.equals("Type1")) {
+                switch (network) {
+                    case "ChargePoint": return 0.12;
+                    case "EVgo": return 0.13;
+                    case "Electrify America": return 0.14;
+                    case "Tesla": return 0.12;
+                }
+            } else if (connector.equals("Type2")) {
+                switch (network) {
+                    case "ChargePoint": return 0.13;
+                    case "EVgo": return 0.14;
+                    case "Electrify America": return 0.15;
+                    case "Tesla": return 0.13;
+                }
+            } else if (connector.equals("CCS") || connector.equals("CHAdeMO")) {
+                switch (network) {
+                    case "ChargePoint": return 0.14;
+                    case "EVgo": return 0.15;
+                    case "Electrify America": return 0.16;
+                    case "Tesla": return 0.14;
+                }
+            }
+        }
+
+        if (level.equals("Level 2")) {
+            if (connector.equals("Type1")) {
+                switch (network) {
+                    case "ChargePoint": return 0.24;
+                    case "EVgo": return 0.27;
+                    case "Electrify America": return 0.30;
+                    case "Tesla": return 0.25;
+                }
+            } else if (connector.equals("Type2")) {
+                switch (network) {
+                    case "ChargePoint": return 0.25;
+                    case "EVgo": return 0.30;
+                    case "Electrify America": return 0.35;
+                    case "Tesla": return 0.28;
+                }
+            } else if (connector.equals("CCS") || connector.equals("CHAdeMO")) {
+                switch (network) {
+                    case "ChargePoint": return 0.27;
+                    case "EVgo": return 0.32;
+                    case "Electrify America": return 0.36;
+                    case "Tesla": return 0.29;
+                }
+            }
+        }
+
+        if (level.equals("DC Fast")) {
+            if (connector.equals("CCS")) {
+                switch (network) {
+                    case "ChargePoint": return 0.42;
+                    case "EVgo": return 0.45;
+                    case "Electrify America": return 0.48;
+                    case "Tesla": return 0.40;
+                }
+            } else if (connector.equals("CHAdeMO")) {
+                switch (network) {
+                    case "ChargePoint": return 0.43;
+                    case "EVgo": return 0.46;
+                    case "Electrify America": return 0.47;
+                    case "Tesla": return 0.44;
+                }
+            }
+        }
+
+        return 0.0; // Default if no match found
     }
 
     private void showFeedbackPopup(boolean isPositive) {
         String[] responses = isPositive ? new String[]{
                 "Thanks for your feedback! We appreciate it!",
-                "Awesome! We're glad you liked it! 😊",
-                "Glad you found this helpful! Want to see more like this?",
+                "Awesome! We're glad you liked it!",
+                "Glad you found this helpful!",
                 "✅ Great! Thanks for the thumbs up!"
         } : new String[]{
                 "Thanks for your feedback! We'll work on improving.",
                 "Sorry to hear that! What could we do better?",
-                "Oops! Didn’t meet your expectations? Let us know why!",
-                "Oh no! We’ll try to do better next time. 😞"
+                "Oops! Didn’t meet your expectations?",
+                "Oh no! We’ll try to do better next time."
         };
 
         Toast.makeText(this, getRandomMessage(responses), Toast.LENGTH_SHORT).show();

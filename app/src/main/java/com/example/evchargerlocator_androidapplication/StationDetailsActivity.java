@@ -31,6 +31,11 @@ public class StationDetailsActivity extends AppCompatActivity {
     private String finalAddress = "";
     private DatabaseReference databaseRef;
 
+    // Variables to pass
+    private String chargingLevelVal = "Unknown";
+    private String connectorTypeVal = "Unknown";
+    private String networkVal = "Unknown";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,12 +106,19 @@ public class StationDetailsActivity extends AppCompatActivity {
                                 for (DataSnapshot child : snapshot.getChildren()) {
                                     ChargingStation station = child.getValue(ChargingStation.class);
                                     if (station != null) {
-                                        plugLevel.setText(station.getChargingLevel() != null ? station.getChargingLevel() : "Unknown");
+                                        // Save for Intent
+                                        chargingLevelVal = station.getChargingLevel() != null ? station.getChargingLevel() : "Unknown";
+                                        connectorTypeVal = station.getConnectorType() != null ? station.getConnectorType() : "Unknown";
+                                        networkVal = station.getNetwork() != null ? station.getNetwork() : "Unknown";
+
+                                        plugLevel.setText(chargingLevelVal);
+                                        plugType.setText(connectorTypeVal);
+                                        paymentMethods.setText(networkVal);
                                         plugAvailability.setText(station.getAvailability() != null ? station.getAvailability() : "N/A");
 
-                                        double price = station.getPricing(); // In cents
+                                        double price = station.getPricing();
                                         if (price > 0) {
-                                            plugPrice.setText(String.format(Locale.getDefault(), "$%.2f/kWh", price ));
+                                            plugPrice.setText(String.format(Locale.getDefault(), "$%.2f/kWh", price));
                                         } else {
                                             plugPrice.setText("Not Available");
                                         }
@@ -140,10 +152,14 @@ public class StationDetailsActivity extends AppCompatActivity {
         // Back button
         backArrowText.setOnClickListener(v -> onBackPressed());
 
-        // Launch PaymentActivity
-        startChargingBtn.setOnClickListener(v ->
-                startActivity(new Intent(this, PaymentActivity.class))
-        );
+        // Launch PaymentProcessingActivity
+        startChargingBtn.setOnClickListener(v -> {
+            Intent paymentIntent = new Intent(StationDetailsActivity.this, PaymentProcessingActivity.class);
+            paymentIntent.putExtra("chargingLevel", chargingLevelVal);
+            paymentIntent.putExtra("connectorType", connectorTypeVal);
+            paymentIntent.putExtra("network", networkVal);
+            startActivity(paymentIntent);
+        });
     }
 
     private void setDefaultDBValues() {
