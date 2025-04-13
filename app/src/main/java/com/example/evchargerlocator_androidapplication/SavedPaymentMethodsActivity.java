@@ -29,10 +29,16 @@ public class SavedPaymentMethodsActivity extends AppCompatActivity {
     private DatabaseReference databaseRef;
     private String selectedCardNumber;
 
+    private String chargingLevel, connectorType, network;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saved_payment_methods);
+
+        chargingLevel = getIntent().getStringExtra("chargingLevel");
+        connectorType = getIntent().getStringExtra("connectorType");
+        network = getIntent().getStringExtra("network");
 
         paymentMethodsRecyclerView = findViewById(R.id.paymentMethodsRecyclerView);
         continueButton = findViewById(R.id.continueButton);
@@ -46,8 +52,8 @@ public class SavedPaymentMethodsActivity extends AppCompatActivity {
         paymentMethods = new ArrayList<>();
         adapter = new PaymentMethodsAdapter(paymentMethods, selectedCard -> {
             selectedCardNumber = selectedCard;
-            continueButton.setEnabled(true); // Enable continue button when a card is selected
-        }, this::deleteCard);  // Pass deleteCard function to adapter
+            continueButton.setEnabled(true);
+        }, this::deleteCard);
 
         paymentMethodsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         paymentMethodsRecyclerView.setAdapter(adapter);
@@ -58,7 +64,10 @@ public class SavedPaymentMethodsActivity extends AppCompatActivity {
         continueButton.setOnClickListener(v -> {
             if (selectedCardNumber != null) {
                 Intent intent = new Intent(SavedPaymentMethodsActivity.this, PaymentProcessingActivity.class);
-                intent.putExtra("selectedCard", selectedCardNumber);  // Pass the selected card number
+                intent.putExtra("selectedCard", selectedCardNumber);
+                intent.putExtra("chargingLevel", chargingLevel);
+                intent.putExtra("connectorType", connectorType);
+                intent.putExtra("network", network);
                 startActivity(intent);
             } else {
                 Toast.makeText(SavedPaymentMethodsActivity.this, "Please select a card", Toast.LENGTH_SHORT).show();
@@ -75,7 +84,7 @@ public class SavedPaymentMethodsActivity extends AppCompatActivity {
                 for (DataSnapshot cardSnapshot : snapshot.getChildren()) {
                     Card card = cardSnapshot.getValue(Card.class);
                     if (card != null) {
-                        card.setCardId(cardSnapshot.getKey()); // Store card ID for deletion
+                        card.setCardId(cardSnapshot.getKey());
                         paymentMethods.add(card);
                     }
                 }
@@ -97,11 +106,10 @@ public class SavedPaymentMethodsActivity extends AppCompatActivity {
                 .setPositiveButton("Delete", (dialog, which) -> {
                     String userId = auth.getCurrentUser().getUid();
                     databaseRef.child(userId).child(card.getCardId()).removeValue()
-                            .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(SavedPaymentMethodsActivity.this, "Card deleted", Toast.LENGTH_SHORT).show();
-                                loadSavedCards();
-                            })
-                            .addOnFailureListener(e -> Toast.makeText(SavedPaymentMethodsActivity.this, "Failed to delete card", Toast.LENGTH_SHORT).show());
+                            .addOnSuccessListener(aVoid ->
+                                    Toast.makeText(SavedPaymentMethodsActivity.this, "Card deleted", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(SavedPaymentMethodsActivity.this, "Failed to delete card", Toast.LENGTH_SHORT).show());
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

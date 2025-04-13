@@ -152,9 +152,9 @@ public class StationDetailsActivity extends AppCompatActivity {
         // Back button
         backArrowText.setOnClickListener(v -> onBackPressed());
 
-        // Launch PaymentProcessingActivity
+        // Launch PaymentActivity
         startChargingBtn.setOnClickListener(v -> {
-            Intent paymentIntent = new Intent(StationDetailsActivity.this, PaymentProcessingActivity.class);
+            Intent paymentIntent = new Intent(StationDetailsActivity.this, PaymentActivity.class);
             paymentIntent.putExtra("chargingLevel", chargingLevelVal);
             paymentIntent.putExtra("connectorType", connectorTypeVal);
             paymentIntent.putExtra("network", networkVal);

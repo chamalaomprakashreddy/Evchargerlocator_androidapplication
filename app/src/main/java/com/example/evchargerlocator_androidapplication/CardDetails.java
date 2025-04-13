@@ -24,16 +24,16 @@ public class CardDetails extends AppCompatActivity {
     private FirebaseAuth auth;
     private DatabaseReference databaseRef;
 
+    private String chargingLevel, connectorType, network;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_details);
 
-        // Initialize Firebase
         auth = FirebaseAuth.getInstance();
         databaseRef = FirebaseDatabase.getInstance().getReference("SavedCards");
 
-        // Initialize UI elements
         cardNumberInput = findViewById(R.id.cardNumberInput);
         cardHolderInput = findViewById(R.id.cardHolderInput);
         expiryDateInput = findViewById(R.id.expiryDateInput);
@@ -42,10 +42,11 @@ public class CardDetails extends AppCompatActivity {
         saveCardCheckbox = findViewById(R.id.saveCardCheckbox);
         TextView backArrowText = findViewById(R.id.backArrowText);
 
-        // Back button functionality
-        backArrowText.setOnClickListener(v -> finish());
+        chargingLevel = getIntent().getStringExtra("chargingLevel");
+        connectorType = getIntent().getStringExtra("connectorType");
+        network = getIntent().getStringExtra("network");
 
-        // Continue button functionality
+        backArrowText.setOnClickListener(v -> finish());
         continueButton.setOnClickListener(v -> saveCardDetails());
     }
 
@@ -56,7 +57,6 @@ public class CardDetails extends AppCompatActivity {
         String expiryDate = expiryDateInput.getText().toString().trim();
         String cvv = cvvInput.getText().toString().trim();
 
-        // Validate inputs
         if (cardNumber.isEmpty() || cardHolderName.isEmpty() || expiryDate.isEmpty() || cvv.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
@@ -72,7 +72,6 @@ public class CardDetails extends AppCompatActivity {
             return;
         }
 
-        // Validate expiry date
         Calendar calendar = Calendar.getInstance();
         int currentMonth = calendar.get(Calendar.MONTH) + 1;
         int currentYear = calendar.get(Calendar.YEAR) % 100;
@@ -91,25 +90,24 @@ public class CardDetails extends AppCompatActivity {
             return;
         }
 
-        // Mask the card number (Only show last 4 digits)
         String maskedCardNumber = "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
 
         if (saveCardCheckbox.isChecked()) {
             String cardId = databaseRef.child(userId).push().getKey();
             Card card = new Card(maskedCardNumber, cardHolderName, expiryDate);
-
-            // Save the card details to Firebase
             databaseRef.child(userId).child(cardId).setValue(card).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    Toast.makeText(CardDetails.this, "Card saved successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Card saved successfully!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(CardDetails.this, "Failed to save card", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to save card", Toast.LENGTH_SHORT).show();
                 }
             });
         }
 
-        // Redirect to PaymentProcessingActivity
-        Intent intent = new Intent(CardDetails.this, PaymentProcessingActivity.class);
+        Intent intent = new Intent(this, PaymentProcessingActivity.class);
+        intent.putExtra("chargingLevel", chargingLevel);
+        intent.putExtra("connectorType", connectorType);
+        intent.putExtra("network", network);
         startActivity(intent);
         finish();
     }

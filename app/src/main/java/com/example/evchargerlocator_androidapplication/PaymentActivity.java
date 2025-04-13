@@ -1,3 +1,4 @@
+// PaymentActivity.java
 package com.example.evchargerlocator_androidapplication;
 
 import android.content.ActivityNotFoundException;
@@ -17,13 +18,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class PaymentActivity extends AppCompatActivity {
 
+    private String chargingLevel, connectorType, network;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // ✅ Correctly apply Edge-to-Edge UI
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-
         setContentView(R.layout.activity_payment);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -32,26 +32,31 @@ public class PaymentActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Initialize UI elements
+        chargingLevel = getIntent().getStringExtra("chargingLevel");
+        connectorType = getIntent().getStringExtra("connectorType");
+        network = getIntent().getStringExtra("network");
+
         Button googlePayButton = findViewById(R.id.googlePayButton);
         Button paypalButton = findViewById(R.id.paypalButton);
         TextView addPaymentMethodText = findViewById(R.id.addPaymentMethodText);
         TextView savedPaymentMethodText = findViewById(R.id.savedPaymentMethodText);
-
         TextView backArrowText = findViewById(R.id.backArrowText);
 
-        // Back button functionality
         backArrowText.setOnClickListener(v -> finish());
 
-        // Open Saved Payment Method Activity
         savedPaymentMethodText.setOnClickListener(v -> {
             Intent intent = new Intent(PaymentActivity.this, SavedPaymentMethodsActivity.class);
+            intent.putExtra("chargingLevel", chargingLevel);
+            intent.putExtra("connectorType", connectorType);
+            intent.putExtra("network", network);
             startActivity(intent);
         });
 
-        // Navigate to Card Details when clicking "Add Payment Method"
         addPaymentMethodText.setOnClickListener(v -> {
             Intent intent = new Intent(PaymentActivity.this, CardDetails.class);
+            intent.putExtra("chargingLevel", chargingLevel);
+            intent.putExtra("connectorType", connectorType);
+            intent.putExtra("network", network);
             startActivity(intent);
         });
 
