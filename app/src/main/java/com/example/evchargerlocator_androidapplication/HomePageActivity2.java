@@ -64,6 +64,12 @@ import com.google.maps.android.PolyUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -109,6 +115,15 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page2);
+        // 🔔 Ask for notification permission on Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), GOOGLE_MAPS_API_KEY);
@@ -154,7 +169,9 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             mapFragment.getMapAsync(this);
         }
         fetchAllEVStations();
+
     }
+
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
@@ -181,6 +198,19 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             fetchCurrentLocation();
         }
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 101) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("MainActivity", "✅ Notification permission granted");
+            } else {
+                Log.w("MainActivity", "❌ Notification permission denied");
+            }
+        }
+    }
+
 
     private void setupDrawer() {
         View headerView = navigationView.getHeaderView(0);

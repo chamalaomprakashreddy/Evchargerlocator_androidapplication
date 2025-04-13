@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.*;
 
 import com.google.firebase.database.*;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -128,6 +129,20 @@ public class MainActivity extends AppCompatActivity {
                     // ✅ User exists -> Proceed to Homepage
                     Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                     navigateToHomePage();
+                    FirebaseMessaging.getInstance().getToken()
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    String token = task.getResult();
+                                    usersRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                            .child("deviceToken")
+                                            .setValue(token)
+                                            .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ FCM token saved to DB"))
+                                            .addOnFailureListener(e -> Log.e(TAG, "❌ Failed to save FCM token", e));
+                                } else {
+                                    Log.w(TAG, "⚠️ Failed to get FCM token", task.getException());
+                                }
+                            });
+
                 } else {
                     // ❌ Unauthorized user
                     firebaseAuth.signOut();
