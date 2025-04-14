@@ -34,7 +34,7 @@ public class CreateTripFragment extends Fragment {
     private SeekBar distanceSeekBar, batterySeekBar;
     private TextView distanceText, batteryText;
     private Spinner vehicleSpinner;
-    private Button findRouteButton, saveButton;
+    private Button findRouteButton;
 
     private LatLng startLatLng, endLatLng;
     private String selectedVehicle = "Tesla";
@@ -74,7 +74,7 @@ public class CreateTripFragment extends Fragment {
         batteryText = view.findViewById(R.id.batteryText);
         vehicleSpinner = view.findViewById(R.id.vehicleSpinner);
         findRouteButton = view.findViewById(R.id.submitButton);
-        saveButton = view.findViewById(R.id.saveButton);
+       // saveButton = view.findViewById(R.id.saveButton);
 
         // Initialize Google Places
         if (!Places.isInitialized()) {
@@ -133,9 +133,6 @@ public class CreateTripFragment extends Fragment {
             startActivity(intent);
         });
 
-        saveButton.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Trip saved (placeholder)", Toast.LENGTH_SHORT).show();
-        });
 
         return view;
     }
