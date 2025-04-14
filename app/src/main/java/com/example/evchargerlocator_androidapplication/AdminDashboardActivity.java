@@ -158,8 +158,8 @@ public class AdminDashboardActivity extends AppCompatActivity implements OnMapRe
 
     private LocationRequest createLocationRequest() {
         LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(5000);  // Update every 5 seconds
-        locationRequest.setFastestInterval(2000); // Fastest update interval
+        //locationRequest.setInterval(5000);  // Update every 5 seconds
+        //locationRequest.setFastestInterval(2000); // Fastest update interval
         // Set priority to high accuracy (not deprecated anymore)
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return locationRequest;

@@ -1,6 +1,8 @@
 package com.example.evchargerlocator_androidapplication;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -9,8 +11,9 @@ import android.view.View;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.google.firebase.auth.*;
-
 import com.google.firebase.database.*;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -27,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference usersRef;
 
     private static final String TAG = "MainActivity"; // For debugging
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001; // Unique request code
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +65,40 @@ public class MainActivity extends AppCompatActivity {
 
         // ✅ Navigation: Forgot Password
         forgotPasswordTextView.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, ForgetPasswordActivity.class)));
+
+        // ✅ Check and request location permission
+        checkLocationPermission();
+    }
+
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            // Permission already granted
+            Log.d(TAG, "✅ Location permission already granted");
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                Toast.makeText(this, "Location permission granted", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "✅ Location permission granted by user");
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Location permission denied. Some features may be limited.",
+                        Toast.LENGTH_LONG).show();
+                Log.w(TAG, "⚠️ Location permission denied by user");
+            }
+        }
     }
 
     private void togglePasswordVisibility() {
