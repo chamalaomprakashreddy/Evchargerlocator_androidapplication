@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -254,6 +255,12 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             filterNetworkChargePoint = data.getBooleanExtra("networkChargePoint", false);
             filterNetworkEVgo = data.getBooleanExtra("networkEVgo", false);
             filterNetworkElectrify = data.getBooleanExtra("networkElectrify", false);
+            boolean filtersCustomized = !(filterLevel1 && filterLevel2 && filterLevel3 &&
+                    connectorTypes != null && connectorTypes.length == 4 &&
+                    Arrays.asList(connectorTypes).containsAll(Arrays.asList("Type 1", "Type 2", "CCS", "CHAdeMO")) &&
+                    filterNetworkTesla && filterNetworkChargePoint && filterNetworkEVgo && filterNetworkElectrify);
+
+            updateFilterUI(filtersCustomized);
 
             fetchAllEVStations();
             if (startLocation != null && endLocation != null) {
@@ -264,6 +271,7 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
             Toast.makeText(this, "Filters applied", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void fetchAllEVStations() {
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -787,6 +795,19 @@ public class HomePageActivity2 extends AppCompatActivity implements OnMapReadyCa
 
         requestQueue.add(request);
     }
+    private void updateFilterUI(boolean filtersCustomized) {
+        View filterDot = findViewById(R.id.filterDot);
+        LinearLayout filterStatusContainer = findViewById(R.id.filterStatusContainer);
+
+        if (filtersCustomized) {
+            if (filterDot != null) filterDot.setVisibility(View.VISIBLE);
+            if (filterStatusContainer != null) filterStatusContainer.setVisibility(View.VISIBLE);
+        } else {
+            if (filterDot != null) filterDot.setVisibility(View.GONE);
+            if (filterStatusContainer != null) filterStatusContainer.setVisibility(View.GONE);
+        }
+    }
+
 
     interface TravelTimeCallback {
         void onResult(String distance, String duration);

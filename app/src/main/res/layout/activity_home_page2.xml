@@ -47,6 +47,41 @@
             android:queryHint="search"
             app:layout_constraintStart_toEndOf="@+id/nav_icon"
             app:layout_constraintTop_toTopOf="@+id/map" />
+        <!-- FILTER STATUS CONTAINER (centered below search bar) -->
+        <LinearLayout
+            android:id="@+id/filterStatusContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="6dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_filter_status"
+            android:visibility="gone"
+            android:elevation="2dp"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@id/mapSearch"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_filter_applied"
+                android:contentDescription="Filter Icon"
+                android:tint="@color/teal_700" />
+
+            <TextView
+                android:id="@+id/filterStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Filters are currently applied"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-medium"
+                android:textStyle="normal" />
+        </LinearLayout>
+
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_center"
@@ -61,15 +96,33 @@
             app:layout_constraintTop_toBottomOf="@+id/mapSearch"
             app:srcCompat="@android:drawable/ic_menu_mylocation" />
 
-        <ImageView
-            android:id="@+id/filterbutton"
-            android:layout_width="46dp"
-            android:layout_height="34dp"
+        <FrameLayout
+            android:id="@+id/filterButtonContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
-            android:src="@drawable/filter"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/fab_center" />
+            app:layout_constraintTop_toBottomOf="@+id/fab_center"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/filterbutton"
+                android:layout_width="46dp"
+                android:layout_height="34dp"
+                android:src="@drawable/filter"
+                android:background="@android:color/transparent"
+                android:contentDescription="Filter" />
+
+            <View
+                android:id="@+id/filterDot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/green_dot_background"
+                android:visibility="gone" />
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
