@@ -123,6 +123,28 @@
             stationStat = findViewById(R.id.stationStat);
             requestQueue = Volley.newRequestQueue(this);
             databaseReference = FirebaseDatabase.getInstance().getReference("ChargingStations");
+            TextView batteryStat = findViewById(R.id.batteryStat);
+            int batteryPercent = getIntent().getIntExtra("batteryPercent", 50); // default 50%
+
+// Choose battery emoji
+            String batteryEmoji;
+            if (batteryPercent >= 90) batteryEmoji = "🔋";
+            else if (batteryPercent >= 60) batteryEmoji = "🔋";
+            else if (batteryPercent >= 30) batteryEmoji = "🪫";
+            else batteryEmoji = "❗"; // low battery warning
+
+// Set color based on battery level
+            int color;
+            if (batteryPercent >= 80) {
+                color = ContextCompat.getColor(this, android.R.color.holo_green_light);
+            } else if (batteryPercent >= 30) {
+                color = ContextCompat.getColor(this, android.R.color.holo_orange_light);
+            } else {
+                color = ContextCompat.getColor(this, android.R.color.holo_red_light);
+            }
+
+            batteryStat.setText(batteryEmoji + " " + batteryPercent + "%");
+            batteryStat.setTextColor(color);
 
             Intent intent = getIntent();
             startLocation = getLatLngFromIntent(intent.getStringExtra("startLocation"));

@@ -100,6 +100,15 @@
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:layout_marginHorizontal="8dp"/>
+        <TextView
+            android:id="@+id/batteryStat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔋 50%"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:layout_marginHorizontal="8dp"/>
+
     </LinearLayout>
     <!-- FILTER STATUS CONTAINER -->
     <LinearLayout
