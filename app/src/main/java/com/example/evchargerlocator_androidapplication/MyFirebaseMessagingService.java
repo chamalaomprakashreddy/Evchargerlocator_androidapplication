@@ -17,7 +17,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
@@ -32,21 +31,50 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (!remoteMessage.getData().isEmpty()) {
             String title = remoteMessage.getData().get("title");
             String body = remoteMessage.getData().get("body");
+            String senderId = remoteMessage.getData().get("senderId");
+            String senderName = remoteMessage.getData().get("senderName");
+
+            // Fallbacks if title/senderName are missing
+            if (senderName == null || senderName.isEmpty()) {
+                if (title != null && title.startsWith("Message from ")) {
+                    senderName = title.replace("Message from ", "");
+                } else {
+                    senderName = "Chat User";
+                }
+            }
+
+            if (senderId == null || senderId.isEmpty()) {
+                Log.w(TAG, "❌ senderId is missing, cannot open specific chat.");
+                return;
+            }
 
             Log.d(TAG, "📦 Data Payload: " + remoteMessage.getData());
-            showNotification(title, body);
+            showNotification(title, body, senderId, senderName);
         } else {
             Log.w(TAG, "⚠️ No data payload in FCM message.");
         }
     }
 
-    private void showNotification(String title, String message) {
-        Intent intent = new Intent(this, HomePageActivity2.class);
-        intent.putExtra("navigateToChats", true);
+
+    private void showNotification(String title, String message, String senderId, String senderName) {
+        if (senderId == null || senderId.isEmpty()) {
+            Log.w(TAG, "⚠️ Missing senderId, cannot open specific chat.");
+            return;
+        }
+
+        if (senderName == null || senderName.isEmpty()) {
+            senderName = "Chat User"; // Fallback
+        }
+
+        Intent intent = new Intent(this, MessageActivity.class);
+        intent.putExtra("receiverUserId", senderId);
+        intent.putExtra("receiverUserName", senderName); // ✅ Send actual name
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, intent,
+                this,
+                senderId.hashCode(), // Unique ID per chat
+                intent,
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE
         );
 
@@ -60,11 +88,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (notificationManager == null) {
-            Log.e(TAG, "❌ NotificationManager is null!");
-            return;
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
@@ -77,8 +100,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         int notificationId = (int) System.currentTimeMillis();
         notificationManager.notify(notificationId, builder.build());
-        Log.d(TAG, "✅ Notification shown: " + title);
+        Log.d(TAG, "✅ Notification shown for: " + senderName);
     }
+
 
     @Override
     public void onNewToken(@NonNull String token) {
@@ -93,6 +117,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     .setValue(token)
                     .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Token saved to DB"))
                     .addOnFailureListener(e -> Log.e(TAG, "❌ Failed to save token", e));
+        } else {
+            Log.w(TAG, "⚠️ No user signed in to save FCM token.");
         }
     }
 }

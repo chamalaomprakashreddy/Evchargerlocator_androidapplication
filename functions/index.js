@@ -23,7 +23,7 @@ exports.sendChatNotification = functions.database
       }
 
       const senderSnapshot = await admin.database().ref(`/users/${senderId}/fullName`).once("value");
-      const senderName = senderSnapshot.val() || "New Message";
+      const senderName = senderSnapshot.val() || "Chat User"; // ✅ Needed
 
       const payload = {
         token: token,
@@ -31,6 +31,7 @@ exports.sendChatNotification = functions.database
           title: `Message from ${senderName}`,
           body: text,
           senderId: senderId,
+          senderName: senderName, // ✅ INCLUDE THIS
           receiverId: receiverId
         }
       };
