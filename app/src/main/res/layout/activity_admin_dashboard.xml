@@ -71,11 +71,11 @@
         android:id="@+id/btnViewStations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="75dp"
-        android:text="View Stations"
-        android:backgroundTint="@android:color/black"
+        android:layout_above="@id/btnAddStation"
         android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="75dp"
         android:layout_marginBottom="10dp"
-        android:layout_above="@id/btnAddStation"/>
+        android:backgroundTint="@android:color/black"
+        android:text="Stations" />
 
 </RelativeLayout>

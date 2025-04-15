@@ -68,6 +68,12 @@ public class StationAdapter extends RecyclerView.Adapter<StationAdapter.ViewHold
                     ", Lng: " + station.getLongitude());
         }
 
+        holder.btnView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ViewStationActivity.class);
+            intent.putExtra("stationId", station.getStationId());
+            context.startActivity(intent);
+        });
+
         holder.btnEdit.setOnClickListener(v -> {
             Intent intent = new Intent(context, EditDetailsActivity.class);
             intent.putExtra("stationId", station.getStationId());
@@ -109,13 +115,14 @@ public class StationAdapter extends RecyclerView.Adapter<StationAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView stationName, stationAddress;
-        ImageButton btnEdit, btnDelete;
+        ImageButton btnEdit, btnDelete,btnView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             stationName = itemView.findViewById(R.id.stationName);
             stationAddress = itemView.findViewById(R.id.stationAddress);
             btnEdit = itemView.findViewById(R.id.btnEdit);
+            btnView = itemView.findViewById(R.id.btnView);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }

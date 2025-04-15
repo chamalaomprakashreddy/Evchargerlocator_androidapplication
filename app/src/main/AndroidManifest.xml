@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.evchargerlocator_androidapplication">
-
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -25,7 +24,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Evchargerlocator_androidapplication"
         tools:targetApi="31">
-
+        <activity
+            android:name=".ViewStationActivity"
+            android:exported="false" />
         <!-- 🔔 Firebase Messaging Service -->
         <service
             android:name=".MyFirebaseMessagingService"
@@ -33,51 +34,102 @@
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service>
-
-        <!-- 🔧 Firebase token handling service (optional if using InstanceIdService) -->
-        <!-- <service android:name="com.google.firebase.iid.FirebaseInstanceIdService"
-            android:exported="false" /> -->
-
+        </service> <!-- 🔧 Firebase token handling service (optional if using InstanceIdService) -->
+        <!--
+ <service android:name="com.google.firebase.iid.FirebaseInstanceIdService"
+            android:exported="false" />
+        -->
         <!-- Activities -->
-        <activity android:name=".NotificationsActivity" android:exported="false" />
-        <activity android:name=".Faqs" android:exported="false" />
-        <activity android:name=".HomePageActivity2" android:exported="false" />
-        <activity android:name=".EVStationDetailsActivity" android:exported="false" />
-        <activity android:name=".EditDetailsActivity" android:exported="false" />
-        <activity android:name=".StationListActivity" android:exported="false" />
-        <activity android:name=".BookingStationActivity" android:exported="false" />
-        <activity android:name=".StationDetailsActivity" android:exported="false" />
-        <activity android:name=".MessageActivity" android:exported="false" />
-        <activity android:name=".AddStationActivity" android:exported="false" />
-        <activity android:name=".PaymentProcessingActivity" android:exported="false" />
-        <activity android:name=".SavedPaymentMethodsActivity" android:exported="false" />
-        <activity android:name=".CardDetails" android:exported="false" />
-        <activity android:name=".CreateTripActivity" android:exported="false" />
-        <activity android:name=".MyTripsActivity" android:exported="false" />
-        <activity android:name=".TripPlannerActivity" android:exported="false" />
-        <activity android:name=".UserProfileActivity" android:exported="false" />
-        <activity android:name=".FilterActivity" android:exported="false" />
-        <activity android:name=".ChatActivity" android:exported="true" />
-        <activity android:name=".MyTripActivity" android:exported="false" />
-        <activity android:name=".HomePageActivity" android:exported="false" />
-        <activity android:name=".PaymentActivity" android:exported="false" />
-        <activity android:name=".ForgetPasswordActivity" android:exported="false" />
-        <activity android:name=".AdminDashboardActivity" android:exported="false" />
-        <activity android:name=".AdminLoginActivity" android:exported="false" />
-        <activity android:name=".RegisterActivity" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity
+            android:name=".NotificationsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Faqs"
+            android:exported="false" />
+        <activity
+            android:name=".HomePageActivity2"
+            android:exported="false" />
+        <activity
+            android:name=".EVStationDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StationListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BookingStationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StationDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MessageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddStationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PaymentProcessingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SavedPaymentMethodsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CardDetails"
+            android:exported="false" />
+        <activity
+            android:name=".CreateTripActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MyTripsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TripPlannerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FilterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChatActivity"
+            android:exported="true" />
+        <activity
+            android:name=".MyTripActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomePageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PaymentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgetPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- 📍 Google Maps API Key -->
+        </activity> <!-- 📍 Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyD9kj3r7bl-InqThDFTljYBwKvUcRD5mKs" />
-
     </application>
 
 </manifest>
