@@ -102,14 +102,25 @@ public class MyTripsFragment extends Fragment {
         DatabaseReference tripsRef = FirebaseDatabase.getInstance().getReference("SavedTrips");
         tripsRef.child(tripId).removeValue()
                 .addOnSuccessListener(unused -> {
-                    tripList.remove(position);
-                    adapter.notifyItemRemoved(position);
+                    // Confirm data snapshot still matches UI before removing
+                    if (position >= 0 && position < tripList.size()
+                            && tripList.get(position).getId().equals(tripId)) {
+                        tripList.remove(position);
+                        adapter.notifyItemRemoved(position);
+                        adapter.notifyItemRangeChanged(position, tripList.size()); // Refresh remaining
+                    } else {
+                        // Safety fallback if indices changed
+                        tripList.removeIf(t -> tripId.equals(t.getId()));
+                        adapter.notifyDataSetChanged();
+                    }
+
                     Toast.makeText(getContext(), "Trip deleted successfully", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Failed to delete trip", Toast.LENGTH_SHORT).show();
                 });
     }
+
 
 
 }
